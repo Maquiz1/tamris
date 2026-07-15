@@ -14,7 +14,7 @@ class Command(BaseCommand):
         for fee_code, description in FEE_TYPES:
             default_amount = DEFAULT_AMOUNTS.get(fee_code, 0.00)
             
-            obj, created = FeeConfiguration.objects.update_or_create(
+            obj, created = FeeConfiguration.objects.get_or_create(
                 fee_type=fee_code,
                 defaults={'amount': default_amount, 'is_active': True}
             )
@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f'Created: {fee_code} with amount {default_amount}'))
                 created_count += 1
             else:
-                self.stdout.write(f'Updated existing: {fee_code} (Amount set to: {obj.amount})')
+                self.stdout.write(f'Skipped (already exists): {fee_code} (Current Amount: {obj.amount})')
                 updated_count += 1
                 
         # Clean up any orphaned fees that are no longer in FEE_TYPES
