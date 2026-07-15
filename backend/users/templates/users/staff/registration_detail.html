@@ -439,7 +439,7 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{{ application.document_statuses|json_script:"doc-statuses-data" }}
 
 {% block extra_js %}
 <script>
@@ -465,7 +465,7 @@
 
     // Initialize badges if they already have data
     document.addEventListener("DOMContentLoaded", function() {
-        const docStatuses = {{ application.document_statuses|default:"{}"|safe }};
+        const docStatuses = JSON.parse(document.getElementById('doc-statuses-data').textContent || '{}');
         for (const [key, data] of Object.entries(docStatuses)) {
             const badge = document.getElementById('badge_' + key);
             if (badge) {

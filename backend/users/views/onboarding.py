@@ -98,9 +98,10 @@ def reupload_document_view(request):
         if hasattr(profile, doc_key):
             setattr(profile, doc_key, uploaded_file)
             profile.save()
-            if user.document_statuses and doc_key in user.document_statuses:
-                user.document_statuses[doc_key]['status'] = 'PENDING'
-                user.document_statuses[doc_key]['reason'] = ''
+            # Update document_statuses dictionary copy to make sure Django detects JSONField change
+            statuses = dict(user.document_statuses or {})
+            statuses[doc_key] = {'status': 'PENDING', 'reason': ''}
+            user.document_statuses = statuses
             has_other_rejections = False
             if user.document_statuses:
                 for (key, data) in user.document_statuses.items():
