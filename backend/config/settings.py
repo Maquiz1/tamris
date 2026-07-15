@@ -37,6 +37,7 @@ DEBUG = env('DEBUG')
 # If DEBUG is True, allow all hosts. Otherwise, default to localhost to prevent crash, 
 # but expect it to be set in .env in production.
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'] if DEBUG else ['localhost', '127.0.0.1'])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 
 
 # Application definition
