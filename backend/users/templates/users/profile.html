@@ -69,13 +69,20 @@
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-card-text me-2"></i> Registration Details</h5>
-                {% if request.user.registration_status == 'VERIFIED' %}
-                    <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i> Registration Complete</span>
-                {% elif request.user.registration_status == 'REJECTED' %}
-                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Registration Rejected</span>
-                {% else %}
-                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Pending Verification</span>
-                {% endif %}
+                <div class="d-flex align-items-center gap-2">
+                    {% if request.user.is_applicant and request.user.registration_status == 'REJECTED' %}
+                        <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#editDetailsModal">
+                            <i class="bi text-white bi-pencil-square me-1"></i> Edit Details
+                        </button>
+                    {% endif %}
+                    {% if request.user.registration_status == 'VERIFIED' %}
+                        <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i> Registration Complete</span>
+                    {% elif request.user.registration_status == 'REJECTED' %}
+                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Registration Rejected</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Pending Verification</span>
+                    {% endif %}
+                </div>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -515,6 +522,73 @@
     </div>
   </div>
 </div>
+
+<!-- Edit Details Modal -->
+{% if request.user.is_applicant and request.user.registration_status == 'REJECTED' %}
+<div class="modal fade" id="editDetailsModal" tabindex="-1" aria-labelledby="editDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold" id="editDetailsModalLabel"><i class="bi bi-pencil-square me-2"></i>Edit Registration Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'users:profile' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="edit_details">
+        <div class="modal-body">
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Phone Number <span class="text-danger">*</span></label>
+            <input type="text" name="phone_number" class="form-control" value="{{ request.user.phone_number }}" required>
+            <div class="form-text text-warning small"><i class="bi bi-exclamation-triangle-fill me-1"></i> Changing your phone number will require you to verify it again.</div>
+          </div>
+          
+          {% if 'Individual Applicant' in request.user.all_roles %}
+            <div class="mb-3">
+              <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" class="form-control" value="{{ request.user.user_profile.full_name }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">NIDA Number <span class="text-danger">*</span></label>
+              <input type="text" name="nida_number" class="form-control" value="{{ request.user.user_profile.nida_number }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">TIN Number <span class="text-danger">*</span></label>
+              <input type="text" name="tin" class="form-control" value="{{ request.user.user_profile.tin }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Address <span class="text-danger">*</span></label>
+              <textarea name="address" class="form-control" rows="3" required>{{ request.user.user_profile.address }}</textarea>
+            </div>
+          {% elif 'Company Applicant' in request.user.all_roles %}
+            <div class="mb-3">
+              <label class="form-label fw-bold">Company Name <span class="text-danger">*</span></label>
+              <input type="text" name="company_name" class="form-control" value="{{ request.user.company_profile.company_name }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">BRELA Number <span class="text-danger">*</span></label>
+              <input type="text" name="brela_number" class="form-control" value="{{ request.user.company_profile.brela_number }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">TIN Number <span class="text-danger">*</span></label>
+              <input type="text" name="tin" class="form-control" value="{{ request.user.company_profile.tin }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Physical Address <span class="text-danger">*</span></label>
+              <textarea name="physical_address" class="form-control" rows="3" required>{{ request.user.company_profile.physical_address }}</textarea>
+            </div>
+          {% endif %}
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary fw-bold">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 {% endblock %}
 

@@ -81,6 +81,43 @@ def profile_view(request):
     password_form = PasswordChangeForm(user=request.user)
     show_password_modal = False
     
+    if request.method == 'POST' and request.POST.get('action') == 'edit_details':
+        if request.user.registration_status != 'REJECTED':
+            messages.error(request, "You can only edit your profile details when your registration is rejected.")
+            return redirect('users:profile')
+            
+        phone_number = request.POST.get('phone_number', '').strip()
+        user = request.user
+        phone_changed = False
+        if phone_number and phone_number != user.phone_number:
+            user.phone_number = phone_number
+            user.is_phone_verified = False  # Reset phone verification!
+            phone_changed = True
+            
+        if 'Individual Applicant' in user.all_roles:
+            profile = getattr(user, 'user_profile', None)
+            if profile:
+                profile.full_name = request.POST.get('full_name', '').strip()
+                profile.nida_number = request.POST.get('nida_number', '').strip()
+                profile.tin = request.POST.get('tin', '').strip()
+                profile.address = request.POST.get('address', '').strip()
+                profile.save()
+        elif 'Company Applicant' in user.all_roles:
+            profile = getattr(user, 'company_profile', None)
+            if profile:
+                profile.company_name = request.POST.get('company_name', '').strip()
+                profile.brela_number = request.POST.get('brela_number', '').strip()
+                profile.tin = request.POST.get('tin', '').strip()
+                profile.physical_address = request.POST.get('physical_address', '').strip()
+                profile.save()
+                
+        user.save()
+        if phone_changed:
+            messages.success(request, 'Profile details updated. Since you changed your phone number, please verify it again.')
+        else:
+            messages.success(request, 'Profile details successfully updated.')
+        return redirect('users:profile')
+
     if request.method == 'POST' and request.POST.get('action') == 'change_password':
         password_form = PasswordChangeForm(user=request.user, data=request.POST)
         if password_form.is_valid():
