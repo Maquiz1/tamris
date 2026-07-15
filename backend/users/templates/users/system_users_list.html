@@ -48,9 +48,15 @@
                                 <tr>
                                     <td class="px-4 py-3 fw-bold text-primary">{{ staff.email }}</td>
                                     <td class="px-4 py-3">
-                                        <span class="badge {% if staff.is_superuser %}bg-dark{% elif staff.role.name == 'Admin' %}bg-danger{% elif staff.role.name == 'Finance Officer' %}bg-success{% else %}bg-primary{% endif %} rounded-pill">
-                                            {{ staff.role.name|default:"Superuser" }}
-                                        </span>
+                                        {% if staff.is_superuser %}
+                                            <span class="badge bg-dark rounded-pill">Superuser</span>
+                                        {% elif staff.role %}
+                                            <span class="badge {% if staff.role.name == 'Admin' %}bg-danger{% elif staff.role.name == 'Finance Officer' %}bg-success{% else %}bg-primary{% endif %} rounded-pill">
+                                                {{ staff.role.name }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill">Not Assigned</span>
+                                        {% endif %}
                                     </td>
                                     <td class="px-4 py-3 text-muted">{{ staff.phone_number|default:"-" }}</td>
                                     <td class="px-4 py-3">
