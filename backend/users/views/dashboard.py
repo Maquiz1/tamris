@@ -53,7 +53,7 @@ def dashboard_view(request):
         context['eval_total_listings'] = MedicineApplication.objects.exclude(status='DRAFT').filter(application_type='LISTING').count()
         context['eval_total_cat_ii'] = MedicineApplication.objects.exclude(status='DRAFT').filter(application_type='CATEGORY_II').count()
         context['eval_pending_users'] = CustomUser.objects.filter(is_onboarding_complete=True, registration_status='PENDING', role__name__in=['Individual Applicant', 'Company Applicant']).count()
-        context['inspector_pending_assignments'] = MedicineApplication.objects.filter(application_type='CATEGORY_II', inspections__isnull=True, status__in=['SUBMITTED', 'UNDER_REVIEW', 'PRELIMINARY_APPROVED']).distinct().count()
+        context['inspector_pending_assignments'] = MedicineApplication.objects.filter(application_type='CATEGORY_II', inspections__isnull=True, status='PRELIMINARY_APPROVED').distinct().count()
         context['inspector_active_schedules'] = InspectionSchedule.objects.filter(status='SCHEDULED').count()
         context['inspector_completed_reports'] = InspectionSchedule.objects.filter(status='COMPLETED').count()
         return render(request, 'users/dashboards/evaluator.html', context)

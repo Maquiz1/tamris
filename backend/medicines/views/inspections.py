@@ -16,7 +16,7 @@ from django.db.models.functions import TruncMonth
 def inspection_dashboard_view(request):
     if not (request.user.is_inspector or request.user.is_admin or request.user.is_evaluator):
         return redirect('users:dashboard')
-    unassigned_apps = MedicineApplication.objects.filter(application_type='CATEGORY_II', inspections__isnull=True, status__in=['SUBMITTED', 'UNDER_REVIEW', 'PRELIMINARY_APPROVED']).distinct().order_by('-updated_at')
+    unassigned_apps = MedicineApplication.objects.filter(application_type='CATEGORY_II', inspections__isnull=True, status='PRELIMINARY_APPROVED').distinct().order_by('-updated_at')
     if request.user.is_admin or request.user.is_evaluator:
         schedules = InspectionSchedule.objects.filter(status='SCHEDULED').order_by('start_date_time')
         reports = InspectionSchedule.objects.filter(status='COMPLETED').order_by('-updated_at')
@@ -32,6 +32,9 @@ def schedule_inspection_view(request, app_id):
     if not (request.user.is_inspector or request.user.is_admin or request.user.is_evaluator):
         return redirect('users:dashboard')
     application = get_object_or_404(MedicineApplication, pk=app_id)
+    if application.status != 'PRELIMINARY_APPROVED':
+        messages.error(request, 'Inspection can only be scheduled after the preliminary evaluation has been approved.')
+        return redirect('medicines:inspection_dashboard')
     if request.method == 'POST':
         form = InspectionScheduleForm(request.POST)
         if form.is_valid():

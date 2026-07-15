@@ -29,7 +29,7 @@ def pending_reviews_count(request):
             insp_sched_count = MedicineApplication.objects.filter(
                 application_type='CATEGORY_II',
                 inspections__isnull=True,
-                status__in=['SUBMITTED', 'UNDER_REVIEW', 'PRELIMINARY_APPROVED']
+                status='PRELIMINARY_APPROVED'
             ).distinct().count()
             
             return {
