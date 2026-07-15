@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Configuration - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="card shadow-lg border-0 p-4 p-md-5 bg-white rounded-4 position-relative overflow-hidden">
+                <!-- Decorative Top Bar -->
+                <div class="position-absolute top-0 start-0 w-100" style="height: 6px; background: linear-gradient(90deg, #0d6efd, #0dcaf0);"></div>
+                
+                <div class="icon-box lg bg-primary-lighten rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: rgba(13, 110, 253, 0.1);">
+                    <i class="ri-settings-5-line text-primary" style="font-size: 3rem; animation: spin 8s linear infinite;"></i>
+                </div>
+                
+                <h3 class="fw-bold mb-2 text-dark">Welcome to TAMRIS</h3>
+                <p class="text-muted mb-4">Hello <strong>{{ request.user.email }}</strong>! Your staff account has been successfully verified.</p>
+                
+                <div class="alert alert-info border-0 rounded-3 text-start p-3 d-flex align-items-start gap-3 mb-4" style="background-color: rgba(13, 202, 240, 0.1);">
+                    <i class="ri-information-line text-info fs-4 mt-1"></i>
+                    <div>
+                        <h6 class="fw-bold text-info mb-1">Role Assignment Pending</h6>
+                        <p class="small text-muted mb-0">A System Administrator needs to assign your primary operational role (e.g., Evaluator, Inspector, or Finance Officer) before you can perform actions in the system.</p>
+                    </div>
+                </div>
+
+                <p class="small text-muted mb-4">In the meantime, you can configure your phone number or change your password in your profile section.</p>
+                
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% url 'users:profile' %}" class="btn btn-primary fw-bold py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2">
+                        <i class="ri-user-settings-line"></i> Manage My Profile
+                    </a>
+                    <a href="{% url 'users:frontend_logout' %}" class="btn btn-outline-secondary py-2 fw-bold">
+                        <i class="ri-logout-box-line me-1"></i> Log Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}

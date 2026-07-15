@@ -49,6 +49,7 @@ def system_user_create_view(request):
             user.set_password(temp_password)
             user.is_email_verified = False
             user.is_onboarding_complete = True
+            user.is_staff = True
             user.registration_status = 'PENDING'
             user.save()
             otp_code = pyotp.TOTP(user.otp_secret).now()
@@ -82,11 +83,10 @@ def system_user_update_view(request, pk):
         form = StaffUserUpdateForm(request.POST, instance=user_to_update, request_user=request.user)
         if form.is_valid():
             updated_user = form.save(commit=False)
+            updated_user.is_staff = True
             if updated_user.is_admin and request.user.is_superuser:
-                updated_user.is_staff = True
                 updated_user.is_superuser = True
-            if not updated_user.is_admin and (not updated_user.is_superuser):
-                updated_user.is_staff = False
+            elif not updated_user.is_admin:
                 updated_user.is_superuser = False
             updated_user.save()
             form.save_m2m()

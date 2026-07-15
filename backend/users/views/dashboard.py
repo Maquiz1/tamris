@@ -23,12 +23,16 @@ from users.emails import notify_staff_new_registration, notify_applicant_registr
 def dashboard_view(request):
     if not request.user.is_email_verified:
         return redirect('users:frontend_verify_otp')
-    is_staff_role = request.user.role and request.user.role.name in ['Admin', 'Evaluator', 'Inspector', 'Finance Officer']
-    if request.user.onboarding_step < 5 and (not is_staff_role) and (not request.user.is_superuser):
+    if request.user.onboarding_step < 5 and not request.user.is_staff_member:
         return redirect('users:onboarding')
     context = {}
     is_superuser = request.user.is_superuser
     role_name = request.user.role.name if request.user.role else None
+    
+    # Handle staff users with unassigned roles
+    if request.user.is_staff_member and not role_name and not is_superuser:
+        return render(request, 'users/dashboards/staff_pending.html')
+        
     from medicines.models import MedicineApplication, Payment, InspectionSchedule
     from users.models import CustomUser
     if is_superuser or role_name == 'Admin':

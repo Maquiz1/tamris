@@ -128,8 +128,7 @@ def frontend_logout_view(request):
 def verify_otp_view(request):
     user = request.user
     if user.is_email_verified:
-        is_staff_role = user.role and user.role.name in ['Admin', 'Evaluator', 'Inspector', 'Finance Officer']
-        if user.onboarding_step < 5 and (not is_staff_role) and (not user.is_superuser):
+        if user.onboarding_step < 5 and not user.is_staff_member:
             return redirect('users:onboarding')
         return redirect('users:dashboard')
     if not user.otp_secret:
@@ -144,8 +143,7 @@ def verify_otp_view(request):
                 user.is_email_verified = True
                 user.save()
                 messages.success(request, 'OTP verified successfully!')
-                is_staff_role = user.role and user.role.name in ['Admin', 'Evaluator', 'Inspector', 'Finance Officer']
-                if user.onboarding_step < 5 and (not is_staff_role) and (not user.is_superuser):
+                if user.onboarding_step < 5 and not user.is_staff_member:
                     return redirect('users:onboarding')
                 return redirect('users:dashboard')
             else:

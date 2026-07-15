@@ -146,7 +146,7 @@ class CustomUser(AbstractUser, TimeStampedModel):
     @property
     def is_staff_member(self):
         """Check if user has any staff role."""
-        return self.is_admin or self.is_evaluator or self.is_inspector or self.is_finance or self.is_superuser
+        return self.is_staff or self.is_admin or self.is_evaluator or self.is_inspector or self.is_finance or self.is_superuser
 
     @property
     def is_applicant(self):
