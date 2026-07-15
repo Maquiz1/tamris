@@ -35,6 +35,10 @@ def system_users_list_view(request):
         Q(additional_roles__name__in=['Evaluator', 'Inspector', 'Finance Officer', 'Admin']) |
         Q(registration_status='PENDING', is_onboarding_complete=True, role__isnull=True)
     ).distinct().order_by('email')
+
+    if not request.user.is_superuser:
+        staff_users = staff_users.exclude(is_superuser=True)
+
     return render(request, 'users/system_users_list.html', {'staff_users': staff_users})
 
 @login_required
