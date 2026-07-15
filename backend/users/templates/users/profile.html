@@ -440,6 +440,78 @@
                                         </div>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td>Representative NIDA</td>
+                                    <td>
+                                        {% if request.user.document_statuses.representative_nida.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.representative_nida.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.representative_nida.reason }}</div>
+                                        {% elif request.user.company_profile.representative_nida %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.company_profile.representative_nida %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.representative_nida.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.representative_nida.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="representative_nida">
+                                                    <input type="file" name="document" class="d-none" id="reupload_representative_nida" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_representative_nida" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Representative ID/Passport Photo</td>
+                                    <td>
+                                        {% if request.user.document_statuses.representative_id_image.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.representative_id_image.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.representative_id_image.reason }}</div>
+                                        {% elif request.user.company_profile.representative_id_image %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.company_profile.representative_id_image %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.representative_id_image.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.representative_id_image.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="representative_id_image">
+                                                    <input type="file" name="document" class="d-none" id="reupload_representative_id_image" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_representative_id_image" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
                             {% endif %}
                         </tbody>
                     </table>
