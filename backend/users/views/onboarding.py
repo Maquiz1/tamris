@@ -111,6 +111,7 @@ def reupload_document_view(request):
             if not has_other_rejections:
                 user.registration_status = 'PENDING'
                 user.rejection_reason = None
+                user.review_remarks = None
             user.save()
             messages.success(request, f'Document successfully re-uploaded. Your application is now pending review.')
         else:
