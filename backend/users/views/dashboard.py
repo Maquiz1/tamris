@@ -69,7 +69,29 @@ def profile_view(request):
         return redirect('users:frontend_verify_otp')
     if request.user.onboarding_step < 5:
         return redirect('users:onboarding')
-    return render(request, 'users/profile.html')
+        
+    from django.contrib.auth.forms import PasswordChangeForm
+    from django.contrib.auth import update_session_auth_hash
+    from django.contrib import messages
+    
+    password_form = PasswordChangeForm(user=request.user)
+    show_password_modal = False
+    
+    if request.method == 'POST' and request.POST.get('action') == 'change_password':
+        password_form = PasswordChangeForm(user=request.user, data=request.POST)
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('users:profile')
+        else:
+            messages.error(request, 'Please correct the errors in the password change form.')
+            show_password_modal = True
+            
+    return render(request, 'users/profile.html', {
+        'password_form': password_form,
+        'show_password_modal': show_password_modal
+    })
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
