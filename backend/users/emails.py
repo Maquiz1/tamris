@@ -141,13 +141,17 @@ def notify_staff_account_created(user, temp_password, otp_code):
     """
     Notify a newly created staff member with their temporary credentials.
     """
+    site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000').rstrip('/')
+    login_url = f"{site_url}/login/"
+    
     subject = "TAMRIS - Your Staff Account Has Been Created"
     message = (
         f"Hello,\n\n"
         f"An administrator has created a TAMRIS staff account for you.\n\n"
+        f"Login Link: {login_url}\n"
         f"Login Email: {user.email}\n"
         f"Temporary Password: {temp_password}\n\n"
-        f"To complete your registration, please log in with these credentials and enter the following verification code:\n"
+        f"To complete your registration, please click the link above, log in with these credentials, and enter the following verification code:\n"
         f"Verification Code: {otp_code}\n\n"
         f"This code will expire in 5 minutes.\n\n"
         f"Once verified, an administrator will assign your specific system roles.\n\n"
