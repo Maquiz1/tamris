@@ -178,3 +178,27 @@ def verify_phone_otp_view(request):
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
+
+@login_required
+def resend_email_otp_view(request):
+    user = request.user
+    if user.is_email_verified:
+        messages.info(request, 'Your email is already verified.')
+        return redirect('users:dashboard')
+        
+    if not user.otp_secret:
+        user.otp_secret = pyotp.random_base32()
+        user.save()
+        
+    otp_code = pyotp.TOTP(user.otp_secret).now()
+    
+    send_mail(
+        subject='TAMRIS - Your OTP Verification Code',
+        message=f'Welcome to TAMRIS! Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.',
+        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@tamris.go.tz'),
+        recipient_list=[user.email],
+        fail_silently=True
+    )
+    
+    messages.success(request, 'A new verification code has been sent to your email!')
+    return redirect('users:frontend_verify_otp')

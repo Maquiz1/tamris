@@ -8,7 +8,7 @@ from .views import (
     staff_registration_list_view, staff_registration_detail_view, staff_registration_action_view,
     reupload_document_view, system_users_list_view, system_user_create_view,
     system_user_update_view, system_user_detail_view, applicant_users_list_view,
-    send_phone_otp_view, verify_phone_otp_view
+    send_phone_otp_view, verify_phone_otp_view, resend_email_otp_view
 )
 
 app_name = 'users'
@@ -27,6 +27,7 @@ urlpatterns = [
     path('login/', frontend_login_view, name='frontend_login'),
     path('logout/', frontend_logout_view, name='frontend_logout'),
     path('verify-otp/', verify_otp_view, name='frontend_verify_otp'),
+    path('verify-otp/resend/', resend_email_otp_view, name='resend_email_otp'),
     path('onboarding/', onboarding_wizard_view, name='onboarding'),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('profile/', profile_view, name='profile'),

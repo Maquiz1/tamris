@@ -23,6 +23,14 @@
                         <i class="ri-checkbox-circle-line me-2"></i> Verify Code
                     </button>
                 </form>
+                
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="text-muted small mb-2">Didn't receive the code or it expired?</p>
+                    <a href="{% url 'users:resend_email_otp' %}" class="btn btn-outline-secondary btn-sm fw-bold">
+                        <i class="ri-mail-send-line me-1"></i> Resend Verification Code
+                    </a>
+                </div>
             </div>
         </div>
     </div>
