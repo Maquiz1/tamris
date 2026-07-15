@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
 from django.views.generic.base import RedirectView
+from django.contrib.auth import views as auth_views
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     RegisterView, LoginView, VerifyOTPView, PasswordResetRequestView,
@@ -27,6 +28,24 @@ urlpatterns = [
     path('register/', FrontendRegisterView.as_view(), name='frontend_register'),
     path('login/', frontend_login_view, name='frontend_login'),
     path('logout/', frontend_logout_view, name='frontend_logout'),
+
+    # Password Reset URLs
+    path('password-reset/', auth_views.PasswordResetView.as_view(
+        template_name='registration/password_reset_form.html',
+        email_template_name='registration/password_reset_email.html',
+        subject_template_name='registration/password_reset_subject.txt',
+        success_url=reverse_lazy('users:password_reset_done')
+    ), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='registration/password_reset_done.html'
+    ), name='password_reset_done'),
+    path('password-reset/confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='registration/password_reset_confirm.html',
+        success_url=reverse_lazy('users:password_reset_complete')
+    ), name='password_reset_confirm'),
+    path('password-reset/complete/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='registration/password_reset_complete.html'
+    ), name='password_reset_complete'),
     path('verify-otp/', verify_otp_view, name='frontend_verify_otp'),
     path('verify-otp/resend/', resend_email_otp_view, name='resend_email_otp'),
     path('onboarding/', onboarding_wizard_view, name='onboarding'),

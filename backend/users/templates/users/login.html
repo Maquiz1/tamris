@@ -24,7 +24,8 @@
                     </button>
                 </form>
                 
-                <div class="text-center mt-4 pt-3 border-top">
+                <div class="text-center mt-4 pt-3 border-top d-flex flex-column gap-2">
+                    <span class="small"><a href="{% url 'users:password_reset' %}" class="text-muted text-decoration-none"><i class="ri-key-line me-1"></i>Forgot your password?</a></span>
                     <span class="small text-muted">Don't have an account? <a href="{% url 'users:frontend_register' %}" class="fw-bold text-decoration-none">Register here</a></span>
                 </div>
             </div>
