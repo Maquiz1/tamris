@@ -125,6 +125,9 @@
             <a href="{% url 'medicines:inspection_dashboard' %}">
               <i class="ri-calendar-event-line"></i>
               <span class="menu-text">Inspections</span>
+              {% if pending_inspection_scheduling_count > 0 %}
+                <span class="badge bg-danger ms-auto">{{ pending_inspection_scheduling_count }}</span>
+              {% endif %}
             </a>
           </li>
         {% endif %}
