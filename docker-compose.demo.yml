@@ -1,0 +1,48 @@
+
+
+services:
+  db-demo:
+    image: postgres:15-alpine
+    container_name: tamris-db-demo
+    volumes:
+      - postgres_data_demo:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    restart: always
+
+  web-demo:
+    build: ./backend
+    container_name: tamris-web-demo
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    volumes:
+      - static_volume_demo:/app/staticfiles
+      - media_volume_demo:/app/media
+    env_file:
+      - ./.env
+    environment:
+      - DB_HOST=db-demo
+      - DB_PORT=5432
+    depends_on:
+      - db-demo
+    restart: always
+
+  nginx-demo:
+    image: nginx:1.25-alpine
+    container_name: tamris-nginx-demo
+    ports:
+      # Expose demo on port 8080 instead of 80 to avoid conflicts with the live version
+      - "8080:80"
+    volumes:
+      - ./nginx/default.demo.conf:/etc/nginx/conf.d/default.conf
+      - static_volume_demo:/app/staticfiles
+      - media_volume_demo:/app/media
+    depends_on:
+      - web-demo
+    restart: always
+
+volumes:
+  postgres_data_demo:
+  static_volume_demo:
+  media_volume_demo:
