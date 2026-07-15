@@ -36,8 +36,18 @@ DEBUG = env('DEBUG')
 
 # If DEBUG is True, allow all hosts. Otherwise, default to localhost to prevent crash, 
 # but expect it to be set in .env in production.
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*', '31.97.187.66', '31.97.187.66:8080'])
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://31.97.187.66', 'http://31.97.187.66:8080', 'http://127.0.0.1:8000', 'http://localhost:8000'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
+ALLOWED_HOSTS += ['*', '31.97.187.66', '31.97.187.66:8080']
+
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+CSRF_TRUSTED_ORIGINS += [
+    'http://31.97.187.66', 
+    'http://31.97.187.66:8080', 
+    'https://31.97.187.66',
+    'https://31.97.187.66:8080',
+    'http://127.0.0.1:8000', 
+    'http://localhost:8000'
+]
 
 
 # Application definition
