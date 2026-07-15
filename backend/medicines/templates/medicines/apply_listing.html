@@ -100,7 +100,7 @@
                     </div>
                 </div>
 
-                <form method="post" action="" enctype="multipart/form-data" id="multiStepForm">
+                <form method="post" action="" enctype="multipart/form-data" id="multiStepForm" novalidate>
                     {% csrf_token %}
                     
                     {% if form.errors %}
