@@ -241,3 +241,6 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@tamris.go.tz')
 
 # Site URL for email links
 SITE_URL = env('SITE_URL', default='http://localhost:8000')
+
+# Trust X-Forwarded-Proto header from Nginx reverse proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
