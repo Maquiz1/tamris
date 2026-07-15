@@ -124,9 +124,27 @@
                     <h5 class="card-title fw-bold">Submit Review Decision</h5>
                     <p class="card-text text-muted small mb-3">Review all documents on the right. If any document is rejected, the entire application will be sent back to the applicant.</p>
                     
-                    <div class="mb-4" id="overallRemarksContainer" style="display: none;">
-                        <label class="form-label fw-bold">Overall Remarks (Optional)</label>
-                        <textarea name="overall_remarks" class="form-control" rows="3" placeholder="Provide any overall feedback for the applicant..."></textarea>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Overall Decision <span class="text-danger">*</span></label>
+                        <div class="d-flex flex-column gap-2 p-2 bg-light rounded border">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="overall_decision" id="decision_verify" value="VERIFIED" checked onchange="toggleRemarksRequirement()">
+                                <label class="form-check-label text-success fw-bold text-decoration-none" for="decision_verify">
+                                    <i class="bi bi-patch-check-fill me-1"></i> Approve & Verify Registration
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="overall_decision" id="decision_reject" value="REJECTED" onchange="toggleRemarksRequirement()">
+                                <label class="form-check-label text-danger fw-bold text-decoration-none" for="decision_reject">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Reject / Query Registration
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4" id="overallRemarksContainer">
+                        <label class="form-label fw-bold" id="overallRemarksLabel">Overall Remarks (Optional)</label>
+                        <textarea name="overall_remarks" id="overallRemarksTextarea" class="form-control" rows="3" placeholder="Provide any overall feedback for the applicant..."></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
@@ -446,22 +464,7 @@
 <script>
     // Function to check if any document is rejected and toggle overall remarks
     function checkOverallRemarksVisibility() {
-        let anyRejected = false;
-        const hiddenInputs = document.querySelectorAll('input[id^="hidden_status_"]');
-        hiddenInputs.forEach(input => {
-            if (input.value === 'REJECTED') {
-                anyRejected = true;
-            }
-        });
-        
-        const remarksContainer = document.getElementById('overallRemarksContainer');
-        if (remarksContainer) {
-            if (anyRejected) {
-                remarksContainer.style.display = 'block';
-            } else {
-                remarksContainer.style.display = 'none';
-            }
-        }
+        // Overall remarks container is always visible now
     }
 
     // Initialize badges if they already have data
@@ -486,6 +489,7 @@
             if (hiddenReason) hiddenReason.value = data.reason || '';
         }
         checkOverallRemarksVisibility();
+        toggleRemarksRequirement();
     });
 
     function viewAndEvaluate(docKey, docTitle, docUrl) {
@@ -531,6 +535,19 @@
         docModal.show();
     }
     
+    function toggleRemarksRequirement() {
+        const isReject = document.getElementById('decision_reject').checked;
+        const label = document.getElementById('overallRemarksLabel');
+        const textarea = document.getElementById('overallRemarksTextarea');
+        if (isReject) {
+            label.innerHTML = 'Overall Remarks / Rejection Reason <span class="text-danger">*</span>';
+            textarea.placeholder = 'Please explain why this registration is being rejected or queried...';
+        } else {
+            label.innerHTML = 'Overall Remarks (Optional)';
+            textarea.placeholder = 'Provide any overall feedback for the applicant...';
+        }
+    }
+    
     function saveDocumentEvaluation() {
         let docKey = document.getElementById('modalDocKey').value;
         let statusInput = document.querySelector('input[name="modal_doc_status"]:checked');
@@ -558,6 +575,13 @@
         } else {
             badge.className = 'badge bg-danger';
             badge.innerText = 'Rejected';
+            
+            // Automatically select Reject overall decision and toggle remarks
+            const rejectRadio = document.getElementById('decision_reject');
+            if (rejectRadio) {
+                rejectRadio.checked = true;
+                toggleRemarksRequirement();
+            }
         }
         
         // Close modal
@@ -584,10 +608,30 @@
             if (document.getElementById('hidden_status_representative_id_image')) requiredDocs.push('representative_id_image');
         {% endif %}
         
+        let hasRejectedDoc = false;
         for (let key of requiredDocs) {
             let status = document.getElementById('hidden_status_' + key).value;
             if (!status) {
                 alert("Please evaluate all documents by clicking 'Open & Evaluate' before submitting your decision.");
+                return false;
+            }
+            if (status === 'REJECTED') {
+                hasRejectedDoc = true;
+            }
+        }
+        
+        const isApprove = document.getElementById('decision_verify').checked;
+        const isReject = document.getElementById('decision_reject').checked;
+        
+        if (isApprove && hasRejectedDoc) {
+            alert("You cannot approve the registration if any individual document is marked as Rejected. Please set all documents to Verified or select Reject / Query as your overall decision.");
+            return false;
+        }
+        
+        if (isReject) {
+            const remarks = document.getElementById('overallRemarksTextarea').value.trim();
+            if (!remarks) {
+                alert("Please provide the Overall Remarks / Rejection Reason to explain the queries or reason for rejecting this registration.");
                 return false;
             }
         }

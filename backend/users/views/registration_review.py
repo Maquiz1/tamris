@@ -76,10 +76,29 @@ def staff_registration_action_view(request, pk):
         application.document_statuses = document_statuses
         overall_remarks = request.POST.get('overall_remarks', '').strip()
         application.review_remarks = overall_remarks
-        if has_rejection:
+        
+        overall_decision = request.POST.get('overall_decision', 'VERIFIED')
+        
+        if has_rejection or overall_decision == 'REJECTED':
             application.registration_status = 'REJECTED'
-            application.rejection_reason = 'The following documents were rejected:\n' + '\n'.join(rejection_messages)
-            messages.warning(request, f'Application for {application.email} has been rejected due to invalid documents.')
+            
+            rejection_msg = ""
+            if overall_remarks:
+                rejection_msg = overall_remarks
+            
+            if rejection_messages:
+                doc_msg = 'The following documents were rejected:\n' + '\n'.join(rejection_messages)
+                if rejection_msg:
+                    rejection_msg += "\n\n" + doc_msg
+                else:
+                    rejection_msg = doc_msg
+            
+            # Fallback if somehow both are empty
+            if not rejection_msg:
+                rejection_msg = "Application was rejected / queried by staff."
+                
+            application.rejection_reason = rejection_msg
+            messages.warning(request, f'Application for {application.email} has been rejected / queried.')
             notify_applicant_registration_status(application, 'REJECTED', application.rejection_reason)
         else:
             application.registration_status = 'VERIFIED'
