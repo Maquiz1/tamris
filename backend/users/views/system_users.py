@@ -106,8 +106,7 @@ def system_user_update_view(request, pk):
     return render(request, 'users/system_user_update.html', {'form': form, 'user_to_update': user_to_update})
 @login_required
 def applicant_users_list_view(request):
-    is_admin = request.user.is_admin
-    if not is_admin:
+    if not request.user.is_staff_member:
         return redirect('users:dashboard')
     
     applicants = CustomUser.objects.filter(role__name__in=['Individual Applicant', 'Company Applicant']).order_by('-date_joined')

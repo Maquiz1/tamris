@@ -65,16 +65,18 @@
         
         <li class="menu-header text-uppercase fs-7 fw-bold text-muted px-3 mt-3 mb-1">Staff Operations</li>
 
-        {% if user.is_superuser or 'Admin' in user.all_roles %}
+        {% if user.is_staff_member %}
           <li class="treeview">
             <a href="#!">
               <i class="ri-group-line"></i>
               <span class="menu-text">Users</span>
             </a>
             <ul class="treeview-menu">
-              <li>
-                <a href="{% url 'users:system_users_list' %}">Staffs</a>
-              </li>
+              {% if user.is_superuser or 'Admin' in user.all_roles %}
+                <li>
+                  <a href="{% url 'users:system_users_list' %}">Staffs</a>
+                </li>
+              {% endif %}
               <li>
                 <a href="{% url 'users:applicant_users_list' %}">Applicants</a>
               </li>
