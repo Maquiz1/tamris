@@ -68,10 +68,10 @@ def notify_applicant_registration_status(applicant, status, reason=None):
 
 def notify_finance_pending_payment(payment, applicant):
     """
-    Notify Finance Officers that a new payment receipt has been submitted.
+    Notify Accountants/Admins that a new payment receipt has been submitted.
     """
     finance_users = CustomUser.objects.filter(
-        role__name__in=['Admin', 'Finance Officer'],
+        role__name__in=['Admin', 'Accountant'],
         is_active=True
     )
     finance_emails = list(finance_users.values_list('email', flat=True))

@@ -8,7 +8,7 @@ def pending_reviews_count(request):
     """
     if request.user.is_authenticated:
         role_name = request.user.role.name if getattr(request.user, 'role', None) else None
-        if role_name in ['Evaluator', 'Inspector', 'Finance Officer', 'Admin'] or request.user.is_superuser:
+        if role_name in ['Evaluator', 'Inspector', 'Accountant', 'Admin'] or request.user.is_superuser:
             count = CustomUser.objects.filter(
                 is_onboarding_complete=True,
                 registration_status='PENDING',

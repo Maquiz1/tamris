@@ -57,7 +57,7 @@ def dashboard_view(request):
         context['inspector_active_schedules'] = InspectionSchedule.objects.filter(status='SCHEDULED').count()
         context['inspector_completed_reports'] = InspectionSchedule.objects.filter(status='COMPLETED').count()
         return render(request, 'users/dashboards/evaluator.html', context)
-    elif role_name == 'Finance Officer':
+    elif role_name == 'Accountant':
         context['finance_pending_payments'] = Payment.objects.filter(is_verified=False).count()
         context['finance_verified_payments'] = Payment.objects.filter(is_verified=True).count()
         return render(request, 'users/dashboards/finance.html', context)

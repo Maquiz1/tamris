@@ -15,7 +15,7 @@
                             <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
                         </a>
                         <h3 class="mb-0 mt-1">System Users</h3>
-                        <p class="text-muted mb-0 small">Manage staff roles like Evaluator, Inspector, and Finance Officer.</p>
+                        <p class="text-muted mb-0 small">Manage staff roles like Evaluator, Inspector, and Accountant.</p>
                     </div>
                     <div>
                         <a href="{% url 'users:system_user_create' %}" class="btn btn-primary fw-bold px-4 py-2 d-inline-flex align-items-center shadow-sm">
@@ -51,7 +51,7 @@
                                         {% if staff.is_superuser %}
                                             <span class="badge bg-dark rounded-pill">Superuser</span>
                                         {% elif staff.role %}
-                                            <span class="badge {% if staff.role.name == 'Admin' %}bg-danger{% elif staff.role.name == 'Finance Officer' %}bg-success{% else %}bg-primary{% endif %} rounded-pill">
+                                            <span class="badge {% if staff.role.name == 'Admin' %}bg-danger{% elif staff.role.name == 'Accountant' %}bg-success{% else %}bg-primary{% endif %} rounded-pill">
                                                 {{ staff.role.name }}
                                             </span>
                                         {% else %}

@@ -31,8 +31,8 @@ def system_users_list_view(request):
     staff_users = CustomUser.objects.filter(
         Q(is_staff=True) |
         Q(is_superuser=True) |
-        Q(role__name__in=['Evaluator', 'Inspector', 'Finance Officer', 'Admin']) |
-        Q(additional_roles__name__in=['Evaluator', 'Inspector', 'Finance Officer', 'Admin']) |
+        Q(role__name__in=['Evaluator', 'Inspector', 'Accountant', 'Admin']) |
+        Q(additional_roles__name__in=['Evaluator', 'Inspector', 'Accountant', 'Admin']) |
         Q(registration_status='PENDING', is_onboarding_complete=True, role__isnull=True)
     ).distinct().order_by('email')
 
@@ -135,7 +135,7 @@ def resend_staff_activation_view(request, pk):
     staff_user = get_object_or_404(CustomUser, pk=pk)
     
     # Verify the user is a staff member
-    is_staff = staff_user.role and staff_user.role.name in ['Admin', 'Evaluator', 'Inspector', 'Finance Officer']
+    is_staff = staff_user.role and staff_user.role.name in ['Admin', 'Evaluator', 'Inspector', 'Accountant']
     if not (is_staff or staff_user.is_superuser):
         messages.error(request, "This action is only available for staff users.")
         return redirect('users:system_users_list')

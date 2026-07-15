@@ -9,7 +9,7 @@ class Command(BaseCommand):
         'Admin',
         'Evaluator',
         'Inspector',
-        'Finance Officer',
+        'Accountant',
 
         # ── Applicant Roles ────────────────────────────────────────
         'Individual Applicant',
@@ -17,6 +17,15 @@ class Command(BaseCommand):
     ]
 
     def handle(self, *args, **kwargs):
+        # Rename legacy role "Finance Officer" to "Accountant" if it exists
+        try:
+            finance_officer = Role.objects.get(name='Finance Officer')
+            finance_officer.name = 'Accountant'
+            finance_officer.save()
+            self.stdout.write(self.style.SUCCESS('Successfully renamed legacy role "Finance Officer" to "Accountant" in the database.'))
+        except Role.DoesNotExist:
+            pass
+
         created_count = 0
         existing_count = 0
 
@@ -29,7 +38,6 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f'  [EXISTS]   {role_name}'))
                 existing_count += 1
 
-        self.stdout.write('')
         self.stdout.write(self.style.SUCCESS(
-            f'Done! {created_count} role(s) created, {existing_count} already existed.'
+            f'\nRole seeding completed: {created_count} created, {existing_count} already existed.'
         ))

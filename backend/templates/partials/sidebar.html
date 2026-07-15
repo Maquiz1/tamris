@@ -61,7 +61,7 @@
       </li>
 
       <!-- Staff / Admin Navigation -->
-      {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Finance Officer' in user.all_roles %}
+      {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Accountant' in user.all_roles %}
         
         <li class="menu-header text-uppercase fs-7 fw-bold text-muted px-3 mt-3 mb-1">Staff Operations</li>
 
@@ -129,7 +129,7 @@
           </li>
         {% endif %}
 
-        {% if user.is_superuser or 'Finance Officer' in user.all_roles or 'Admin' in user.all_roles %}
+        {% if user.is_superuser or 'Accountant' in user.all_roles or 'Admin' in user.all_roles %}
           <li class="treeview">
             <a href="#!">
               <i class="ri-money-dollar-circle-line"></i>
@@ -179,7 +179,7 @@
             </li>
             {% endif %}
             
-            {% if user.is_superuser or 'Admin' in user.all_roles or 'Finance Officer' in user.all_roles %}
+            {% if user.is_superuser or 'Admin' in user.all_roles or 'Accountant' in user.all_roles %}
             <li>
               <a href="{% url 'reports:payments' %}">All Payments</a>
             </li>

@@ -95,7 +95,7 @@ class CustomUser(AbstractUser, TimeStampedModel):
             return 1
             
         # Staff bypasses onboarding completely
-        if self.role.name in ['Evaluator', 'Inspector', 'Finance Officer', 'Admin']:
+        if self.role.name in ['Evaluator', 'Inspector', 'Accountant', 'Admin']:
             return 5
         
         # Step 2: Needs Details (Profile Creation)
@@ -140,8 +140,12 @@ class CustomUser(AbstractUser, TimeStampedModel):
         return 'Inspector' in self.all_roles
 
     @property
+    def is_accountant(self):
+        return 'Accountant' in self.all_roles
+
+    @property
     def is_finance(self):
-        return 'Finance Officer' in self.all_roles
+        return self.is_accountant
         
     @property
     def is_staff_member(self):
