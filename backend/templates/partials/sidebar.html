@@ -124,14 +124,33 @@
         {% endif %}
 
         {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Admin' in user.all_roles %}
-          <li>
-            <a href="{% url 'medicines:inspection_dashboard' %}">
+          <li class="treeview">
+            <a href="#!">
               <i class="ri-calendar-event-line"></i>
               <span class="menu-text">Inspections</span>
               {% if pending_inspection_scheduling_count > 0 %}
                 <span class="badge bg-danger ms-auto">{{ pending_inspection_scheduling_count }}</span>
               {% endif %}
             </a>
+            <ul class="treeview-menu">
+              <li>
+                <a href="{% url 'medicines:inspection_dashboard' %}?tab=pending" class="d-flex align-items-center justify-content-between">
+                  <span>Pending Scheduling</span>
+                  {% if pending_inspection_scheduling_count > 0 %}
+                    <span class="badge bg-danger">{{ pending_inspection_scheduling_count }}</span>
+                  {% endif %}
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'medicines:inspection_dashboard' %}?tab=scheduled">Scheduled</a>
+              </li>
+              <li>
+                <a href="{% url 'medicines:inspection_dashboard' %}?tab=reports">Reports Submitted</a>
+              </li>
+              <li>
+                <a href="{% url 'medicines:inspection_dashboard' %}?tab=all">All Inspections</a>
+              </li>
+            </ul>
           </li>
         {% endif %}
 

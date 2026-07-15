@@ -27,7 +27,7 @@
         <div class="col-12">
             <ul class="nav nav-tabs border-bottom-0 gap-2 mb-3" id="inspectionTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {% if request.GET.filter != 'all' %}active{% endif %} rounded-top text-dark fw-bold border shadow-sm" id="unassigned-tab" data-bs-toggle="tab" data-bs-target="#unassigned" type="button" role="tab">
+                    <button class="nav-link rounded-top text-dark fw-bold border shadow-sm" id="unassigned-tab" data-bs-toggle="tab" data-bs-target="#unassigned" type="button" role="tab">
                         <i class="ri-file-add-line me-2 text-danger"></i> Pending Scheduling
                     </button>
                 </li>
@@ -42,7 +42,7 @@
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {% if request.GET.filter == 'all' %}active{% endif %} rounded-top text-dark fw-bold border shadow-sm" id="all-inspections-tab" data-bs-toggle="tab" data-bs-target="#all-inspections" type="button" role="tab">
+                    <button class="nav-link rounded-top text-dark fw-bold border shadow-sm" id="all-inspections-tab" data-bs-toggle="tab" data-bs-target="#all-inspections" type="button" role="tab">
                         <i class="ri-archive-line me-2 text-secondary"></i> All Inspections
                     </button>
                 </li>
@@ -50,7 +50,7 @@
             
             <div class="tab-content" id="inspectionTabsContent">
                 <!-- UNASSIGNED TAB -->
-                <div class="tab-pane fade {% if request.GET.filter != 'all' %}show active{% endif %}" id="unassigned" role="tabpanel">
+                <div class="tab-pane fade" id="unassigned" role="tabpanel">
                     <div class="card shadow-sm border-0 border-top border-danger border-4">
                         <div class="card-header bg-white py-3">
                             <h5 class="mb-0 fw-bold text-dark">Applications Pending Inspection Schedule</h5>
@@ -378,4 +378,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const tabMap = {
+    'pending':   'unassigned-tab',
+    'scheduled': 'schedules-tab',
+    'reports':   'reports-tab',
+    'all':       'all-inspections-tab',
+  };
+  const param = new URLSearchParams(window.location.search).get('tab') || 'pending';
+  const tabId = tabMap[param] || 'unassigned-tab';
+  const tabEl = document.getElementById(tabId);
+  if (tabEl) {
+    new bootstrap.Tab(tabEl).show();
+  }
+})();
+</script>
 {% endblock %}
