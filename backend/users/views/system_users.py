@@ -93,10 +93,6 @@ def system_user_update_view(request, pk):
         if form.is_valid():
             updated_user = form.save(commit=False)
             updated_user.is_staff = True
-            if updated_user.is_admin and request.user.is_superuser:
-                updated_user.is_superuser = True
-            elif not updated_user.is_admin:
-                updated_user.is_superuser = False
             updated_user.save()
             form.save_m2m()
             messages.success(request, f'Successfully updated user: {updated_user.email}')
