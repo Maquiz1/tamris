@@ -96,7 +96,7 @@
           </li>
         {% endif %}
 
-        {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Admin' in user.all_roles %}
+        {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Admin' in user.all_roles %}
           <li class="treeview">
             <a href="#!">
               <i class="ri-flask-line"></i>
@@ -121,6 +121,9 @@
               </li>
             </ul>
           </li>
+        {% endif %}
+
+        {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Admin' in user.all_roles %}
           <li>
             <a href="{% url 'medicines:inspection_dashboard' %}">
               <i class="ri-calendar-event-line"></i>
