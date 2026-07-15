@@ -27,12 +27,85 @@
                 <hr class="my-4">
                 <div class="text-center">
                     <p class="text-muted small mb-2">Didn't receive the code or it expired?</p>
-                    <a href="{% url 'users:resend_email_otp' %}" class="btn btn-outline-secondary btn-sm fw-bold">
+                    <button type="button" id="resendOtpBtn" data-url="{% url 'users:resend_email_otp' %}" class="btn btn-outline-secondary btn-sm fw-bold">
                         <i class="ri-mail-send-line me-1"></i> Resend Verification Code
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const resendBtn = document.getElementById('resendOtpBtn');
+        if (!resendBtn) return;
+
+        const cooldownTime = 120; // 120 seconds
+        const userEmail = '{{ request.user.email|escapejs }}';
+        const storageKey = 'lastOtpResendTime_' + userEmail;
+
+        function updateButton(secondsLeft) {
+            if (secondsLeft > 0) {
+                resendBtn.disabled = true;
+                resendBtn.innerHTML = `<i class="ri-time-line me-1"></i> Resend in ${secondsLeft}s`;
+                resendBtn.classList.add('disabled');
+            } else {
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = `<i class="ri-mail-send-line me-1"></i> Resend Verification Code`;
+                resendBtn.classList.remove('disabled');
+            }
+        }
+
+        function checkCooldown() {
+            let lastSentTime = localStorage.getItem(storageKey);
+            
+            // If this is the user's first time on the verification page in this session
+            // start the initial cooldown immediately since the OTP was just sent.
+            if (!lastSentTime) {
+                lastSentTime = Date.now().toString();
+                localStorage.setItem(storageKey, lastSentTime);
+            }
+
+            const timePassed = Math.floor((Date.now() - parseInt(lastSentTime, 10)) / 1000);
+            const secondsLeft = cooldownTime - timePassed;
+            
+            if (secondsLeft > 0) {
+                updateButton(secondsLeft);
+                
+                const interval = setInterval(function() {
+                    const newTimePassed = Math.floor((Date.now() - parseInt(lastSentTime, 10)) / 1000);
+                    const newSecondsLeft = cooldownTime - newTimePassed;
+                    
+                    if (newSecondsLeft <= 0) {
+                        clearInterval(interval);
+                        updateButton(0);
+                    } else {
+                        updateButton(newSecondsLeft);
+                    }
+                }, 1000);
+            } else {
+                updateButton(0);
+            }
+        }
+
+        // Check on page load
+        checkCooldown();
+
+        // Handle button click
+        resendBtn.addEventListener('click', function(e) {
+            if (resendBtn.disabled || resendBtn.classList.contains('disabled')) {
+                e.preventDefault();
+                return;
+            }
+            
+            // Set new timestamp and navigate to the Django resend view
+            localStorage.setItem(storageKey, Date.now().toString());
+            const targetUrl = resendBtn.getAttribute('data-url');
+            window.location.href = targetUrl;
+        });
+    });
+</script>
 {% endblock %}
