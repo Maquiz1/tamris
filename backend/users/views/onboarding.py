@@ -96,6 +96,10 @@ def reupload_document_view(request):
         else:
             profile = user.company_profile
         if hasattr(profile, doc_key):
+            doc_status = user.document_statuses.get(doc_key, {}).get('status') if user.document_statuses else None
+            if doc_status != 'REJECTED':
+                messages.error(request, 'You can only re-upload documents that have been rejected.')
+                return redirect('users:dashboard')
             setattr(profile, doc_key, uploaded_file)
             profile.save()
             # Update document_statuses dictionary copy to make sure Django detects JSONField change
