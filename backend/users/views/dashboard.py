@@ -111,11 +111,24 @@ def profile_view(request):
                 profile.physical_address = request.POST.get('physical_address', '').strip()
                 profile.save()
                 
+        # Check if there are any remaining rejected documents
+        has_rejected_docs = False
+        if user.document_statuses:
+            for (key, data) in user.document_statuses.items():
+                if data.get('status') == 'REJECTED':
+                    has_rejected_docs = True
+                    break
+                    
+        if not has_rejected_docs:
+            user.registration_status = 'PENDING'
+            user.rejection_reason = None
+            user.review_remarks = None
+            
         user.save()
         if phone_changed:
-            messages.success(request, 'Profile details updated. Since you changed your phone number, please verify it again.')
+            messages.success(request, 'Profile details updated and resubmitted. Since you changed your phone number, please verify it again.')
         else:
-            messages.success(request, 'Profile details successfully updated.')
+            messages.success(request, 'Profile details successfully updated and resubmitted for review.')
         return redirect('users:profile')
 
     if request.method == 'POST' and request.POST.get('action') == 'change_password':
