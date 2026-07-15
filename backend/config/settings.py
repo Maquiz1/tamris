@@ -37,7 +37,7 @@ DEBUG = env('DEBUG')
 # If DEBUG is True, allow all hosts. Otherwise, default to localhost to prevent crash, 
 # but expect it to be set in .env in production.
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
-ALLOWED_HOSTS += ['*', '31.97.187.66', '31.97.187.66:8080', 'demo.tamris.org']
+ALLOWED_HOSTS += ['*', '31.97.187.66', '31.97.187.66:8080', 'demo.tamris.org', 'live.tamris.org']
 
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 CSRF_TRUSTED_ORIGINS += [
@@ -49,6 +49,8 @@ CSRF_TRUSTED_ORIGINS += [
     'http://demo.tamris.org:8080',
     'https://demo.tamris.org',
     'https://demo.tamris.org:8080',
+    'http://live.tamris.org',
+    'https://live.tamris.org',
     'http://127.0.0.1:8000', 
     'http://localhost:8000'
 ]
