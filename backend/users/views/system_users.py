@@ -28,8 +28,13 @@ def system_users_list_view(request):
     is_admin = request.user.is_admin
     if not is_admin:
         return redirect('users:dashboard')
-    from django.db.models import Q
-    staff_users = CustomUser.objects.filter(Q(role__name__in=['Evaluator', 'Inspector', 'Finance Officer', 'Admin']) | Q(additional_roles__name__in=['Evaluator', 'Inspector', 'Finance Officer', 'Admin']) | Q(is_superuser=True) | Q(registration_status='PENDING', is_email_verified=False, role__isnull=True)).distinct().order_by('email')
+    staff_users = CustomUser.objects.filter(
+        Q(is_staff=True) |
+        Q(is_superuser=True) |
+        Q(role__name__in=['Evaluator', 'Inspector', 'Finance Officer', 'Admin']) |
+        Q(additional_roles__name__in=['Evaluator', 'Inspector', 'Finance Officer', 'Admin']) |
+        Q(registration_status='PENDING', is_onboarding_complete=True, role__isnull=True)
+    ).distinct().order_by('email')
     return render(request, 'users/system_users_list.html', {'staff_users': staff_users})
 
 @login_required
