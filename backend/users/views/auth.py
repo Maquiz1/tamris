@@ -79,6 +79,14 @@ class FrontendRegisterView(CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('users:frontend_verify_otp')
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            if not request.user.is_email_verified:
+                request.session['verify_email'] = request.user.email
+                return redirect('users:frontend_verify_otp')
+            return redirect('users:dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         user = form.save(commit=False)
         user.otp_secret = pyotp.random_base32()
@@ -92,6 +100,12 @@ class FrontendRegisterView(CreateView):
         return redirect(self.success_url)
 
 def frontend_login_view(request):
+    if request.user.is_authenticated:
+        if not request.user.is_email_verified:
+            request.session['verify_email'] = request.user.email
+            return redirect('users:frontend_verify_otp')
+        return redirect('users:dashboard')
+
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
