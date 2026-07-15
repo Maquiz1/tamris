@@ -1,0 +1,14 @@
+Django>=5.0,<5.1
+djangorestframework>=3.15.1
+django-environ>=0.11.2
+django-crispy-forms>=2.1
+crispy-bootstrap5>=2024.2
+django-filter>=24.3
+psycopg2-binary>=2.9.9
+Pillow>=10.3.0
+django-cors-headers>=4.3.1
+whitenoise>=6.7.0
+django-axes>=6.4.0
+djangorestframework-simplejwt>=5.3.0
+pyotp>=2.9.0
+gunicorn>=21.2.0

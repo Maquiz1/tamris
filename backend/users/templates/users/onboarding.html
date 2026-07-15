@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Onboarding - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            
+            <!-- Progress Bar -->
+            <div class="mb-5 position-relative">
+                <div class="progress shadow-sm" style="height: 6px; border-radius: 3px;">
+                    <div class="progress-bar bg-primary" role="progressbar" 
+                         style="width: {% widthratio step 4 100 %}%;" 
+                         aria-valuenow="{{ step }}" aria-valuemin="1" aria-valuemax="4"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between position-absolute w-100" style="top: -9px;">
+                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 1 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">1</span>
+                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 2 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">2</span>
+                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 3 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">3</span>
+                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 4 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">4</span>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-2 small text-muted fw-bold">
+                    <span>Identity</span>
+                    <span>Details</span>
+                    <span>Documents</span>
+                    <span>Review</span>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card shadow-sm border-0 p-4 p-md-5">
+                <h3 class="mb-2 fw-bold text-primary">{{ title }}</h3>
+                <p class="text-muted mb-4 fs-6">{{ subtitle }}</p>
+                
+                {% if step == 4 %}
+                    <!-- Step 4: Review Summary -->
+                    <div class="alert alert-info border-0 shadow-sm d-flex bg-info-lighten text-primary py-3 mb-4">
+                        <i class="ri-information-line fs-4 me-3 text-info"></i>
+                        <div>
+                            Please review your information before finalizing. You cannot change these details once submitted.
+                        </div>
+                    </div>
+                    
+                    <h5 class="border-bottom pb-2 fw-bold text-secondary mb-3">Account Details</h5>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2"><strong>Email:</strong> <span class="text-muted">{{ request.user.email }}</span></li>
+                        <li class="mb-2"><strong>Role:</strong> <span class="text-muted">{{ request.user.all_roles|join:", " }}</span></li>
+                    </ul>
+                    
+                    <h5 class="border-bottom pb-2 fw-bold text-secondary mb-3">Profile Details</h5>
+                    <ul class="list-unstyled mb-4">
+                        {% if 'Individual Applicant' in request.user.all_roles %}
+                            <li class="mb-2"><strong>Full Name:</strong> <span class="text-muted">{{ request.user.user_profile.full_name }}</span></li>
+                            <li class="mb-2"><strong>NIDA:</strong> <span class="text-muted">{{ request.user.user_profile.formatted_nida }}</span></li>
+                            <li class="mb-2"><strong>TIN:</strong> <span class="text-muted">{{ request.user.user_profile.formatted_tin }}</span></li>
+                        {% else %}
+                            <li class="mb-2"><strong>Company Name:</strong> <span class="text-muted">{{ request.user.company_profile.company_name }}</span></li>
+                            <li class="mb-2"><strong>BRELA:</strong> <span class="text-muted">{{ request.user.company_profile.brela_number }}</span></li>
+                            <li class="mb-2"><strong>TIN:</strong> <span class="text-muted">{{ request.user.company_profile.formatted_tin }}</span></li>
+                        {% endif %}
+                    </ul>
+                    
+                    <h5 class="border-bottom pb-2 fw-bold text-secondary mb-3">Uploaded Documents</h5>
+                    <p class="text-success fw-bold d-inline-flex align-items-center mb-4">
+                        <i class="ri-checkbox-circle-fill me-2 fs-5"></i> All mandatory documents uploaded successfully.
+                    </p>
+                    
+                    <form method="post" action="{% url 'users:onboarding' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100 py-2.5 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm">
+                            <i class="ri-check-double-line me-2"></i> Submit Application & Enter Dashboard
+                        </button>
+                    </form>
+
+                {% else %}
+                    <!-- Steps 1 to 3: Render Crispy Form -->
+                    <form method="post" action="{% url 'users:onboarding' %}" {% if step == 3 %}enctype="multipart/form-data"{% endif %}>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary w-100 mt-4 py-2.5 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm">
+                            {% if step == 3 %}
+                                <i class="ri-upload-cloud-line me-2"></i> Upload & Continue
+                            {% else %}
+                                <i class="ri-save-line me-2"></i> Save & Continue
+                            {% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

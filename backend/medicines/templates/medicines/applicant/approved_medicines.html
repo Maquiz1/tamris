@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}My {{ title }} - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    
+    <!-- Title / Actions Header -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'users:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small">
+                            <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+                        </a>
+                        <h3 class="fw-bold mb-0 mt-1 d-inline-flex align-items-center text-{{ theme_color }}">
+                            {% if icon == 'bi-capsule' %}
+                                <i class="ri-capsule-line me-2"></i>
+                            {% else %}
+                                <i class="ri-checkbox-circle-line me-2"></i>
+                            {% endif %}
+                            My {{ title }}
+                        </h3>
+                        <p class="text-muted small mb-0 mt-1">List of your approved medicines and official registration certificates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="row gx-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 border-top border-{{ theme_color }} border-4">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-dark">Fully Listed Medicines</h5>
+                    <span class="badge bg-{{ theme_color }} text-dark rounded-pill px-3">{{ applications.count }} {{ title }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">Medicine Info</th>
+                                    <th class="py-3">Registration Number</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="py-3">Approved On</th>
+                                    <th class="text-end px-4 py-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for application in applications %}
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="icon-box md bg-{{ theme_color }}-lighten rounded-circle me-3">
+                                                {% if icon == 'bi-capsule' %}
+                                                    <i class="ri-capsule-line text-{{ theme_color }} fs-4"></i>
+                                                {% else %}
+                                                    <i class="ri-checkbox-circle-line text-{{ theme_color }} fs-4"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">{{ application.medicine_name }}</div>
+                                                <div class="small text-muted">{{ application.get_application_type_display }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 fw-semibold font-monospace text-secondary">
+                                        {{ application.registration_number|default:"Pending Generation" }}
+                                    </td>
+                                    <td class="py-3">
+                                        {% if application.status == 'FULL_REGISTRATION' %}
+                                            <span class="badge bg-success-lighten text-success"><i class="ri-checkbox-circle-fill me-1"></i> Full Registration</span>
+                                        {% else %}
+                                            <span class="badge bg-primary-lighten text-primary"><i class="ri-time-line me-1"></i> Provisional Registration</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3 text-muted">
+                                        {{ application.updated_at|date:"M d, Y" }}
+                                    </td>
+                                    <td class="text-end px-4 py-3">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            {% if application.status == 'FULL_REGISTRATION' %}
+                                                <a href="{% url 'medicines:download_certificate' application.pk %}" class="btn btn-outline-{{ theme_color }} btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
+                                                    <i class="ri-article-line me-1"></i> Certificate
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'medicines:download_certificate' application.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
+                                                    <i class="ri-file-text-line me-1"></i> Provisional Letter
+                                                </a>
+                                            {% endif %}
+                                            <a href="{% url 'medicines:applicant_application_detail' application.pk %}" class="btn btn-light btn-sm rounded-pill px-3 text-secondary border fw-bold">
+                                                Details
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="ri-inbox-line fs-1 d-block mb-3 opacity-50 text-secondary"></i>
+                                            <h5 class="fw-bold">No {{ title }} Found</h5>
+                                            <p class="mb-0">You do not currently have any approved {{ title|lower }}.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

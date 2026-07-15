@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports Dashboard - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    
+    <!-- Title Section -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h2 class="fw-bold mb-1 text-primary d-inline-flex align-items-center">
+                            <i class="ri-bar-chart-box-line me-2"></i> Reports & Analytics
+                        </h2>
+                        <p class="text-muted mb-0">Centralized reporting module for viewing and exporting system-wide data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row gx-3 mb-4">
+        <!-- Total Applications -->
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="p-2 border border-primary rounded-circle me-3">
+                            <div class="icon-box md bg-primary-lighten rounded-5">
+                                <i class="ri-file-list-3-line fs-4 text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h1 class="lh-1 mb-1">{{ total_applications }}</h1>
+                            <p class="m-0 text-muted small">Total Applications</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered Medicines -->
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="p-2 border border-success rounded-circle me-3">
+                            <div class="icon-box md bg-success-lighten rounded-5">
+                                <i class="ri-checkbox-circle-line fs-4 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h1 class="lh-1 mb-1">{{ total_registered }}</h1>
+                            <p class="m-0 text-muted small">Registered Medicines</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verified Payments -->
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="p-2 border border-warning rounded-circle me-3">
+                            <div class="icon-box md bg-warning-lighten rounded-5">
+                                <i class="ri-money-dollar-circle-line fs-4 text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h1 class="lh-1 mb-1">{{ total_payments_verified }}</h1>
+                            <p class="m-0 text-muted small">Verified Payments</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Users -->
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="p-2 border border-info rounded-circle me-3">
+                            <div class="icon-box md bg-info-lighten rounded-5">
+                                <i class="ri-group-line fs-4 text-info"></i>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h1 class="lh-1 mb-1">{{ total_users }}</h1>
+                            <p class="m-0 text-muted small">Total Users</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row gx-3 mb-4">
+        <!-- Status Distribution Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0">
+                    <h5 class="fw-bold text-secondary mb-0">Applications by Status</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 280px; position: relative;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Applications Trend Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0">
+                    <h5 class="fw-bold text-secondary mb-0">Application Trends (Last 6 Months)</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 280px; position: relative;">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Reports Section -->
+    <div class="row gx-3">
+        <div class="col-12 mb-3">
+            <h4 class="fw-bold text-secondary">Available Reports</h4>
+        </div>
+
+        <!-- Applications Report -->
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-primary-lighten rounded-circle me-3">
+                            <i class="ri-file-text-line text-primary fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Applications Report</h5>
+                            <p class="text-muted small mb-0">List & status of all submissions.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:applications' %}" class="btn btn-outline-primary btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:applications' %}?export=csv" class="btn btn-primary btn-sm flex-fill fw-bold">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Report -->
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-success-lighten rounded-circle me-3">
+                            <i class="ri-money-dollar-circle-line text-success fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Payments & Revenue</h5>
+                            <p class="text-muted small mb-0">Fee payments & validation report.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:payments' %}" class="btn btn-outline-success btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:payments' %}?export=csv" class="btn btn-success btn-sm flex-fill fw-bold">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered Medicines Report -->
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-warning-lighten rounded-circle me-3">
+                            <i class="ri-checkbox-circle-line text-warning fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Registered Medicines</h5>
+                            <p class="text-muted small mb-0">Active directories and listings.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:medicines' %}" class="btn btn-outline-warning btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:medicines' %}?export=csv" class="btn btn-warning btn-sm flex-fill fw-bold">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Report -->
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-info-lighten rounded-circle me-3">
+                            <i class="ri-group-line text-info fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Users & Applicants</h5>
+                            <p class="text-muted small mb-0">Audit of registered user accounts.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:users' %}" class="btn btn-outline-info btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:users' %}?export=csv" class="btn btn-info btn-sm flex-fill fw-bold text-white">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluations Report -->
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-primary-lighten rounded-circle me-3">
+                            <i class="ri-flask-line text-primary fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Evaluations Report</h5>
+                            <p class="text-muted small mb-0">Scientific evaluation progress data.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:evaluations' %}" class="btn btn-outline-primary btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:evaluations' %}?export=csv" class="btn btn-primary btn-sm flex-fill fw-bold">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inspections Report -->
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-danger-lighten rounded-circle me-3">
+                            <i class="ri-calendar-check-line text-danger fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Inspections Report</h5>
+                            <p class="text-muted small mb-0">Inspection schedules & outcomes.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:inspections' %}" class="btn btn-outline-danger btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:inspections' %}?export=csv" class="btn btn-danger btn-sm flex-fill fw-bold">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const labels = {{ status_labels|safe }};
+    const data = {{ status_data|safe }};
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    '#0d6efd',
+                    '#198754',
+                    '#ffc107',
+                    '#dc3545',
+                    '#0dcaf0',
+                    '#6c757d'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+
+    // Trend Line Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendLabels = {{ trend_labels|safe }};
+    const trendData = {{ trend_data|safe }};
+
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: trendLabels.length > 0 ? trendLabels : ['No Data Yet'],
+            datasets: [{
+                label: 'New Applications',
+                data: trendData.length > 0 ? trendData : [0],
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.08)',
+                borderWidth: 2.5,
+                fill: true,
+                tension: 0.35
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

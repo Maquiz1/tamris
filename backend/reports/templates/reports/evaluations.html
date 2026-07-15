@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}All Evaluations Report - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    
+    <!-- Title / Actions Header -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'reports:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small">
+                            <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+                        </a>
+                        <h3 class="fw-bold mb-0 mt-1 d-inline-flex align-items-center text-primary">
+                            <i class="ri-flask-line me-2"></i> All Evaluations Report
+                        </h3>
+                    </div>
+                    <div>
+                        <a href="?{% if docs_filter %}docs_complete={{ docs_filter }}&{% endif %}{% if quality_filter %}quality_check={{ quality_filter }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}export=csv" class="btn btn-primary fw-bold shadow-sm d-inline-flex align-items-center">
+                            <i class="ri-download-line me-2"></i> Export to CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="row gx-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3">
+                    <form method="get" class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small text-muted mb-1">Documents Complete</label>
+                            <select name="docs_complete" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                <option value="1" {% if docs_filter == '1' %}selected{% endif %}>Complete</option>
+                                <option value="0" {% if docs_filter == '0' %}selected{% endif %}>Incomplete</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small text-muted mb-1">Quality Check</label>
+                            <select name="quality_check" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                <option value="1" {% if quality_filter == '1' %}selected{% endif %}>Passed</option>
+                                <option value="0" {% if quality_filter == '0' %}selected{% endif %}>Not Passed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold small text-muted mb-1">From Date</label>
+                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold small text-muted mb-1">To Date</label>
+                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date|default:'' }}">
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">
+                                <i class="ri-filter-3-line me-1"></i> Filter
+                            </button>
+                            <a href="{% url 'reports:evaluations' %}" class="btn btn-outline-secondary btn-sm fw-bold">
+                                <i class="ri-close-line"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphs Row -->
+    <div class="row gx-3 mb-4">
+        <!-- Documents Verification Status -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card shadow-sm border-0 mb-3 mb-xl-0">
+                <div class="card-header bg-transparent border-0 pt-3">
+                    <h5 class="card-title fw-bold mb-0">Documents Verification Status</h5>
+                </div>
+                <div class="card-body">
+                    <div id="docsChart" style="min-height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Quality Checked Distribution -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-0 pt-3">
+                    <h5 class="card-title fw-bold mb-0">Quality Check Status</h5>
+                </div>
+                <div class="card-body">
+                    <div id="qualityChart" style="min-height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="row gx-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 border-top border-primary border-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">Eval ID</th>
+                                    <th class="py-3">Medicine Name</th>
+                                    <th class="py-3">Evaluator</th>
+                                    <th class="py-3">Documents Complete</th>
+                                    <th class="px-4 py-3">Quality Checked</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for e in evaluations %}
+                                <tr>
+                                    <td class="px-4 py-3 text-muted">#{{ e.id }}</td>
+                                    <td class="py-3 fw-bold text-dark">{{ e.application.medicine_name }}</td>
+                                    <td class="py-3 text-muted">{{ e.evaluator.email|default:"Not Assigned" }}</td>
+                                    <td class="py-3">
+                                        {% if e.documents_complete %}
+                                            <span class="badge bg-success-lighten text-success">Yes</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-lighten text-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        {% if e.quality_check %}
+                                            <span class="badge bg-success-lighten text-success">Yes</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-lighten text-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="ri-survey-line fs-2 mb-2 d-block opacity-50"></i>
+                                        No evaluations found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Documents Complete Chart
+    const docsOptions = {
+        series: [{{ docs_complete_count }}, {{ docs_incomplete_count }}],
+        chart: {
+            type: 'pie',
+            height: 250
+        },
+        labels: ['Complete', 'Incomplete'],
+        colors: ['#198754', '#dc3545'],
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+    const docsChart = new ApexCharts(document.querySelector("#docsChart"), docsOptions);
+    docsChart.render();
+
+    // Quality Check Chart
+    const qualityOptions = {
+        series: [{{ quality_checked_count }}, {{ quality_unchecked_count }}],
+        chart: {
+            type: 'donut',
+            height: 250
+        },
+        labels: ['Quality Checked', 'Pending Quality Check'],
+        colors: ['#0d6efd', '#ffc107'],
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+    const qualityChart = new ApexCharts(document.querySelector("#qualityChart"), qualityOptions);
+    qualityChart.render();
+});
+</script>
+{% endblock %}

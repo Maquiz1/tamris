@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Applications Report - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    
+    <!-- Title / Actions Header -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'reports:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small">
+                            <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+                        </a>
+                        <h3 class="fw-bold mb-0 mt-1 d-inline-flex align-items-center text-primary">
+                            <i class="ri-file-text-line me-2"></i> All Applications Report
+                        </h3>
+                    </div>
+                    <div>
+                        <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}export=csv" class="btn btn-primary fw-bold shadow-sm d-inline-flex align-items-center">
+                            <i class="ri-download-line me-2"></i> Export to CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="row gx-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3">
+                    <form method="get" class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small text-muted mb-1">Status</label>
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="">All Statuses</option>
+                                {% for value, label in STATUS_CHOICES %}
+                                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small text-muted mb-1">From Date</label>
+                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small text-muted mb-1">To Date</label>
+                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date|default:'' }}">
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">
+                                <i class="ri-filter-3-line me-1"></i> Filter
+                            </button>
+                            <a href="{% url 'reports:applications' %}" class="btn btn-outline-secondary btn-sm fw-bold">
+                                <i class="ri-close-line"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphs Row -->
+    <div class="row gx-3 mb-4">
+        <!-- Application Status Distribution -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card shadow-sm border-0 mb-3 mb-xl-0">
+                <div class="card-header bg-transparent border-0 pt-3">
+                    <h5 class="card-title fw-bold mb-0">Applications by Status</h5>
+                </div>
+                <div class="card-body">
+                    <div id="statusChart" style="min-height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Application Type Distribution -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-0 pt-3">
+                    <h5 class="card-title fw-bold mb-0">Applications by Type</h5>
+                </div>
+                <div class="card-body">
+                    <div id="typeChart" style="min-height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="row gx-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-0 pt-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0">Results <span class="badge bg-primary ms-2">{{ applications|length }}</span></h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">ID</th>
+                                    <th class="py-3">Medicine Name</th>
+                                    <th class="py-3">Applicant</th>
+                                    <th class="py-3">Type</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="px-4 py-3">Date Applied</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications %}
+                                <tr>
+                                    <td class="px-4 py-3 text-muted">#{{ app.id }}</td>
+                                    <td class="py-3 fw-bold">{{ app.medicine_name }}</td>
+                                    <td class="py-3 text-muted small">{{ app.applicant.get_full_name|default:app.applicant.email }}</td>
+                                    <td class="py-3">{{ app.get_application_type_display }}</td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary-lighten text-primary">{{ app.get_status_display }}</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-muted">{{ app.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="ri-file-list-3-line fs-2 mb-2 d-block opacity-50"></i>
+                                        No applications found for the selected filters.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status Donut Chart
+    const statusOptions = {
+        series: {{ status_data|safe }},
+        chart: {
+            type: 'donut',
+            height: 250
+        },
+        labels: {{ status_labels|safe }},
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }],
+        colors: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6c757d', '#6610f2', '#fd7e14', '#20c997', '#e83e8c']
+    };
+    const statusChart = new ApexCharts(document.querySelector("#statusChart"), statusOptions);
+    statusChart.render();
+
+    // Type Bar Chart
+    const typeOptions = {
+        series: [{
+            name: 'Applications',
+            data: {{ type_data|safe }}
+        }],
+        chart: {
+            type: 'bar',
+            height: 250,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: true,
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        xaxis: {
+            categories: {{ type_labels|safe }},
+        },
+        colors: ['#198754']
+    };
+    const typeChart = new ApexCharts(document.querySelector("#typeChart"), typeOptions);
+    typeChart.render();
+});
+</script>
+{% endblock %}

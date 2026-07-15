@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block title %}Applicant Dashboard - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+  
+  <div class="row gx-3">
+    <div class="col-xxl-12 col-sm-12">
+      <div class="card mb-3 bg-3">
+        <div class="card-body">
+          <div class="mh-230">
+            <div class="py-3 px-2 text-dark">
+              <h6>Welcome Back,</h6>
+              <h3 class="mb-1">{{ user.display_name }}</h3>
+              <p class="fw-normal">Applicant Dashboard</p>
+              
+              <div class="mt-4 d-flex gap-3">
+                <div class="d-flex align-items-center">
+                  <div class="icon-box lg bg-lime rounded-5 me-2">
+                    <i class="ri-folder-open-line fs-4"></i>
+                  </div>
+                  <div class="d-flex flex-column">
+                    <h2 class="m-0 lh-1">{{ user.medicine_applications.count }}</h2>
+                    <p class="m-0">Applications</p>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <div class="icon-box lg bg-lime rounded-5 me-2">
+                    <i class="ri-search-eye-line fs-4"></i>
+                  </div>
+                  <div class="d-flex flex-column">
+                    <h2 class="m-0 lh-1">{{ applicant_inspection_count }}</h2>
+                    <p class="m-0">Inspections</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row gx-3">
+    <div class="col-xl-6 col-sm-6 col-12">
+      <a href="{% url 'medicines:applicant_listed_medicines' %}" class="text-decoration-none">
+        <div class="card mb-3 bg-success">
+          <div class="card-body text-white">
+            <div class="d-flex align-items-center mb-4">
+              <div class="p-2 border border-white rounded-circle me-3">
+                <div class="icon-box md bg-white bg-opacity-25 rounded-5">
+                  <i class="ri-medicine-bottle-line fs-4 text-white"></i>
+                </div>
+              </div>
+              <div class="d-flex flex-column">
+                <h1 class="lh-1 text-white m-0">{{ applicant_listed_count }}</h1>
+                <p class="m-0 text-white-50">Listed Medicines</p>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Fully Listed Medicines</span>
+              <i class="ri-arrow-right-circle-line fs-5"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-xl-6 col-sm-6 col-12">
+      <a href="{% url 'medicines:applicant_registered_medicines' %}" class="text-decoration-none">
+        <div class="card mb-3 bg-info">
+          <div class="card-body text-white">
+            <div class="d-flex align-items-center mb-4">
+              <div class="p-2 border border-white rounded-circle me-3">
+                <div class="icon-box md bg-white bg-opacity-25 rounded-5">
+                  <i class="ri-flask-line fs-4 text-white"></i>
+                </div>
+              </div>
+              <div class="d-flex flex-column">
+                <h1 class="lh-1 text-white m-0">{{ applicant_registered_count }}</h1>
+                <p class="m-0 text-white-50">Registered Category II</p>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Fully registered medicines</span>
+              <i class="ri-arrow-right-circle-line fs-5"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Actions Section -->
+  <div class="row gx-3">
+    <div class="col-12 mb-4">
+        {% if user.registration_status == 'VERIFIED' %}
+            <div class="card mb-3 border-0 border-start border-success border-4 shadow" style="background: #f0fdf4;">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-success" style="width:48px;height:48px;flex-shrink:0;">
+                            <i class="ri-checkbox-circle-fill text-white fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-success"><i class="ri-lock-unlock-line me-2"></i>Account Verified &mdash; Ready to Apply!</h5>
+                            <p class="mb-0 text-dark">Your account has been verified. You can now submit applications for medicine listing or registration.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'medicines:initiate_application' 'LISTING' %}" class="btn btn-outline-success tamris-hover-btn"><i class="ri-file-add-line me-1"></i> Listing of Traditional Medicines</a>
+                        <a href="{% url 'medicines:initiate_application' 'CATEGORY_II' %}" class="btn btn-outline-success tamris-hover-btn"><i class="ri-check-double-line me-1"></i> Registration of Category II Traditional Medicines</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="card mb-3 border-0 border-start border-warning border-4 shadow" style="background: #fff8e1;">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-warning" style="width:48px;height:48px;flex-shrink:0;">
+                            <i class="ri-lock-fill text-dark fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark"><i class="ri-alert-line me-2"></i>Medicine Evaluation Locked</h5>
+                            <p class="mb-0 text-dark">Your account registration must be <strong>Verified by an Evaluator</strong> before you can apply for medicine listing or registration. You will be notified once your account is reviewed.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-warning text-dark" disabled><i class="ri-file-add-line me-1"></i> Listing of Traditional Medicines</button>
+                        <button class="btn btn-outline-warning text-dark" disabled><i class="ri-check-double-line me-1"></i> Registration of Category II Traditional Medicines</button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+  </div>
+
+  <!-- My Applications Table -->
+  <div class="row gx-3">
+    <div class="col-sm-12">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="card-title">My Applications</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-outer">
+            <div class="table-responsive">
+              <table class="table align-middle truncate m-0">
+                <thead>
+                  <tr>
+                    <th>Application Type</th>
+                    <th>Submitted On</th>
+                    <th>Status</th>
+                    <th class="text-end">Required Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for med_app in user.medicine_applications.all %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="icon-box md bg-light rounded-5 me-3">
+                          {% if med_app.application_type == 'LISTING' %}
+                            <i class="ri-capsule-fill text-success fs-5"></i>
+                          {% else %}
+                            <i class="ri-medicine-bottle-line text-warning fs-5"></i>
+                          {% endif %}
+                        </div>
+                        <div>
+                          <p class="m-0 fw-semibold">{{ med_app.get_application_type_display }}</p>
+                          <p class="m-0 text-muted small">{{ med_app.medicine_name }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="m-0 text-muted">{{ med_app.created_at|date:"M d, Y" }}</p>
+                    </td>
+                    <td>
+                        {% if med_app.status == 'FULL_REGISTRATION' %}
+                            <span class="badge bg-success"><i class="ri-check-double-line me-1"></i> Full Registration</span>
+                        {% elif med_app.status == 'PROVISIONAL_REGISTRATION' %}
+                            <span class="badge bg-primary"><i class="ri-time-line me-1"></i> Provisional</span>
+                        {% elif med_app.status == 'CONDITIONS_APPLIED' %}
+                            <span class="badge bg-warning"><i class="ri-error-warning-line me-1"></i> Conditions</span>
+                            {% if med_app.evaluation.overall_comments %}
+                            <button type="button" class="btn btn-link btn-sm text-danger p-0 mt-1 text-decoration-none fw-bold d-block text-start" data-bs-toggle="modal" data-bs-target="#conditionsModal{{ med_app.pk }}">
+                                <i class="ri-information-line"></i> View Recommendations
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="conditionsModal{{ med_app.pk }}" tabindex="-1" aria-labelledby="conditionsModalLabel{{ med_app.pk }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="conditionsModalLabel{{ med_app.pk }}">Conditions for Improvement</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="bg-light p-3 rounded border text-wrap text-break" style="white-space: pre-line;">{{ med_app.evaluation.overall_comments }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% elif med_app.status == 'REJECTED' %}
+                            <span class="badge bg-danger"><i class="ri-close-circle-line me-1"></i> Rejected</span>
+                            {% if med_app.rejection_reason %}
+                            <button type="button" class="btn btn-link btn-sm text-danger p-0 mt-1 text-decoration-none fw-bold d-block text-start" data-bs-toggle="modal" data-bs-target="#rejectModal{{ med_app.pk }}">
+                                <i class="ri-information-line"></i> View Feedback
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="rejectModal{{ med_app.pk }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ med_app.pk }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="rejectModalLabel{{ med_app.pk }}">Rejection Feedback</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="bg-light p-3 rounded border text-wrap text-break" style="white-space: pre-line;">{{ med_app.rejection_reason }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% elif med_app.status == 'DRAFT' %}
+                            <span class="badge bg-secondary"><i class="ri-edit-2-line me-1"></i> Draft</span>
+                        {% else %}
+                            <span class="badge bg-info"><i class="ri-information-line me-1"></i> {{ med_app.get_status_display|default:med_app.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2">
+                          {% if med_app.status == 'FULL_REGISTRATION' %}
+                              <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-success btn-sm" target="_blank">
+                                  <i class="ri-medal-line me-1"></i> Certificate
+                              </a>
+                          {% elif med_app.status == 'PROVISIONAL_REGISTRATION' %}
+                              <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-primary btn-sm" target="_blank">
+                                  <i class="ri-file-paper-2-line me-1"></i> Letter
+                              </a>
+                          {% elif med_app.status == 'CONDITIONS_APPLIED' %}
+                              <a href="{% url 'medicines:edit_application' med_app.pk %}" class="btn btn-warning btn-sm text-dark">
+                                  <i class="ri-edit-2-line me-1"></i> Correct
+                              </a>
+                          {% elif 'PENDING' in med_app.status and 'FEE' in med_app.status %}
+                              {% with pending_payment=med_app.payments.last %}
+                                  {% if pending_payment and not pending_payment.is_verified and not pending_payment.receipt_number %}
+                                      <a href="{% url 'medicines:submit_payment' pending_payment.pk %}" class="btn btn-danger btn-sm">
+                                          <i class="ri-upload-2-line me-1"></i> Receipt
+                                      </a>
+                                  {% elif pending_payment and pending_payment.receipt_number and not pending_payment.is_verified %}
+                                      <button class="btn btn-secondary btn-sm" disabled>
+                                          <i class="ri-time-line me-1"></i> Verifying
+                                      </button>
+                                  {% endif %}
+                              {% endwith %}
+                          {% elif med_app.status == 'DRAFT' %}
+                              {% if med_app.application_type == 'LISTING' %}
+                                  <a href="{% url 'medicines:apply_listing' med_app.pk %}" class="btn btn-primary btn-sm">
+                                      <i class="ri-edit-line me-1"></i> Fill Form
+                                  </a>
+                              {% else %}
+                                  <a href="{% url 'medicines:apply_category_ii' med_app.pk %}" class="btn btn-primary btn-sm">
+                                      <i class="ri-edit-line me-1"></i> Fill Form
+                                  </a>
+                              {% endif %}
+                          {% elif med_app.status == 'REJECTED' %}
+                              <button class="btn btn-outline-danger btn-sm" disabled>
+                                  <i class="ri-close-circle-line me-1"></i> Rejected
+                              </button>
+                          {% else %}
+                              <button class="btn btn-light btn-sm text-muted border" disabled>
+                                  <i class="ri-time-line me-1"></i> Awaiting Staff
+                              </button>
+                          {% endif %}
+                          <a href="{% url 'medicines:applicant_application_detail' med_app.pk %}" class="btn btn-outline-primary btn-sm">
+                              Details
+                          </a>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% if user.registration_status == 'REJECTED' and user.rejection_reason %}
+          <div class="mt-4">
+              <div class="alert alert-danger mb-0">
+                  <h6 class="alert-heading fw-bold"><i class="ri-error-warning-line me-2"></i> Reason for Rejection:</h6>
+                  <p class="mb-0">{{ user.rejection_reason|linebreaksbr }}</p>
+                  <div class="mt-3">
+                      <a href="{% url 'users:profile' %}" class="btn btn-danger btn-sm">Update My Profile Documents</a>
+                  </div>
+              </div>
+          </div>
+          {% endif %}
+          {% if user.review_remarks %}
+          <div class="mt-4">
+              <div class="alert alert-info mb-0">
+                  <h6 class="alert-heading fw-bold"><i class="ri-information-line me-2"></i> Staff Remarks:</h6>
+                  <p class="mb-0">{{ user.review_remarks|linebreaksbr }}</p>
+              </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

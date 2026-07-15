@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}View System User - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <a href="{% url 'users:system_users_list' %}" class="text-decoration-none text-muted mb-3 d-block">
+            <i class="bi bi-arrow-left me-1"></i> Back to Staffs
+        </a>
+        
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3 border-bottom-0">
+                <h5 class="fw-bold mb-0"><i class="bi bi-person-badge me-2"></i>Staff Details</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-fill text-primary fs-2"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-1">{{ staff_user.email }}</h4>
+                        <span class="badge {% if staff_user.is_superuser %}bg-dark{% elif staff_user.is_admin %}bg-danger{% elif staff_user.is_finance %}bg-success{% else %}bg-primary{% endif %} rounded-pill">
+                            {{ staff_user.all_roles|join:", " }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted fw-bold">Email Address</div>
+                    <div class="col-sm-8">{{ staff_user.email }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted fw-bold">Phone Number</div>
+                    <div class="col-sm-8">{{ staff_user.phone_number|default:"Not Provided" }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted fw-bold">Account Status</div>
+                    <div class="col-sm-8">
+                        {% if staff_user.is_active %}
+                            <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Active</span>
+                        {% else %}
+                            <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i> Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted fw-bold">Date Joined</div>
+                    <div class="col-sm-8">{{ staff_user.date_joined|date:"d M Y" }}</div>
+                </div>
+                
+                <div class="d-grid mt-4 pt-3 border-top">
+                    <a href="{% url 'users:system_user_update' staff_user.pk %}" class="btn btn-outline-primary fw-bold py-2">
+                        <i class="bi bi-pencil-square me-2"></i>Edit User
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

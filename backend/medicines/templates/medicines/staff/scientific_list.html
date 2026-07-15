@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Applications - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{% url 'users:dashboard' %}" class="text-decoration-none text-muted mb-2 d-block">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+                <h2>{% if list_filter == 'pending' %}Scientific Evaluation Queue{% else %}All Scientific Evaluations{% endif %}</h2>
+                <p class="text-muted mb-0">{% if list_filter == 'pending' %}Evaluate applications that have passed preliminary screening.{% else %}Full history of all scientifically evaluated applications.{% endif %}</p>
+            </div>
+            <span class="badge bg-primary rounded-pill px-3 py-2">
+                {{ total_applications }} {% if list_filter == 'pending' %}Pending Applications{% else %}Total Applications{% endif %}
+            </span>
+        </div>
+        
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body py-3">
+                <form method="get" class="d-flex flex-column flex-md-row gap-3 w-100 w-md-75 ms-auto">
+                    <div class="input-group" style="max-width: 200px;">
+                        <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-funnel"></i></span>
+                        <select name="status" class="form-select border-start-0 ps-0 text-muted" aria-label="Filter by Status">
+                            <option value="">All Statuses</option>
+                            <option value="SUBMITTED" {% if status_filter == 'SUBMITTED' %}selected{% endif %}>Pending Review</option>
+                            <option value="UNDER_REVIEW" {% if status_filter == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
+                            <option value="FULL_REGISTRATION" {% if status_filter == 'FULL_REGISTRATION' %}selected{% endif %}>Full Registration</option>
+                            <option value="PROVISIONAL_REGISTRATION" {% if status_filter == 'PROVISIONAL_REGISTRATION' %}selected{% endif %}>Provisional Registration</option>
+                            <option value="CONDITIONS_APPLIED" {% if status_filter == 'CONDITIONS_APPLIED' %}selected{% endif %}>Conditions for Improvement</option>
+                            <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group" style="max-width: 320px;">
+                        <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-calendar-range"></i></span>
+                        <input type="date" name="start_date" value="{{ start_date }}" class="form-control border-start-0 border-end-0 ps-0 text-muted" aria-label="Start Date" title="Start Date">
+                        <span class="input-group-text bg-white text-muted border-start-0 border-end-0 px-2">-</span>
+                        <input type="date" name="end_date" value="{{ end_date }}" class="form-control border-start-0 ps-0 text-muted" aria-label="End Date" title="End Date">
+                    </div>
+                    
+                    <div class="input-group flex-grow-1">
+                        <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0 ps-0" placeholder="Search by Medicine Name or Applicant..." aria-label="Search">
+                        <button class="btn btn-primary px-4" type="submit">Filter</button>
+                        {% if query or status_filter or start_date or end_date %}
+                            <a href="{% url 'medicines:staff_scientific_list' %}" class="btn btn-outline-secondary">Clear</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">Medicine Name</th>
+                                <th class="py-3">Application Type</th>
+                                <th class="py-3">Applicant</th>
+                                <th class="py-3">Submitted On</th>
+                                <th class="py-3">Status</th>
+                                <th class="text-end px-4 py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                                <tr>
+                                    <td class="px-4 py-3 fw-bold text-primary">
+                                        {{ app.medicine_name }}
+                                    </td>
+                                    <td class="py-3">
+                                        {{ app.get_application_type_display }}
+                                    </td>
+                                    <td class="py-3 text-muted">
+                                        {{ app.applicant.email }}
+                                    </td>
+                                    <td class="py-3 text-muted">
+                                        {{ app.submitted_at|date:"M d, Y" }}
+                                    </td>
+                                    <td class="py-3">
+                                        {% if app.status == 'FULL_REGISTRATION' %}
+                                            <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i> Full Registration</span>
+                                        {% elif app.status == 'PROVISIONAL_REGISTRATION' %}
+                                            <span class="badge bg-primary"><i class="bi bi-clock-history me-1"></i> Provisional Registration</span>
+                                        {% elif app.status == 'CONDITIONS_APPLIED' %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill me-1"></i> Conditions Applied</span>
+                                        {% elif app.status == 'REJECTED' %}
+                                            <span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i> Rejected</span>
+                                        {% elif app.status == 'UNDER_REVIEW' %}
+                                            <span class="badge bg-info text-dark"><i class="bi bi-search me-1"></i> Under Review</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Submitted</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end px-4 py-3">
+                                        <a href="{% url 'medicines:staff_scientific_detail' app.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                            Evaluate <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                        No medicine applications waiting for review.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            {% if applications.has_other_pages %}
+            <div class="card-footer bg-white py-3 border-top-0">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if applications.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ applications.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        {% for num in applications.paginator.page_range %}
+                            {% if applications.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > applications.number|add:'-3' and num < applications.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if applications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ applications.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&raquo;</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

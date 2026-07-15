@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Evaluator & Inspector Dashboard - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+  
+  <div class="row gx-3">
+    <div class="col-xxl-12 col-sm-12">
+      <div class="card mb-3 bg-3">
+        <div class="card-body">
+          <div class="mh-230">
+            <div class="py-3 px-2 text-dark">
+              <h6>Welcome Back,</h6>
+              <h3 class="mb-1">{{ user.display_name }}</h3>
+              <p class="fw-normal">You are logged in as <strong>{{ user.all_roles|join:", " }}</strong>.</p>
+              
+              {% if 'Evaluator' in user.all_roles or user.is_superuser %}
+              <div class="mt-4 d-flex gap-3">
+                <div class="d-flex align-items-center">
+                  <div class="icon-box lg bg-lime rounded-5 me-2">
+                    <i class="ri-clipboard-line fs-4"></i>
+                  </div>
+                  <div class="d-flex flex-column">
+                    <h2 class="m-0 lh-1">{{ eval_pending_inspections }}</h2>
+                    <p class="m-0">Pending Inspections</p>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <div class="icon-box lg bg-lime rounded-5 me-2">
+                    <i class="ri-microscope-line fs-4"></i>
+                  </div>
+                  <div class="d-flex flex-column">
+                    <h2 class="m-0 lh-1">{{ eval_pending_final }}</h2>
+                    <p class="m-0">Final Evaluations</p>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if 'Evaluator' in user.all_roles or user.is_superuser %}
+  <!-- Evaluator Section -->
+  <div class="row gx-3">
+    <div class="col-12 mb-3 mt-2">
+      <h4 class="fw-bold text-primary border-bottom pb-2">Evaluator Actions</h4>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="p-2 border border-primary rounded-circle me-3">
+              <div class="icon-box md bg-primary-lighten rounded-5">
+                <i class="ri-user-add-line fs-4 text-primary"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="lh-1 mb-0">{{ eval_pending_users }}</h2>
+              <p class="m-0 text-muted">Pending Accounts</p>
+            </div>
+          </div>
+          <a href="{% url 'users:staff_registration_list' %}" class="btn btn-primary btn-sm w-100 fw-bold">Review Users</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="p-2 border border-warning rounded-circle me-3">
+              <div class="icon-box md bg-warning-lighten rounded-5">
+                <i class="ri-folder-check-line fs-4 text-warning"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="lh-1 mb-0">{{ eval_pending_prelim }}</h2>
+              <p class="m-0 text-muted">Pending Prelim</p>
+            </div>
+          </div>
+          <a href="{% url 'medicines:staff_preliminary_list' %}" class="btn btn-warning btn-sm w-100 fw-bold">Review Applications</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="p-2 border border-info rounded-circle me-3">
+              <div class="icon-box md bg-info-lighten rounded-5">
+                <i class="ri-flask-line fs-4 text-info"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="lh-1 mb-0">{{ eval_pending_sci }}</h2>
+              <p class="m-0 text-muted">Pending Scientific</p>
+            </div>
+          </div>
+          <a href="{% url 'medicines:staff_scientific_list' %}" class="btn btn-info btn-sm w-100 fw-bold text-white">Evaluate Applications</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="p-2 border border-success rounded-circle me-3">
+              <div class="icon-box md bg-success-lighten rounded-5">
+                <i class="ri-checkbox-circle-line fs-4 text-success"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="lh-1 mb-0">{{ eval_pending_final }}</h2>
+              <p class="m-0 text-muted">Final Evaluations</p>
+            </div>
+          </div>
+          <a href="{% url 'medicines:staff_scientific_list' %}?filter=final" class="btn btn-success btn-sm w-100 fw-bold text-white">Final Approvals</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if 'Inspector' in user.all_roles or user.is_superuser %}
+  <!-- Inspector Section -->
+  <div class="row gx-3 mt-4">
+    <div class="col-12 mb-3 mt-2">
+      <h4 class="fw-bold text-danger border-bottom pb-2">Inspector Actions</h4>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="p-2 border border-danger rounded-circle me-3">
+              <div class="icon-box md bg-danger-lighten rounded-5">
+                <i class="ri-calendar-event-line fs-4 text-danger"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="lh-1 mb-0">{{ inspector_pending_assignments }}</h2>
+              <p class="m-0 text-muted">Pending Scheduling</p>
+            </div>
+          </div>
+          <a href="{% url 'medicines:inspection_dashboard' %}" class="btn btn-danger btn-sm w-100 fw-bold">Schedule Inspections</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="p-2 border border-primary rounded-circle me-3">
+              <div class="icon-box md bg-primary-lighten rounded-5">
+                <i class="ri-list-check-2 fs-4 text-primary"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="lh-1 mb-0">{{ inspector_active_schedules }}</h2>
+              <p class="m-0 text-muted">Active Schedules</p>
+            </div>
+          </div>
+          <a href="{% url 'medicines:inspection_dashboard' %}" class="btn btn-primary btn-sm w-100 fw-bold">View Schedules</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="p-2 border border-success rounded-circle me-3">
+              <div class="icon-box md bg-success-lighten rounded-5">
+                <i class="ri-file-text-line fs-4 text-success"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="lh-1 mb-0">{{ inspector_completed_reports }}</h2>
+              <p class="m-0 text-muted">Completed Reports</p>
+            </div>
+          </div>
+          <a href="{% url 'medicines:inspection_dashboard' %}" class="btn btn-success btn-sm w-100 fw-bold">Review Reports</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Details - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    
+    <!-- Title / Actions Header -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'users:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small">
+                            <i class="ri-arrow-left-line me-1"></i> Back
+                        </a>
+                        <h3 class="fw-bold mb-0 mt-1 d-inline-flex align-items-center text-primary">
+                            <i class="ri-file-text-line me-2"></i> Application Details
+                        </h3>
+                        <p class="text-muted small mb-0 mt-1">{{ application.medicine_name }} &mdash; {{ application.get_application_type_display }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row gx-3">
+        <!-- Main Application Details -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                    <i class="ri-capsule-line text-primary fs-5 me-2"></i>
+                    <h5 class="mb-0 fw-bold">Medicine Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Medicine Name</div>
+                        <div class="col-sm-8 text-dark fw-semibold">{{ application.medicine_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Dosage Form</div>
+                        <div class="col-sm-8 text-dark">{{ application.dosage_form }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Net Weight/Volume</div>
+                        <div class="col-sm-8 text-dark">{{ application.net_weight_volume|default:"-" }}</div>
+                    </div>
+                    
+                    <h6 class="fw-bold text-secondary mt-4 border-bottom pb-2">Appearance & Packaging</h6>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Color</div>
+                        <div class="col-sm-8 text-dark">{{ application.medicine_color|default:"-" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Smell</div>
+                        <div class="col-sm-8 text-dark">{{ application.medicine_smell|default:"-" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Taste</div>
+                        <div class="col-sm-8 text-dark">{{ application.medicine_taste|default:"-" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Texture</div>
+                        <div class="col-sm-8 text-dark">{{ application.medicine_texture|default:"-" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Packaging Size</div>
+                        <div class="col-sm-8 text-dark">{{ application.packaging_size|default:"-" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Packaging Color</div>
+                        <div class="col-sm-8 text-dark">{{ application.packaging_color|default:"-" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Lid Color</div>
+                        <div class="col-sm-8 text-dark">{{ application.lid_color|default:"-" }}</div>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary mt-4 border-bottom pb-2">Ingredients</h6>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="bg-light p-3 rounded text-break" style="white-space: pre-line;">{{ application.ingredients }}</div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary mt-4 border-bottom pb-2">Usage & Safety</h6>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Indications</div>
+                        <div class="col-sm-8 text-break text-dark">{{ application.indications }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Directions for Use</div>
+                        <div class="col-sm-8 text-break text-dark">{{ application.directions_for_use }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Contraindications</div>
+                        <div class="col-sm-8 text-break text-dark">{{ application.contraindications|default:"None listed" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Side Effects</div>
+                        <div class="col-sm-8 text-break text-dark">{{ application.side_effects|default:"None listed" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Antidote</div>
+                        <div class="col-sm-8 text-break text-dark">{{ application.antidote|default:"-" }}</div>
+                    </div>
+                    
+                    {% if application.facility_address %}
+                    <h6 class="fw-bold text-secondary mt-4 border-bottom pb-2">Facility Location</h6>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Address</div>
+                        <div class="col-sm-8 text-dark">{{ application.facility_address }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">Region</div>
+                        <div class="col-sm-8 text-dark">{{ application.facility_region }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted">District</div>
+                        <div class="col-sm-8 text-dark">{{ application.facility_district }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4 mb-4">
+            <!-- Status Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted fw-bold mb-3 small">Application Status</h6>
+                    <div class="d-flex align-items-center mb-3">
+                        {% if application.status == 'FULL_REGISTRATION' %}
+                            <div class="icon-box md bg-success-lighten rounded-circle me-3">
+                                <i class="ri-checkbox-circle-fill text-success fs-3"></i>
+                            </div>
+                        {% elif application.status == 'PROVISIONAL_REGISTRATION' %}
+                            <div class="icon-box md bg-primary-lighten rounded-circle me-3">
+                                <i class="ri-time-line text-primary fs-3"></i>
+                            </div>
+                        {% elif application.status == 'REJECTED' %}
+                            <div class="icon-box md bg-danger-lighten rounded-circle me-3">
+                                <i class="ri-close-circle-fill text-danger fs-3"></i>
+                            </div>
+                        {% else %}
+                            <div class="icon-box md bg-info-lighten rounded-circle me-3">
+                                <i class="ri-information-fill text-info fs-3"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark">{{ application.get_status_display }}</h5>
+                            <div class="small text-muted">Last updated: {{ application.updated_at|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if application.status == 'FULL_REGISTRATION' or application.status == 'PROVISIONAL_REGISTRATION' %}
+                    <hr>
+                    <div class="mb-2">
+                        <span class="text-muted small">Registration Number:</span>
+                        <strong class="d-block text-dark font-monospace">{{ application.registration_number|default:"Pending" }}</strong>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <a href="{% url 'medicines:download_certificate' application.pk %}" class="btn btn-success fw-bold text-dark" target="_blank">
+                            <i class="ri-download-line me-2"></i> Download Certificate
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documents Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                    <i class="ri-attachment-line text-secondary fs-5 me-2"></i>
+                    <h5 class="mb-0 fw-bold">Submitted Documents</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% if application.label_artwork %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <div class="fw-bold text-dark">Label Artwork</div>
+                                <div class="small text-muted">Packaging design</div>
+                            </div>
+                            <a href="{{ application.label_artwork.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">View</a>
+                        </li>
+                        {% endif %}
+                        {% if application.tbs_certificate %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <div class="fw-bold text-dark">TBS Certificate</div>
+                                <div class="small text-muted">Quality verification</div>
+                            </div>
+                            <a href="{{ application.tbs_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">View</a>
+                        </li>
+                        {% endif %}
+                        {% if application.other_attachments %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <div class="fw-bold text-dark">Other Attachments</div>
+                            </div>
+                            <a href="{{ application.other_attachments.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">View</a>
+                        </li>
+                        {% endif %}
+                        {% if not application.label_artwork and not application.tbs_certificate and not application.other_attachments %}
+                        <li class="list-group-item text-center py-4 text-muted">
+                            No documents attached.
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

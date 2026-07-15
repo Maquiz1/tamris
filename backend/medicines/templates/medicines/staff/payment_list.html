@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Payments - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    
+    <!-- Title / Actions Header -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'users:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small">
+                            <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+                        </a>
+                        <h3 class="fw-bold mb-0 mt-1 text-primary d-inline-flex align-items-center">
+                            <i class="ri-money-dollar-circle-line me-2"></i> Payment Verification Queue
+                        </h3>
+                        <p class="text-muted small mb-0 mt-1">Verify payments and submit receipt approvals for processing applications.</p>
+                    </div>
+                    <span class="badge bg-primary-lighten text-primary px-3 py-2 fw-bold">
+                        {{ total_pending }} Pending Verification
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body py-3">
+                    <form method="get" class="d-flex flex-column flex-md-row gap-3 w-100">
+                        <div class="input-group" style="max-width: 220px;">
+                            <span class="input-group-text bg-white text-muted border-end-0"><i class="ri-filter-3-line"></i></span>
+                            <select name="status" class="form-select border-start-0 ps-0 text-muted" aria-label="Filter by Status">
+                                <option value="">All Statuses</option>
+                                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending Verification</option>
+                                <option value="VERIFIED" {% if status_filter == 'VERIFIED' %}selected{% endif %}>Verified Payments</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group" style="max-width: 320px;">
+                            <span class="input-group-text bg-white text-muted border-end-0"><i class="ri-calendar-line"></i></span>
+                            <input type="date" name="start_date" value="{{ start_date }}" class="form-control border-start-0 border-end-0 ps-0 text-muted" aria-label="Start Date" title="Start Date">
+                            <span class="input-group-text bg-white text-muted border-start-0 border-end-0 px-2">-</span>
+                            <input type="date" name="end_date" value="{{ end_date }}" class="form-control border-start-0 ps-0 text-muted" aria-label="End Date" title="End Date">
+                        </div>
+                        
+                        <div class="input-group flex-grow-1">
+                            <span class="input-group-text bg-white text-muted border-end-0"><i class="ri-search-line"></i></span>
+                            <input type="text" name="q" value="{{ query|default:'' }}" class="form-control border-start-0 ps-0" placeholder="Search by Medicine Name or Applicant..." aria-label="Search">
+                            <button class="btn btn-primary px-4 fw-bold" type="submit">Filter</button>
+                            {% if query or status_filter or start_date or end_date %}
+                                <a href="{% url 'medicines:staff_payment_list' %}" class="btn btn-outline-secondary">Clear</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="row gx-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">Medicine Name</th>
+                                    <th class="py-3">Fee Type</th>
+                                    <th class="py-3">Applicant</th>
+                                    <th class="py-3">Generated On</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="text-end px-4 py-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                    <tr>
+                                        <td class="px-4 py-3 fw-bold text-dark">
+                                            {{ payment.application.medicine_name }}
+                                            <div class="small text-muted fw-normal">{{ payment.application.get_application_type_display }}</div>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="fw-semibold text-dark" style="font-size: 0.875rem;">{{ payment.get_payment_type_display }}</span>
+                                        </td>
+                                        <td class="py-3 fw-semibold text-dark">
+                                            {{ payment.application.applicant.display_name }}
+                                        </td>
+                                        <td class="py-3 text-muted">
+                                            {{ payment.created_at|date:"M d, Y" }}
+                                        </td>
+                                        <td class="py-3">
+                                            {% if payment.is_verified %}
+                                                <span class="badge bg-success-lighten text-success d-inline-flex align-items-center"><i class="ri-checkbox-circle-fill me-1"></i> Verified</span>
+                                            {% elif payment.receipt_number %}
+                                                <span class="badge bg-warning-lighten text-warning d-inline-flex align-items-center"><i class="ri-time-line me-1"></i> Receipt Submitted</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-lighten text-danger d-inline-flex align-items-center"><i class="ri-error-warning-line me-1"></i> Awaiting Receipt</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end px-4 py-3">
+                                            <a href="{% url 'medicines:staff_payment_detail' payment.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
+                                                Verify Payment <i class="ri-arrow-right-line ms-1"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="ri-inbox-line fs-2 mb-2 d-block opacity-50"></i>
+                                            No payments waiting for review.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                {% if payments.has_other_pages %}
+                <div class="card-footer bg-white py-3 border-top-0">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if payments.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ payments.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {% for num in payments.paginator.page_range %}
+                                {% if payments.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > payments.number|add:'-3' and num < payments.number|add:'3' %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if payments.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ payments.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

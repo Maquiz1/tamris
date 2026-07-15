@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMRIS {% if application.status in 'PROVISIONAL_REGISTRATION,PENDING_LISTING_FEE,PENDING_REGISTRATION_FEE,PENDING_FINAL_APPROVAL' %}Provisional Letter{% else %}Certificate{% endif %} - {{ application.medicine_name }}</title>
+    <!-- Use Bootstrap for simple layouting even in print -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .certificate-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 50px;
+            border: 15px solid #1a4a38;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .inner-border {
+            border: 2px solid #ce9a29;
+            padding: 40px;
+            position: relative;
+        }
+        .cert-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .emblem {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .cert-title {
+            color: #1a4a38;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #ce9a29;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        .cert-subtitle {
+            font-size: 1.2rem;
+            color: #555;
+            font-style: italic;
+        }
+        .cert-body {
+            text-align: center;
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin: 40px 0;
+        }
+        .highlight {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1a4a38;
+            display: block;
+            margin: 15px 0;
+            text-transform: uppercase;
+        }
+        .cert-footer {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .signature-line {
+            width: 250px;
+            border-top: 2px solid #333;
+            text-align: center;
+            padding-top: 10px;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+        .seal {
+            width: 120px;
+            height: 120px;
+            border: 4px solid #ce9a29;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ce9a29;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+            margin-left: 50px;
+        }
+        .date-issued {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        /* Letter specific styles */
+        .letter-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 60px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
+            text-align: left;
+        }
+        .letter-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #1a4a38;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .letter-title {
+            text-align: center;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+        
+        @media print {
+            body { background: white; }
+            .certificate-container, .letter-container { 
+                box-shadow: none; 
+                margin: 0; 
+                padding: 20px; 
+                max-width: 100%;
+            }
+            .certificate-container { border-width: 10px; }
+            .print-btn { display: none !important; }
+            @page { margin: 0; size: landscape; }
+        }
+    </style>
+</head>
+<body>
+
+    <button onclick="window.print()" class="btn btn-primary btn-lg shadow print-btn rounded-pill px-4">
+        <i class="bi bi-printer me-2"></i> Print {% if application.status in 'PROVISIONAL_REGISTRATION,PENDING_LISTING_FEE,PENDING_REGISTRATION_FEE,PENDING_FINAL_APPROVAL' %}Letter{% else %}Certificate{% endif %}
+    </button>
+
+    {% if application.status in 'PROVISIONAL_REGISTRATION,PENDING_LISTING_FEE,PENDING_REGISTRATION_FEE,PENDING_FINAL_APPROVAL' %}
+    <!-- LETTER FORMAT -->
+    <div class="letter-container">
+        <div class="letter-header">
+            <div style="width: 80px; height: 80px; background-color: #eee; border-radius: 50%; display:flex; align-items:center; justify-content:center; border: 2px solid #ccc; flex-shrink: 0; margin-right: 20px;">
+                <span style="font-size: 0.6rem; color: #888;">COAT OF ARMS</span>
+            </div>
+            <div>
+                <h5 class="text-uppercase mb-1 fw-bold" style="color: #333;">The United Republic of Tanzania</h5>
+                <h6 class="text-uppercase mb-0" style="color: #555;">Traditional and Alternative Health Practice Council (TAHPC)</h6>
+            </div>
+        </div>
+        
+        <div style="text-align: right; margin-bottom: 20px;">
+            <strong>Date:</strong> {{ application.updated_at|date:"F d, Y" }}<br>
+            <strong>Ref No:</strong> TAHPC/PROV/{{ application.id|stringformat:"06d" }}
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+            <strong>To:</strong><br>
+            {% if 'Company Applicant' in application.applicant.all_roles %}
+                {{ application.applicant.company_profile.company_name }}<br>
+                Director / Authorized Representative
+            {% else %}
+                {{ application.applicant.user_profile.full_name }}
+            {% endif %}
+        </div>
+        
+        <div class="letter-title">
+            RE: LETTER OF PROVISIONAL REGISTRATION FOR TRADITIONAL MEDICINE
+        </div>
+        
+        <div style="line-height: 1.6; font-size: 1.1rem; text-align: justify; margin-bottom: 40px;">
+            <p>Please refer to the subject matter above.</p>
+            
+            <p>This letter serves to officially notify you that the Traditional and Alternative Health Practice Council (TAHPC) has evaluated your application and granted <strong>Provisional Registration</strong> for your traditional medicine named:</p>
+            
+            <p style="text-align: center; font-size: 1.3rem; font-weight: bold; margin: 20px 0;">"{{ application.medicine_name }}"</p>
+            
+            <p>This provisional status allows you to proceed with preliminary activities as outlined by the Traditional and Alternative Medicines Act, while full clinical observations and regulatory reviews continue. You are required to adhere to all guidelines and instructions provided by the Council during this period.</p>
+            
+            <p>If conditions for improvement were issued during evaluation, they must be fulfilled before Full Registration can be granted.</p>
+        </div>
+        
+        <div style="margin-top: 50px;">
+            <p>Sincerely,</p>
+            <div style="height: 60px;"></div>
+            <p style="font-weight: bold; margin-bottom: 0;">Registrar</p>
+            <p>Traditional & Alternative Health Practice Council (TAHPC)</p>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- CERTIFICATE FORMAT -->
+    <div class="certificate-container">
+        <div class="inner-border">
+            
+            <div class="cert-header">
+                <div style="width: 100px; height: 100px; background-color: #eee; border-radius: 50%; margin: 0 auto 20px; display:flex; align-items:center; justify-content:center; border: 2px solid #ccc;">
+                    <span style="font-size: 0.7rem; color: #888;">COAT OF ARMS</span>
+                </div>
+                
+                <h4 class="text-uppercase mb-1" style="color: #333;">The United Republic of Tanzania</h4>
+                <h5 class="text-uppercase mb-4" style="color: #555;">Traditional and Alternative Health Practice Council (TAHPC)</h5>
+                
+                <h1 class="cert-title">Certificate of Registration</h1>
+                <p class="cert-subtitle">This is to certify that the traditional medicine below has met all requirements for Full Registration.</p>
+            </div>
+
+            <div class="cert-body">
+                This document officially recognizes the medicine:<br>
+                <span class="highlight">{{ application.medicine_name }}</span>
+                <br>
+                Manufactured / Provided by:<br>
+                <span class="fw-bold fs-4 d-block mt-2 mb-4" style="color: #333;">
+                    {% if 'Company Applicant' in application.applicant.all_roles %}
+                        {{ application.applicant.company_profile.company_name }}
+                    {% else %}
+                        {{ application.applicant.user_profile.full_name }}
+                    {% endif %}
+                </span>
+
+                Has been evaluated and granted 
+                <strong>Full Registration Status</strong> 
+                under the Traditional and Alternative Medicines Act.
+            </div>
+
+            <div class="date-issued">
+                <strong>Date of Issuance:</strong> {{ application.updated_at|date:"F d, Y" }}<br>
+                <small class="text-muted">Registration Number: {{ application.registration_number }}</small>
+            </div>
+
+            <div class="cert-footer">
+                <div class="seal">
+                    TAHPC<br>OFFICIAL<br>SEAL
+                </div>
+                
+                <div class="signature-block text-center">
+                    <div style="height: 60px;"></div> <!-- Space for signature -->
+                    <div class="signature-line">
+                        Registrar<br>
+                        Traditional & Alternative Health Practice Council
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</body>
+</html>

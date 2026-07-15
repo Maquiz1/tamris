@@ -1,0 +1,561 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3">My Profile</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Profile</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Account Information -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i> Account</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Email</small>
+                        <strong>{{ request.user.email }}</strong>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Phone Number</small>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <strong>{{ request.user.formatted_phone|default:"Not Provided" }}</strong>
+                            {% if request.user.phone_number %}
+                                {% if request.user.is_phone_verified %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Verified</span>
+                                {% else %}
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#verifyPhoneModal">Verify Phone</button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Role</small>
+                        <span class="badge bg-secondary">{{ request.user.all_roles|join:", " }}</span>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Email Status</small>
+                        {% if request.user.is_email_verified %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Verified</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Unverified</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Specific Profile Details -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-card-text me-2"></i> Registration Details</h5>
+                {% if request.user.registration_status == 'VERIFIED' %}
+                    <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i> Registration Complete</span>
+                {% elif request.user.registration_status == 'REJECTED' %}
+                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Registration Rejected</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Pending Verification</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if 'Individual Applicant' in request.user.all_roles %}
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Full Name</small>
+                            <strong>{{ request.user.user_profile.full_name }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">NIDA Number</small>
+                            <strong>{{ request.user.user_profile.formatted_nida }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">TIN Number</small>
+                            <strong>{{ request.user.user_profile.formatted_tin }}</strong>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <small class="text-muted d-block">Address</small>
+                            <strong>{{ request.user.user_profile.address|default:"None" }}</strong>
+                        </div>
+                    {% elif 'Company Applicant' in request.user.all_roles %}
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Company Name</small>
+                            <strong>{{ request.user.company_profile.company_name }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">BRELA Number</small>
+                            <strong>{{ request.user.company_profile.brela_number }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">TIN Number</small>
+                            <strong>{{ request.user.company_profile.formatted_tin }}</strong>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <small class="text-muted d-block">Physical Address</small>
+                            <strong>{{ request.user.company_profile.physical_address|default:"None" }}</strong>
+                        </div>
+                    {% else %}
+                        <div class="col-12">
+                            <div class="alert alert-warning">Admin/Staff Account - No specific registration details required.</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Uploaded Documents -->
+{% if request.user.is_applicant %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-pdf me-2"></i> Uploaded Documents</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Document Type</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if 'Individual Applicant' in request.user.all_roles %}
+                                <tr>
+                                    <td>NIDA Copy</td>
+                                    <td>
+                                        {% if request.user.document_statuses.nida_copy.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.nida_copy.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.nida_copy.reason }}</div>
+                                        {% elif request.user.user_profile.nida_copy %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.user_profile.nida_copy %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.nida_copy.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.nida_copy.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="nida_copy">
+                                                    <input type="file" name="document" class="d-none" id="reupload_nida_copy" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_nida_copy" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Passport Photo</td>
+                                    <td>
+                                        {% if request.user.document_statuses.passport_photo.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.passport_photo.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.passport_photo.reason }}</div>
+                                        {% elif request.user.user_profile.passport_photo %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.user_profile.passport_photo %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.passport_photo.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.passport_photo.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="passport_photo">
+                                                    <input type="file" name="document" class="d-none" id="reupload_passport_photo" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_passport_photo" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>TAHPC Certificate</td>
+                                    <td>
+                                        {% if request.user.document_statuses.tahpc_certificate.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.tahpc_certificate.reason }}</div>
+                                        {% elif request.user.user_profile.tahpc_certificate %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.user_profile.tahpc_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.tahpc_certificate.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="tahpc_certificate">
+                                                    <input type="file" name="document" class="d-none" id="reupload_tahpc_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_tahpc_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>TIN Certificate</td>
+                                    <td>
+                                        {% if request.user.document_statuses.tin_certificate.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.tin_certificate.reason }}</div>
+                                        {% elif request.user.user_profile.tin_certificate %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.user_profile.tin_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.tin_certificate.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="tin_certificate">
+                                                    <input type="file" name="document" class="d-none" id="reupload_ind_tin_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_ind_tin_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% elif 'Company Applicant' in request.user.all_roles %}
+                                <tr>
+                                    <td>BRELA Certificate</td>
+                                    <td>
+                                        {% if request.user.document_statuses.brela_certificate.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.brela_certificate.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.brela_certificate.reason }}</div>
+                                        {% elif request.user.company_profile.brela_certificate %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.company_profile.brela_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.brela_certificate.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.brela_certificate.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="brela_certificate">
+                                                    <input type="file" name="document" class="d-none" id="reupload_brela_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_brela_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>TIN Certificate</td>
+                                    <td>
+                                        {% if request.user.document_statuses.tin_certificate.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.tin_certificate.reason }}</div>
+                                        {% elif request.user.company_profile.tin_certificate %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.company_profile.tin_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.tin_certificate.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="tin_certificate">
+                                                    <input type="file" name="document" class="d-none" id="reupload_tin_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_tin_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Business License</td>
+                                    <td>
+                                        {% if request.user.document_statuses.business_license.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.business_license.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.business_license.reason }}</div>
+                                        {% elif request.user.company_profile.business_license %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.company_profile.business_license %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.business_license.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.business_license.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="business_license">
+                                                    <input type="file" name="document" class="d-none" id="reupload_business_license" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_business_license" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>TAHPC Certificate</td>
+                                    <td>
+                                        {% if request.user.document_statuses.tahpc_certificate.status == 'VERIFIED' %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% elif request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                            <div class="small text-danger mt-1">{{ request.user.document_statuses.tahpc_certificate.reason }}</div>
+                                        {% elif request.user.company_profile.tahpc_certificate %}
+                                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Missing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if request.user.company_profile.tahpc_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.tahpc_certificate.url }}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
+                                            {% endif %}
+                                            {% if request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
+                                                <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="doc_key" value="tahpc_certificate">
+                                                    <input type="file" name="document" class="d-none" id="reupload_com_tahpc_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    <label for="reupload_com_tahpc_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
+                                                    </label>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Document Viewer Modal -->
+<div class="modal fade" id="documentViewerModal" tabindex="-1" aria-labelledby="documentViewerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content h-100">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="documentViewerModalLabel"><i class="bi bi-file-earmark-text me-2"></i> Document Viewer</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0" style="height: 80vh;">
+        <iframe id="documentIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+      <div class="modal-footer">
+        <a id="downloadDocBtn" href="#" download class="btn btn-success"><i class="bi bi-download me-1"></i> Download File</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Verify Phone Modal -->
+<div class="modal fade" id="verifyPhoneModal" tabindex="-1" aria-labelledby="verifyPhoneModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="verifyPhoneModalLabel"><i class="bi bi-phone-vibrate me-2"></i> Verify Phone Number</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center" id="phoneVerifyStep1">
+        <p>Click the button below to send a 6-digit verification code to your phone number: <strong>{{ request.user.phone_number }}</strong></p>
+        <button type="button" class="btn btn-primary" id="sendPhoneOtpBtn">
+            <span id="sendOtpText">Send SMS Code</span>
+            <span id="sendOtpSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+        <div id="sendOtpError" class="text-danger mt-2 d-none"></div>
+      </div>
+      
+      <div class="modal-body text-center d-none" id="phoneVerifyStep2">
+        <form method="post" action="{% url 'users:verify_phone_otp' %}">
+            {% csrf_token %}
+            <p class="text-success mb-3"><i class="bi bi-check-circle me-1"></i> SMS Sent! Enter the 6-digit code below.</p>
+            <div class="mb-3">
+                <input type="text" name="otp_code" class="form-control text-center fs-4 letter-spacing-2" placeholder="------" maxlength="6" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Verify Code</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const viewButtons = document.querySelectorAll('.view-doc-btn');
+        const documentIframe = document.getElementById('documentIframe');
+        const downloadDocBtn = document.getElementById('downloadDocBtn');
+        const documentModal = new bootstrap.Modal(document.getElementById('documentViewerModal'));
+
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const url = this.getAttribute('data-url');
+                // Set iframe src to load the document
+                documentIframe.src = url;
+                // Set download button href to allow direct downloading
+                downloadDocBtn.href = url;
+                // Show the modal
+                documentModal.show();
+            });
+        });
+        
+        // Clear iframe source when modal is closed to stop loading/audio etc.
+        document.getElementById('documentViewerModal').addEventListener('hidden.bs.modal', function () {
+            documentIframe.src = '';
+        });
+
+        // Phone Verification Logic
+        const sendPhoneOtpBtn = document.getElementById('sendPhoneOtpBtn');
+        if (sendPhoneOtpBtn) {
+            sendPhoneOtpBtn.addEventListener('click', function() {
+                const textSpan = document.getElementById('sendOtpText');
+                const spinner = document.getElementById('sendOtpSpinner');
+                const errorDiv = document.getElementById('sendOtpError');
+                
+                textSpan.classList.add('d-none');
+                spinner.classList.remove('d-none');
+                errorDiv.classList.add('d-none');
+                sendPhoneOtpBtn.disabled = true;
+
+                fetch("{% url 'users:send_phone_otp' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('phoneVerifyStep1').classList.add('d-none');
+                        document.getElementById('phoneVerifyStep2').classList.remove('d-none');
+                    } else {
+                        textSpan.classList.remove('d-none');
+                        spinner.classList.add('d-none');
+                        sendPhoneOtpBtn.disabled = false;
+                        errorDiv.textContent = data.error;
+                        errorDiv.classList.remove('d-none');
+                    }
+                })
+                .catch(err => {
+                    textSpan.classList.remove('d-none');
+                    spinner.classList.add('d-none');
+                    sendPhoneOtpBtn.disabled = false;
+                    errorDiv.textContent = "An error occurred. Please try again.";
+                    errorDiv.classList.remove('d-none');
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

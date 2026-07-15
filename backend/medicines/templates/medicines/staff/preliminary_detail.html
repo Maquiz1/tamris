@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Details - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mt-4 mb-3">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <a href="{% url 'medicines:staff_preliminary_list' %}" class="text-decoration-none text-muted mb-2 d-block">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+                <h2>Preliminary Screening Details</h2>
+                <p class="text-muted mb-0">Reviewing {{ application.get_application_type_display }}</p>
+            </div>
+            <div>
+                {% if application.status == 'FULL_REGISTRATION' %}
+                    <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-patch-check-fill me-1"></i> Full Registration</span>
+                {% elif application.status == 'PROVISIONAL_REGISTRATION' %}
+                    <span class="badge bg-primary fs-6 px-3 py-2"><i class="bi bi-clock-history me-1"></i> Provisional Registration</span>
+                {% elif application.status == 'CONDITIONS_APPLIED' %}
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="bi bi-exclamation-triangle-fill me-1"></i> Conditions for Improvement</span>
+                {% elif application.status == 'REJECTED' %}
+                    <span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-x-circle-fill me-1"></i> Rejected</span>
+                {% elif application.status == 'UNDER_REVIEW' %}
+                    <span class="badge bg-info text-dark fs-6 px-3 py-2"><i class="bi bi-search me-1"></i> Under Review</span>
+                {% else %}
+                    <span class="badge bg-secondary fs-6 px-3 py-2">Pending Review</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Details -->
+    <div class="col-lg-8">
+        
+        <!-- Step Navigation Tabs -->
+        <ul class="nav nav-pills nav-fill bg-white shadow-sm rounded p-2 mb-4" id="applicationTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="step1-tab" data-bs-toggle="tab" data-bs-target="#step1" type="button" role="tab">
+                    <i class="bi bi-capsule me-1"></i> Basic Info
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="step2-tab" data-bs-toggle="tab" data-bs-target="#step2" type="button" role="tab">
+                    <i class="bi bi-tree me-1"></i> Ingredients
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="step3-tab" data-bs-toggle="tab" data-bs-target="#step3" type="button" role="tab">
+                    <i class="bi bi-gear-fill me-1"></i> Production
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="step4-tab" data-bs-toggle="tab" data-bs-target="#step4" type="button" role="tab">
+                    <i class="bi bi-shield-check me-1"></i> Usage
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="step5-tab" data-bs-toggle="tab" data-bs-target="#step5" type="button" role="tab">
+                    <i class="bi bi-paperclip me-1"></i> Files
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="applicationTabsContent">
+            
+            <!-- STEP 1: Basic Info -->
+            <div class="tab-pane fade show active" id="step1" role="tabpanel">
+                <!-- Applicant Skills -->
+                <div class="card shadow-sm border-0 mb-4 border-top border-secondary border-4">
+                    <div class="card-header bg-white pt-3 pb-0 border-0">
+                        <h5 class="fw-bold mb-0 text-secondary"><i class="bi bi-mortarboard me-2"></i>Applicant Traditional Medicine Skills</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Skill Source</p>
+                                <p class="mb-0 fs-5 fw-medium">{{ application.get_traditional_medicine_skills_display|default:"Not Provided" }}</p>
+                            </div>
+                            <div class="col-sm-8">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">How Acquired Details</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.skills_acquired_details|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medicine Details -->
+                <div class="card shadow-sm border-0 mb-4 border-top border-primary border-4">
+                    <div class="card-header bg-white pt-3 pb-0 border-0">
+                        <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-capsule me-2"></i>Medicine Information & Appearance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Medicine Name</p>
+                                <p class="mb-0 fs-5 fw-medium">{{ application.medicine_name }}</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Dosage Form</p>
+                                <p class="mb-0 fs-5">{{ application.dosage_form }}</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Net Weight/Volume</p>
+                                <p class="mb-0 fs-5">{{ application.net_weight_volume|default:"-" }}</p>
+                            </div>
+                            <div class="col-sm-4 mt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Dosage</p>
+                                <p class="mb-0 fs-5">{{ application.dosage|default:"-" }}</p>
+                            </div>
+                            <div class="col-sm-4 mt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Shelf Life</p>
+                                <p class="mb-0 fs-5">{{ application.shelf_life|default:"-" }}</p>
+                            </div>
+                            
+                            <div class="col-12 mt-4 mb-2"><h6 class="fw-bold border-bottom pb-2">Appearance & Packaging</h6></div>
+                            <div class="col-sm-3"><p class="text-muted small mb-1">Color</p><p class="fw-medium">{{ application.medicine_color|default:"-" }}</p></div>
+                            <div class="col-sm-3"><p class="text-muted small mb-1">Smell</p><p class="fw-medium">{{ application.medicine_smell|default:"-" }}</p></div>
+                            <div class="col-sm-3"><p class="text-muted small mb-1">Taste</p><p class="fw-medium">{{ application.medicine_taste|default:"-" }}</p></div>
+                            <div class="col-sm-3"><p class="text-muted small mb-1">Texture</p><p class="fw-medium">{{ application.medicine_texture|default:"-" }}</p></div>
+                            
+                            <div class="col-sm-4"><p class="text-muted small mb-1">Pkg Size</p><p class="fw-medium">{{ application.packaging_size|default:"-" }}</p></div>
+                            <div class="col-sm-4"><p class="text-muted small mb-1">Pkg Color</p><p class="fw-medium">{{ application.packaging_color|default:"-" }}</p></div>
+                            <div class="col-sm-4"><p class="text-muted small mb-1">Lid Color</p><p class="fw-medium">{{ application.lid_color|default:"-" }}</p></div>
+                            
+                            {% if application.other_appearance_instructions %}
+                            <div class="col-12">
+                                <p class="text-muted small mb-1">Other Appearance Notes</p>
+                                <p class="mb-0 bg-light p-2 rounded">{{ application.other_appearance_instructions }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-end mb-4">
+                    <button type="button" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step2-tab').click(); window.scrollTo(0, 0);">Next: Ingredients <i class="bi bi-arrow-right ms-1"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Ingredients -->
+            <div class="tab-pane fade" id="step2" role="tabpanel">
+                <div class="card shadow-sm border-0 mb-4 border-top border-success border-4">
+                    <div class="card-header bg-white pt-3 pb-0 border-0">
+                        <h5 class="fw-bold mb-0 text-success"><i class="bi bi-list-check me-2"></i>Ingredients Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Active Ingredients</p>
+                                <p class="mb-0 bg-light p-3 rounded mb-3">{{ application.active_ingredients|linebreaksbr|default:"-" }}</p>
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Excipients (Minor Ingredients)</p>
+                                <p class="mb-0 bg-light p-3 rounded mb-3">{{ application.excipients|linebreaksbr|default:"-" }}</p>
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Full Ingredients Table</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.ingredients_table|linebreaksbr|default:"-" }}</p>
+                                <p class="text-muted small mb-1 text-uppercase fw-bold mt-3">General Ingredients List</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.ingredients|linebreaksbr|default:"-" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Raw Materials Info -->
+                <div class="card shadow-sm border-0 mb-4 border-top border-success border-4">
+                    <div class="card-header bg-white pt-3 pb-0 border-0">
+                        <h5 class="fw-bold mb-0 text-success"><i class="bi bi-tree me-2"></i>Raw Material Sources</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold border-bottom pb-2">Local Sourcing</h6>
+                                <ul class="list-group list-group-flush mb-0">
+                                    <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted small">Harvest Season</span> <span class="fw-medium">{{ application.local_harvest_season|default:"-" }}</span></li>
+                                    <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted small">Harvested Part</span> <span class="fw-medium">{{ application.local_harvested_part|default:"-" }}</span></li>
+                                    <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted small">Cultivated/Wild</span> <span class="fw-medium">{{ application.get_local_cultivated_or_wild_display|default:"-" }}</span></li>
+                                    <li class="list-group-item px-0 d-flex justify-content-between border-0"><span class="text-muted small">Abundance</span> <span class="fw-medium">{{ application.local_abundance|default:"-" }}</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold border-bottom pb-2">Imported Sourcing</h6>
+                                <ul class="list-group list-group-flush mb-0">
+                                    <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted small">Countries</span> <span class="fw-medium">{{ application.imported_countries|default:"-" }}</span></li>
+                                    <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted small">Plant Part</span> <span class="fw-medium">{{ application.imported_plant_part|default:"-" }}</span></li>
+                                    <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted small">Raw State</span> <span class="fw-medium">{{ application.imported_raw_state|default:"-" }}</span></li>
+                                    <li class="list-group-item px-0 d-flex justify-content-between border-0"><span class="text-muted small">Abundance</span> <span class="fw-medium">{{ application.imported_abundance|default:"-" }}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between mb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step1-tab').click(); window.scrollTo(0, 0);"><i class="bi bi-arrow-left me-1"></i> Previous</button>
+                    <button type="button" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step3-tab').click(); window.scrollTo(0, 0);">Next: Production <i class="bi bi-arrow-right ms-1"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Production -->
+            <div class="tab-pane fade" id="step3" role="tabpanel">
+                <!-- Manufacturing Information -->
+                <div class="card shadow-sm border-0 mb-4 border-top border-warning border-4">
+                    <div class="card-header bg-white pt-3 pb-0 border-0">
+                        <h5 class="fw-bold mb-0 text-warning"><i class="bi bi-gear-fill me-2"></i>Manufacturing Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Location Type</p>
+                                <p class="mb-0 fs-6">{{ application.get_manufacturing_location_type_display|default:"-" }}</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Area Size</p>
+                                <p class="mb-0 fs-6">{{ application.manufacturing_area_size|default:"-" }}</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Drying Area</p>
+                                <p class="mb-0 fs-6">{{ application.drying_area|default:"-" }}</p>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Drying Equipment</p>
+                                <p class="mb-0 fs-6">{{ application.drying_equipment|default:"-" }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Harvesting Method</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.harvesting_method|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Drying Procedures</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.drying_procedures|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Equipment Used</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.equipment_used|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Manufacturing Procedures</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.manufacturing_procedures|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Packaging Procedures</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.packaging_procedures|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Quality Control Procedures</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.quality_control_procedures|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">In-Process Control Procedures</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.in_process_control_procedures|linebreaksbr|default:"Not Provided" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between mb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step2-tab').click(); window.scrollTo(0, 0);"><i class="bi bi-arrow-left me-1"></i> Previous</button>
+                    <button type="button" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step4-tab').click(); window.scrollTo(0, 0);">Next: Usage <i class="bi bi-arrow-right ms-1"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Usage -->
+            <div class="tab-pane fade" id="step4" role="tabpanel">
+                <!-- Usage & Safety -->
+                <div class="card shadow-sm border-0 mb-4 border-top border-info border-4">
+                    <div class="card-header bg-white pt-3 pb-0 border-0">
+                        <h5 class="fw-bold mb-0 text-info"><i class="bi bi-shield-check me-2"></i>Usage & Safety</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-sm-4">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Route of Admin</p>
+                                <p class="mb-0 fs-5">{{ application.route_of_administration|default:"-" }}</p>
+                            </div>
+                            <div class="col-sm-8">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Indications</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.indications|linebreaksbr }}</p>
+                            </div>
+                            <div class="col-md-6 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Directions for Use</p>
+                                <p class="mb-0 bg-light p-3 rounded h-100">{{ application.directions_for_use|linebreaksbr }}</p>
+                            </div>
+                            <div class="col-md-6 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Instructions for Use</p>
+                                <p class="mb-0 bg-light p-3 rounded h-100">{{ application.instructions_for_use|linebreaksbr }}</p>
+                            </div>
+                            <div class="col-md-6 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Possible Side Effects</p>
+                                <p class="mb-0 bg-light p-3 rounded h-100">{{ application.possible_side_effects|linebreaksbr }}</p>
+                            </div>
+                            <div class="col-md-6 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Precautions</p>
+                                <p class="mb-0 bg-light p-3 rounded h-100">{{ application.precautions|linebreaksbr }}</p>
+                            </div>
+                            <div class="col-12 border-top pt-3">
+                                <p class="text-muted small mb-1 text-uppercase fw-bold">Storage Conditions</p>
+                                <p class="mb-0 bg-light p-3 rounded">{{ application.storage_conditions|linebreaksbr }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between mb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step3-tab').click(); window.scrollTo(0, 0);"><i class="bi bi-arrow-left me-1"></i> Previous</button>
+                    <button type="button" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step5-tab').click(); window.scrollTo(0, 0);">Next: Files <i class="bi bi-arrow-right ms-1"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 5: Attachments -->
+            <div class="tab-pane fade" id="step5" role="tabpanel">
+                <!-- Attachments -->
+                <div class="card shadow-sm border-0 mb-4 border-top border-secondary border-4">
+                    <div class="card-header bg-white pt-3 pb-0 border-0">
+                        <h5 class="fw-bold mb-0 text-secondary"><i class="bi bi-paperclip me-2"></i>Uploaded Attachments</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% if application.sample_label %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 d-flex align-items-center bg-light">
+                                    <i class="bi bi-file-earmark-image fs-3 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Sample Label</h6>
+                                        <a href="{{ application.sample_label.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if application.statement_of_efficacy %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 d-flex align-items-center bg-light">
+                                    <i class="bi bi-file-earmark-text fs-3 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Statement of Efficacy</h6>
+                                        <a href="{{ application.statement_of_efficacy.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if application.literature_review %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 d-flex align-items-center bg-light">
+                                    <i class="bi bi-file-earmark-pdf fs-3 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Literature Review</h6>
+                                        <a href="{{ application.literature_review.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if application.tahpc_certificate %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 d-flex align-items-center bg-light">
+                                    <i class="bi bi-patch-check fs-3 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">TAHPC Certificate</h6>
+                                        <a href="{{ application.tahpc_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if application.ingredients_info_doc %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 d-flex align-items-center bg-light">
+                                    <i class="bi bi-file-earmark-text fs-3 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Ingredients Info Doc</h6>
+                                        <a href="{{ application.ingredients_info_doc.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if application.medicine_photos %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 d-flex align-items-center bg-light">
+                                    <i class="bi bi-images fs-3 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Medicine Photos</h6>
+                                        <a href="{{ application.medicine_photos.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if application.instructions_doc %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 d-flex align-items-center bg-light">
+                                    <i class="bi bi-file-earmark-text fs-3 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Instructions for Use Doc</h6>
+                                        <a href="{{ application.instructions_doc.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if application.application_type == 'CATEGORY_II' %}
+                                <div class="col-12 mt-4"><h6 class="fw-bold border-bottom pb-2">Category II Laboratory Reports</h6></div>
+                                
+                                {% if application.scientific_name_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Scientific Name Report</h6><a href="{{ application.scientific_name_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.heavy_metals_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Heavy Metals Report</h6><a href="{{ application.heavy_metals_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.pesticides_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Pesticides Report</h6><a href="{{ application.pesticides_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.toxic_chemicals_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Toxic Chemicals Report</h6><a href="{{ application.toxic_chemicals_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.conventional_drugs_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Conventional Drugs Report</h6><a href="{{ application.conventional_drugs_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.foreign_matter_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Foreign Matter Report</h6><a href="{{ application.foreign_matter_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.microbes_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Microbes Report</h6><a href="{{ application.microbes_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.aflatoxin_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Aflatoxin Report</h6><a href="{{ application.aflatoxin_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.toxicity_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Toxicity Results</h6><a href="{{ application.toxicity_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.stability_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Stability Report</h6><a href="{{ application.stability_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.moisture_analysis_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Moisture Analysis</h6><a href="{{ application.moisture_analysis_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.ph_analysis_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">pH Analysis</h6><a href="{{ application.ph_analysis_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.uniformity_test_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Uniformity Tests</h6><a href="{{ application.uniformity_test_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.dissolution_test_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Dissolution Tests</h6><a href="{{ application.dissolution_test_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.clinical_observation_report %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Clinical Observation</h6><a href="{{ application.clinical_observation_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                                
+                                {% if application.manufacturing_flow_chart %}
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-diagram-3 fs-3 text-primary me-3"></i><div><h6 class="mb-1">Manufacturing Flow Chart</h6><a href="{{ application.manufacturing_flow_chart.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {% if not application.sample_label and not application.statement_of_efficacy and not application.literature_review and not application.tahpc_certificate and not application.ingredients_info_doc and not application.medicine_photos and not application.instructions_doc and not application.scientific_name_report %}
+                            <div class="col-12 text-center text-muted py-4">
+                                <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
+                                No attachments were uploaded with this application.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-start mb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('step4-tab').click(); window.scrollTo(0, 0);"><i class="bi bi-arrow-left me-1"></i> Previous: Usage</button>
+                </div>
+            </div>
+
+        </div> <!-- End Tab Content -->
+    </div> <!-- End Left Column -->
+
+    <!-- Right Column: Applicant & Actions -->
+    <div class="col-lg-4">
+        <!-- Applicant Profile Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="fw-bold mb-0"><i class="bi bi-person-badge me-2 text-secondary"></i>Applicant Details</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        {% if 'Company Applicant' in application.applicant.all_roles %}
+                            <i class="bi bi-building text-secondary fs-4"></i>
+                        {% else %}
+                            <i class="bi bi-person-fill text-secondary fs-4"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">
+                            {% if 'Company Applicant' in application.applicant.all_roles %}
+                                {{ application.applicant.company_profile.company_name }}
+                            {% else %}
+                                {{ application.applicant.user_profile.full_name }}
+                            {% endif %}
+                        </h6>
+                        <span class="badge bg-secondary rounded-pill mt-1">{{ application.applicant.all_roles|join:", " }}</span>
+                    </div>
+                </div>
+                
+                <ul class="list-group list-group-flush mb-0">
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small"><i class="bi bi-envelope me-2"></i>Email</span>
+                        <span class="fw-medium text-break text-end ms-2">{{ application.applicant.email }}</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small"><i class="bi bi-telephone me-2"></i>Phone</span>
+                        <span class="fw-medium">
+                            {% if 'Company Applicant' in application.applicant.all_roles %}
+                                {{ application.applicant.company_profile.phone_number }}
+                            {% else %}
+                                {{ application.applicant.user_profile.phone_number }}
+                            {% endif %}
+                        </span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom-0 pb-0">
+                        <span class="text-muted small"><i class="bi bi-geo-alt me-2"></i>Region</span>
+                        <span class="fw-medium">
+                            {% if 'Company Applicant' in application.applicant.all_roles %}
+                                {{ application.applicant.company_profile.region }}
+                            {% else %}
+                                {{ application.applicant.user_profile.region }}
+                            {% endif %}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer bg-light p-3 border-top text-center">
+                <a href="{% url 'users:staff_registration_detail' application.applicant.pk %}" class="btn btn-sm btn-outline-secondary w-100" target="_blank">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> View Full Applicant Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Preliminary Screening Form -->
+        <div class="card shadow-sm border-0 mb-4 sticky-top" style="top: 20px;">
+            <div class="card-header bg-dark text-white py-3 border-bottom-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-folder-check me-2"></i>Preliminary Screening & Actions</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'medicines:staff_preliminary_detail' application.pk %}">
+                    {% csrf_token %}
+                    
+                    <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">6.1 Uhakiki wa Awali (Preliminary Screening)</h6>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch mb-2">
+                            {{ evaluation_form.documents_complete }}
+                            <label class="form-check-label fw-bold" for="{{ evaluation_form.documents_complete.id_for_label }}">{{ evaluation_form.documents_complete.label }}</label>
+                        </div>
+                        {{ evaluation_form.documents_remarks }}
+                    </div>
+
+                    <h6 class="fw-bold text-primary mb-3 mt-4 border-bottom pb-2">Final Comments & Action</h6>
+                    
+                    <div class="mb-3 bg-light p-3 rounded border">
+                        <label class="form-label fw-bold text-muted small text-uppercase mb-2"><i class="bi bi-list-check me-1"></i> {{ evaluation_form.sections_to_revise.label }}</label>
+                        <div class="mb-2">
+                            {% for checkbox in evaluation_form.sections_to_revise %}
+                                <div class="form-check">
+                                    {{ checkbox.tag }}
+                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-text text-muted mb-3">Check the sections that the applicant is allowed to edit.</div>
+                        
+                        <label class="form-label fw-bold text-muted small text-uppercase">{{ evaluation_form.overall_comments.label }}</label>
+                        {{ evaluation_form.overall_comments }}
+                        <div class="form-text text-danger">Must be filled out if applying Conditions for Improvement or Rejecting.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" name="action" value="approve" class="btn btn-success fw-bold py-2 w-100 mb-2">
+                            <i class="bi bi-check-circle-fill me-1"></i> Approve Preliminary Screening
+                        </button>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="action" value="conditions" class="btn btn-warning text-dark fw-bold py-2 w-50">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Apply Conditions
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger fw-bold py-2 w-50">
+                                <i class="bi bi-x-circle-fill me-1"></i> Reject Application
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

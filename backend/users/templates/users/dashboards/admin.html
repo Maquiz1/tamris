@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}System Administrator Dashboard - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+  
+  <div class="row gx-3">
+    <div class="col-12">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h2 class="mb-2">System Administrator Dashboard</h2>
+          <p class="text-muted lead">Welcome, {{ user.email }}! You are logged in as <strong>{{ user.all_roles|join:", "|default:"Superuser" }}</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row gx-3">
+    <!-- Pending Accounts Card -->
+    <div class="col-xl-3 col-sm-6 col-12">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="p-2 border border-primary rounded-circle me-3">
+              <div class="icon-box md bg-primary-lighten rounded-5">
+                <i class="ri-user-add-line fs-4 text-primary"></i>
+              </div>
+            </div>
+            <div class="d-flex flex-column">
+              <h1 class="lh-1">{{ admin_pending_users }}</h1>
+              <p class="m-0">Pending Accounts</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-3">
+            <a class="text-primary fw-bold" href="{% url 'users:staff_registration_list' %}">
+              <span>Review Users</span>
+              <i class="ri-arrow-right-line ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Evaluations Card -->
+    <div class="col-xl-3 col-sm-6 col-12">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="p-2 border border-info rounded-circle me-3">
+              <div class="icon-box md bg-info-lighten rounded-5">
+                <i class="ri-flask-line fs-4 text-info"></i>
+              </div>
+            </div>
+            <div class="d-flex flex-column">
+              <h1 class="lh-1">{{ admin_pending_evaluations }}</h1>
+              <p class="m-0">Pending Evaluations</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-3">
+            <a class="text-info fw-bold" href="{% url 'medicines:staff_preliminary_list' %}">
+              <span>Evaluate Apps</span>
+              <i class="ri-arrow-right-line ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Inspections Card -->
+    <div class="col-xl-3 col-sm-6 col-12">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="p-2 border border-warning rounded-circle me-3">
+              <div class="icon-box md bg-warning-lighten rounded-5">
+                <i class="ri-shield-check-line fs-4 text-warning"></i>
+              </div>
+            </div>
+            <div class="d-flex flex-column">
+              <h1 class="lh-1">{{ admin_pending_inspections }}</h1>
+              <p class="m-0">Pending Inspections</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-3">
+            <a class="text-warning fw-bold" href="{% url 'medicines:inspection_dashboard' %}">
+              <span>Manage Inspections</span>
+              <i class="ri-arrow-right-line ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Payments Card -->
+    <div class="col-xl-3 col-sm-6 col-12">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="p-2 border border-danger rounded-circle me-3">
+              <div class="icon-box md bg-danger-lighten rounded-5">
+                <i class="ri-money-dollar-circle-line fs-4 text-danger"></i>
+              </div>
+            </div>
+            <div class="d-flex flex-column">
+              <h1 class="lh-1">{{ finance_pending_payments }}</h1>
+              <p class="m-0">Pending Payments</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-3">
+            <a class="text-danger fw-bold" href="{% url 'medicines:staff_payment_list' %}">
+              <span>Verify Payments</span>
+              <i class="ri-arrow-right-line ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Complete Profile - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4">
+            <h3 class="text-center mb-4">Complete Your Profile</h3>
+            <p class="text-muted text-center mb-4">
+                To access the dashboard and submit applications, you must upload the required documents for your profile.
+            </p>
+            
+            <form method="post" action="{% url 'users:complete_profile' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <h5 class="border-bottom pb-2 mb-3">Required Documents</h5>
+                {{ form|crispy }}
+                
+                <button type="submit" class="btn btn-primary w-100 mt-4">Upload Documents & Finish</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

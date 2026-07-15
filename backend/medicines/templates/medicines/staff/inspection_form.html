@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 border-top border-primary border-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">{{ title }}</h4>
+                <a href="{% url 'medicines:inspection_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4 p-3 bg-light rounded border">
+                    <h6 class="text-uppercase fw-bold text-muted mb-2">Application Details</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Medicine:</strong> {{ application.medicine_name }}</p>
+                            <p class="mb-1"><strong>Type:</strong> {{ application.get_application_type_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Applicant:</strong> 
+                                {% if 'Company Applicant' in application.applicant.all_roles %}
+                                    {{ application.applicant.company_profile.company_name }}
+                                {% else %}
+                                    {{ application.applicant.user_profile.full_name }}
+                                {% endif %}
+                            </p>
+                            <p class="mb-1"><strong>Status:</strong> <span class="badge bg-secondary">{{ application.get_status_display }}</span></p>
+                        </div>
+                    </div>
+                </div>
+                {% if schedule %}
+                <div class="mb-4 p-3 bg-light rounded border border-info">
+                    <h6 class="text-uppercase fw-bold text-info mb-2">Inspection Checklist</h6>
+                    <p class="small text-muted mb-2">The following items were scheduled for inspection. If any were not inspected, you may note it as N/A in the remarks.</p>
+                    <ul class="list-unstyled mb-0">
+                        {% if schedule.check_manufacturing_area %}<li><i class="bi bi-check-circle-fill text-success me-2"></i>Eneo la uzalishaji (Manufacturing area)</li>{% endif %}
+                        {% if schedule.check_machines %}<li><i class="bi bi-check-circle-fill text-success me-2"></i>Mashine (Machines)</li>{% endif %}
+                        {% if schedule.check_cleanliness %}<li><i class="bi bi-check-circle-fill text-success me-2"></i>Usafi (Cleanliness)</li>{% endif %}
+                        {% if schedule.check_medicine_storage %}<li><i class="bi bi-check-circle-fill text-success me-2"></i>Hifadhi ya dawa (Medicine storage)</li>{% endif %}
+                        {% if schedule.check_quality_control %}<li><i class="bi bi-check-circle-fill text-success me-2"></i>Mfumo wa udhibiti wa ubora (Quality control system)</li>{% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {{ form|crispy }}
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'medicines:inspection_dashboard' %}" class="btn btn-light shadow-sm px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary shadow-sm px-4">
+                            <i class="bi bi-save me-1"></i> Save Information
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

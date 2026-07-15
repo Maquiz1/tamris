@@ -1,0 +1,612 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Details - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mt-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{% url 'users:staff_registration_list' %}" class="text-decoration-none text-muted mb-2 d-block">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+                <h2>Registration Details</h2>
+                <p class="text-muted mb-0">Reviewing {{ application.role.name }} Registration</p>
+            </div>
+            <div>
+                {% if application.registration_status == 'VERIFIED' %}
+                    <span class="badge bg-success fs-6 px-3 py-2">Verified</span>
+                {% elif application.registration_status == 'REJECTED' %}
+                    <span class="badge bg-danger fs-6 px-3 py-2">Rejected</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">Pending Verification</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Details -->
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom fw-bold py-3">
+                <i class="bi bi-person-lines-fill me-2 text-primary"></i> Identification Details
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item py-3">
+                    <small class="text-muted d-block">Email Address</small>
+                    <strong>{{ application.email }}</strong>
+                </li>
+                <li class="list-group-item py-3">
+                    <small class="text-muted d-block">Phone Number</small>
+                    <strong>{{ application.formatted_phone|default:"Not Provided" }}</strong>
+                </li>
+                
+                {% if application.role.name == 'Individual Applicant' %}
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">Full Name</small>
+                        <strong>{{ application.user_profile.full_name }}</strong>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">NIDA Number</small>
+                        <strong>{{ application.user_profile.formatted_nida }}</strong>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">TIN Number</small>
+                        <strong>{{ application.user_profile.formatted_tin }}</strong>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">Address</small>
+                        <strong>{{ application.user_profile.address|default:"Not Provided" }}</strong>
+                    </li>
+                {% else %}
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">Company Name</small>
+                        <strong>{{ application.company_profile.company_name }}</strong>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">BRELA Registration Number</small>
+                        <strong>{{ application.company_profile.brela_number }}</strong>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">TIN Number</small>
+                        <strong>{{ application.company_profile.formatted_tin }}</strong>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">Physical Address</small>
+                        <strong>{{ application.company_profile.physical_address|default:"Not Provided" }}</strong>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        {% if application.registration_status == 'PENDING' %}
+        <!-- Overall Action Form Starts Here -->
+        <form method="post" action="{% url 'users:staff_registration_action' application.pk %}" onsubmit="return validateForm()">
+            {% csrf_token %}
+            
+            <!-- Hidden inputs for documents -->
+            {% if application.role.name == 'Individual Applicant' %}
+                <input type="hidden" name="doc_status_nida_copy" id="hidden_status_nida_copy" value="">
+                <input type="hidden" name="doc_reason_nida_copy" id="hidden_reason_nida_copy" value="">
+                
+                <input type="hidden" name="doc_status_passport_photo" id="hidden_status_passport_photo" value="">
+                <input type="hidden" name="doc_reason_passport_photo" id="hidden_reason_passport_photo" value="">
+                
+                <input type="hidden" name="doc_status_tahpc_certificate" id="hidden_status_tahpc_certificate" value="">
+                <input type="hidden" name="doc_reason_tahpc_certificate" id="hidden_reason_tahpc_certificate" value="">
+                
+                <input type="hidden" name="doc_status_tin_certificate" id="hidden_status_tin_certificate" value="">
+                <input type="hidden" name="doc_reason_tin_certificate" id="hidden_reason_tin_certificate" value="">
+            {% else %}
+                <input type="hidden" name="doc_status_brela_certificate" id="hidden_status_brela_certificate" value="">
+                <input type="hidden" name="doc_reason_brela_certificate" id="hidden_reason_brela_certificate" value="">
+                
+                <input type="hidden" name="doc_status_tin_certificate" id="hidden_status_tin_certificate" value="">
+                <input type="hidden" name="doc_reason_tin_certificate" id="hidden_reason_tin_certificate" value="">
+                
+                <input type="hidden" name="doc_status_business_license" id="hidden_status_business_license" value="">
+                <input type="hidden" name="doc_reason_business_license" id="hidden_reason_business_license" value="">
+                
+                <input type="hidden" name="doc_status_tahpc_certificate" id="hidden_status_tahpc_certificate" value="">
+                <input type="hidden" name="doc_reason_tahpc_certificate" id="hidden_reason_tahpc_certificate" value="">
+                
+                <input type="hidden" name="doc_status_representative_nida" id="hidden_status_representative_nida" value="">
+                <input type="hidden" name="doc_reason_representative_nida" id="hidden_reason_representative_nida" value="">
+                
+                <input type="hidden" name="doc_status_representative_id_image" id="hidden_status_representative_id_image" value="">
+                <input type="hidden" name="doc_reason_representative_id_image" id="hidden_reason_representative_id_image" value="">
+            {% endif %}
+
+            <div class="card shadow-sm border-0 border-top border-primary border-4 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Submit Review Decision</h5>
+                    <p class="card-text text-muted small mb-3">Review all documents on the right. If any document is rejected, the entire application will be sent back to the applicant.</p>
+                    
+                    <div class="mb-4" id="overallRemarksContainer" style="display: none;">
+                        <label class="form-label fw-bold">Overall Remarks (Optional)</label>
+                        <textarea name="overall_remarks" class="form-control" rows="3" placeholder="Provide any overall feedback for the applicant..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+                        <i class="bi bi-send-check me-2"></i> Submit Final Decision
+                    </button>
+                </div>
+            </div>
+        {% elif application.review_remarks or application.rejection_reason %}
+        <!-- Remarks Display -->
+        <div class="card shadow-sm border-0 border-top border-info border-4 mb-4">
+            <div class="card-body">
+                <h6 class="card-title fw-bold"><i class="bi bi-chat-left-text-fill me-2"></i> Overall Remarks / Feedback</h6>
+                <hr>
+                <p class="mb-0">{{ application.review_remarks|default:application.rejection_reason|linebreaksbr }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Documents -->
+    <div class="col-md-7 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom fw-bold py-3">
+                <i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i> Uploaded Documents
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    {% if application.role.name == 'Individual Applicant' %}
+                        <!-- Practitioner Documents -->
+                        
+                        <!-- NIDA Card -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-badge fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">NIDA Card</h6>
+                                        <span id="badge_nida_copy" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.user_profile.nida_copy %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('nida_copy', 'NIDA Card', '{{ application.user_profile.nida_copy.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('NIDA Card', '{{ application.user_profile.nida_copy.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Passport Photo -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-camera fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Passport Photo</h6>
+                                        <span id="badge_passport_photo" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.user_profile.passport_photo %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('passport_photo', 'Passport Photo', '{{ application.user_profile.passport_photo.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Passport Photo', '{{ application.user_profile.passport_photo.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- TAHPC Certificate -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-award fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">TAHPC Certificate</h6>
+                                        <span id="badge_tahpc_certificate" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.user_profile.tahpc_certificate %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tahpc_certificate', 'TAHPC Certificate', '{{ application.user_profile.tahpc_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TAHPC Certificate', '{{ application.user_profile.tahpc_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- TIN Certificate -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-receipt fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">TIN Certificate</h6>
+                                        <span id="badge_tin_certificate" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.user_profile.tin_certificate %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tin_certificate', 'TIN Certificate', '{{ application.user_profile.tin_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TIN Certificate', '{{ application.user_profile.tin_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <!-- Company Documents -->
+                        
+                        <!-- BRELA Certificate -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-building fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">BRELA Certificate</h6>
+                                        <span id="badge_brela_certificate" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.company_profile.brela_certificate %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('brela_certificate', 'BRELA Certificate', '{{ application.company_profile.brela_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('BRELA Certificate', '{{ application.company_profile.brela_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- TIN Certificate -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-receipt fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">TIN Certificate</h6>
+                                        <span id="badge_tin_certificate" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.company_profile.tin_certificate %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tin_certificate', 'TIN Certificate', '{{ application.company_profile.tin_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TIN Certificate', '{{ application.company_profile.tin_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Business License -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-shop fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Business License</h6>
+                                        <span id="badge_business_license" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.company_profile.business_license %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('business_license', 'Business License', '{{ application.company_profile.business_license.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Business License', '{{ application.company_profile.business_license.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- TAHPC Certificate -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-award fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">TAHPC Certificate</h6>
+                                        <span id="badge_tahpc_certificate" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.company_profile.tahpc_certificate %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tahpc_certificate', 'TAHPC Certificate', '{{ application.company_profile.tahpc_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TAHPC Certificate', '{{ application.company_profile.tahpc_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Representative NIDA -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-badge fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Representative NIDA</h6>
+                                        <span id="badge_representative_nida" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.company_profile.representative_nida %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('representative_nida', 'Representative NIDA', '{{ application.company_profile.representative_nida.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Representative NIDA', '{{ application.company_profile.representative_nida.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Representative ID Copy -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-camera fs-2 text-secondary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Representative ID/Passport</h6>
+                                        <span id="badge_representative_id_image" class="badge bg-secondary">Pending Evaluation</span>
+                                    </div>
+                                </div>
+                                {% if application.company_profile.representative_id_image %}
+                                    {% if application.registration_status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('representative_id_image', 'Representative ID/Passport', '{{ application.company_profile.representative_id_image.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Representative ID/Passport', '{{ application.company_profile.representative_id_image.url }}')"><i class="bi bi-eye"></i> View</button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if application.registration_status == 'PENDING' %}
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Document Viewer Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="documentModalLabel">
+                    <i class="bi bi-file-earmark-text me-2"></i> Document Viewer - <span id="modalDocTitle"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 d-flex flex-column flex-md-row" style="height: 80vh;">
+                <!-- Left side: iframe -->
+                <div class="flex-grow-1 bg-dark">
+                    <iframe id="docViewerFrame" src="" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+                
+                <!-- Right side: evaluation form -->
+                {% if application.registration_status == 'PENDING' %}
+                <div class="bg-light p-4" id="modalEvaluationPanel" style="width: 350px; overflow-y: auto; border-left: 1px solid #dee2e6; flex-shrink: 0;">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-clipboard-check me-2"></i> Evaluate this document</h6>
+                    <input type="hidden" id="modalDocKey" value="">
+                    
+                    <div class="mb-3 p-3 bg-white border rounded">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="modal_doc_status" id="modal_verify" value="VERIFIED">
+                            <label class="form-check-label text-success fw-bold" for="modal_verify">Verify</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="modal_doc_status" id="modal_reject" value="REJECTED">
+                            <label class="form-check-label text-danger fw-bold" for="modal_reject">Reject</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="modalReasonDiv" style="display: none;">
+                        <label class="form-label small fw-bold text-muted">Reason for rejection <span class="text-danger">*</span></label>
+                        <textarea id="modalReasonText" class="form-control" rows="5" placeholder="Explain why this document is being rejected..."></textarea>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="button" class="btn btn-primary fw-bold" onclick="saveDocumentEvaluation()">
+                            <i class="bi bi-save me-1"></i> Save Evaluation
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to check if any document is rejected and toggle overall remarks
+    function checkOverallRemarksVisibility() {
+        let anyRejected = false;
+        const hiddenInputs = document.querySelectorAll('input[id^="hidden_status_"]');
+        hiddenInputs.forEach(input => {
+            if (input.value === 'REJECTED') {
+                anyRejected = true;
+            }
+        });
+        
+        const remarksContainer = document.getElementById('overallRemarksContainer');
+        if (remarksContainer) {
+            if (anyRejected) {
+                remarksContainer.style.display = 'block';
+            } else {
+                remarksContainer.style.display = 'none';
+            }
+        }
+    }
+
+    // Initialize badges if they already have data
+    document.addEventListener("DOMContentLoaded", function() {
+        const docStatuses = {{ application.document_statuses|default:"{}"|safe }};
+        for (const [key, data] of Object.entries(docStatuses)) {
+            const badge = document.getElementById('badge_' + key);
+            if (badge) {
+                if (data.status === 'VERIFIED') {
+                    badge.className = 'badge bg-success';
+                    badge.innerText = 'Verified';
+                } else if (data.status === 'REJECTED') {
+                    badge.className = 'badge bg-danger';
+                    badge.innerText = 'Rejected';
+                }
+            }
+            
+            // Also populate hidden inputs if they exist
+            const hiddenStatus = document.getElementById('hidden_status_' + key);
+            const hiddenReason = document.getElementById('hidden_reason_' + key);
+            if (hiddenStatus) hiddenStatus.value = data.status;
+            if (hiddenReason) hiddenReason.value = data.reason || '';
+        }
+        checkOverallRemarksVisibility();
+    });
+
+    function viewAndEvaluate(docKey, docTitle, docUrl) {
+        if (!docUrl) return;
+        
+        document.getElementById('docViewerFrame').src = docUrl;
+        document.getElementById('modalDocTitle').innerText = docTitle;
+        
+        let currentStatus = document.getElementById('hidden_status_' + docKey).value;
+        let currentReason = document.getElementById('hidden_reason_' + docKey).value;
+        
+        document.getElementById('modalDocKey').value = docKey;
+        document.getElementById('modalReasonText').value = currentReason;
+        
+        document.getElementById('modalEvaluationPanel').style.display = 'block';
+        
+        if (currentStatus === 'VERIFIED') {
+            document.getElementById('modal_verify').checked = true;
+            document.getElementById('modalReasonDiv').style.display = 'none';
+        } else if (currentStatus === 'REJECTED') {
+            document.getElementById('modal_reject').checked = true;
+            document.getElementById('modalReasonDiv').style.display = 'block';
+        } else {
+            document.getElementById('modal_verify').checked = false;
+            document.getElementById('modal_reject').checked = false;
+            document.getElementById('modalReasonDiv').style.display = 'none';
+        }
+        
+        var docModal = new bootstrap.Modal(document.getElementById('documentModal'));
+        docModal.show();
+    }
+    
+    function viewOnly(docTitle, docUrl) {
+        if (!docUrl) return;
+        document.getElementById('docViewerFrame').src = docUrl;
+        document.getElementById('modalDocTitle').innerText = docTitle;
+        
+        // Hide evaluation panel if it exists
+        const evalPanel = document.getElementById('modalEvaluationPanel');
+        if (evalPanel) evalPanel.style.display = 'none';
+        
+        var docModal = new bootstrap.Modal(document.getElementById('documentModal'));
+        docModal.show();
+    }
+    
+    function saveDocumentEvaluation() {
+        let docKey = document.getElementById('modalDocKey').value;
+        let statusInput = document.querySelector('input[name="modal_doc_status"]:checked');
+        let reason = document.getElementById('modalReasonText').value;
+        
+        if (!statusInput) {
+            alert("Please select Verify or Reject.");
+            return;
+        }
+        
+        if (statusInput.value === 'REJECTED' && !reason.trim()) {
+            alert("Please provide a reason for rejection.");
+            return;
+        }
+        
+        // Update hidden inputs
+        document.getElementById('hidden_status_' + docKey).value = statusInput.value;
+        document.getElementById('hidden_reason_' + docKey).value = reason;
+        
+        // Update UI badge
+        let badge = document.getElementById('badge_' + docKey);
+        if (statusInput.value === 'VERIFIED') {
+            badge.className = 'badge bg-success';
+            badge.innerText = 'Verified';
+        } else {
+            badge.className = 'badge bg-danger';
+            badge.innerText = 'Rejected';
+        }
+        
+        // Close modal
+        var docModal = bootstrap.Modal.getInstance(document.getElementById('documentModal'));
+        docModal.hide();
+        
+        // Re-evaluate overall remarks visibility
+        checkOverallRemarksVisibility();
+    }
+    
+    function validateForm() {
+        let requiredDocs = [];
+        {% if application.role.name == 'Individual Applicant' %}
+            if (document.getElementById('hidden_status_nida_copy')) requiredDocs.push('nida_copy');
+            if (document.getElementById('hidden_status_passport_photo')) requiredDocs.push('passport_photo');
+            if (document.getElementById('hidden_status_tahpc_certificate')) requiredDocs.push('tahpc_certificate');
+            if (document.getElementById('hidden_status_tin_certificate')) requiredDocs.push('tin_certificate');
+        {% else %}
+            if (document.getElementById('hidden_status_brela_certificate')) requiredDocs.push('brela_certificate');
+            if (document.getElementById('hidden_status_tin_certificate')) requiredDocs.push('tin_certificate');
+            if (document.getElementById('hidden_status_business_license')) requiredDocs.push('business_license');
+            if (document.getElementById('hidden_status_tahpc_certificate')) requiredDocs.push('tahpc_certificate');
+            if (document.getElementById('hidden_status_representative_nida')) requiredDocs.push('representative_nida');
+            if (document.getElementById('hidden_status_representative_id_image')) requiredDocs.push('representative_id_image');
+        {% endif %}
+        
+        for (let key of requiredDocs) {
+            let status = document.getElementById('hidden_status_' + key).value;
+            if (!status) {
+                alert("Please evaluate all documents by clicking 'Open & Evaluate' before submitting your decision.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Clear iframe src when modal is hidden
+    document.getElementById('documentModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('docViewerFrame').src = '';
+    });
+
+    // Toggle reason textareas inside modal
+    document.querySelectorAll('input[name="modal_doc_status"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.value === 'REJECTED') {
+                document.getElementById('modalReasonDiv').style.display = 'block';
+            } else {
+                document.getElementById('modalReasonDiv').style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

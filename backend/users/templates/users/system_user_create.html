@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Create System User - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <a href="{% url 'users:system_users_list' %}" class="text-decoration-none text-muted mb-3 d-block">
+            <i class="bi bi-arrow-left me-1"></i> Back to System Users
+        </a>
+        
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3 border-bottom-0">
+                <h5 class="fw-bold mb-0"><i class="bi bi-person-plus-fill me-2"></i>Create New Staff User</h5>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-4">Create a new account for a system user. The user will receive an email with their temporary password and an OTP code to verify their account. Once verified, you can assign them specific roles.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold py-2">
+                            Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

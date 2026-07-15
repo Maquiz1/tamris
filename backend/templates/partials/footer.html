@@ -1,0 +1,6 @@
+{% load static %}
+<!-- App footer starts -->
+<div class="app-footer {% if not user.is_authenticated %}text-center{% endif %}">
+  <span>© TAMRIS {% now "Y" %}</span>
+</div>
+<!-- App footer ends -->

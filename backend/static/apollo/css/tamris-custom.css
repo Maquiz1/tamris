@@ -1,0 +1,39 @@
+/* ─── TAMRIS Custom Overrides ────────────────────────────────────────────── */
+
+/*
+ * Fix: sidebar and main content overlap / touch each other.
+ * The theme's .app-container has padding:0 by default.
+ * Add left padding so content breathes away from the sidebar edge.
+ */
+.app-container {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+/* Keep unauthenticated pages (login / register) centred with no extra padding */
+.main-container .app-container[style*="margin: 0 auto"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/*
+ * Fix: Remove the nurse/patient banner image from the welcome card.
+ * Light teal gradient so dark/black text is clearly readable.
+ */
+.bg-3 {
+    background: linear-gradient(135deg, #e0f4f3 0%, #b2e0dc 100%) !important;
+    background-image: none !important;
+}
+
+/* ─── Application button: outline by default, fills on hover ─────────────── */
+.tamris-hover-btn {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.tamris-hover-btn:hover,
+.tamris-hover-btn:focus {
+    background-color: var(--bs-success) !important;
+    color: #fff !important;
+    border-color: var(--bs-success) !important;
+}
+

@@ -1,0 +1,290 @@
+{% load static %}
+<!-- Sidebar wrapper starts -->
+<nav id="sidebar" class="sidebar-wrapper">
+
+  <!-- Brand container starts -->
+  <div class="brand-container d-flex align-items-center justify-content-between">
+
+    <!-- App brand starts -->
+    <div class="app-brand ms-3">
+      <a href="{% url 'users:dashboard' %}" class="d-flex align-items-center text-decoration-none">
+        <img src="{% static 'apollo/images/logo.svg' %}?v=2" class="logo" alt="TAMRIS Logo" style="height: 32px;">
+        <span class="ms-2 fw-bold text-primary fs-4">TAMRIS</span>
+      </a>
+    </div>
+    <!-- App brand ends -->
+
+    <!-- Pin sidebar starts -->
+    <button type="button" class="pin-sidebar me-3">
+      <i class="ri-menu-line"></i>
+    </button>
+    <!-- Pin sidebar ends -->
+
+  </div>
+  <!-- Brand container ends -->
+
+  <!-- Sidebar profile starts -->
+  <div class="sidebar-profile">
+    <a href="{% url 'users:profile' %}" class="text-decoration-none text-center d-block">
+      {% if user.profile_photo_url %}
+        <div class="mb-2" style="margin: 0 auto; width: 48px; height: 48px;">
+          <img src="{{ user.profile_photo_url }}"
+               alt="Profile Photo"
+               class="rounded-circle"
+               style="width: 48px; height: 48px; object-fit: cover; border: 2px solid var(--bs-primary);">
+        </div>
+      {% else %}
+        <div class="icon-box md bg-primary-lighten rounded-circle mb-2 d-flex align-items-center justify-content-center text-primary" style="width: 48px; height: 48px; font-size: 1.5rem; margin: 0 auto;">
+          <i class="ri-user-3-line"></i>
+        </div>
+      {% endif %}
+      <h6 class="mb-1 profile-name text-nowrap text-truncate text-primary" title="{{ user.display_name }}">
+        {{ user.display_name }}
+      </h6>
+      <small class="profile-name text-nowrap text-truncate text-muted">
+        {{ user.all_roles|join:", "|default:"Administrator" }}
+      </small>
+    </a>
+  </div>
+  <!-- Sidebar profile ends -->
+
+  <!-- Sidebar menu starts -->
+  <div class="sidebarMenuScroll">
+    <ul class="sidebar-menu">
+      
+      <!-- General Dashboard -->
+      <li>
+        <a href="{% url 'users:dashboard' %}">
+          <i class="ri-home-5-line"></i>
+          <span class="menu-text">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Staff / Admin Navigation -->
+      {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Finance Officer' in user.all_roles %}
+        
+        <li class="menu-header text-uppercase fs-7 fw-bold text-muted px-3 mt-3 mb-1">Staff Operations</li>
+
+        {% if user.is_superuser or 'Admin' in user.all_roles %}
+          <li class="treeview">
+            <a href="#!">
+              <i class="ri-group-line"></i>
+              <span class="menu-text">Users</span>
+            </a>
+            <ul class="treeview-menu">
+              <li>
+                <a href="{% url 'users:system_users_list' %}">Staffs</a>
+              </li>
+              <li>
+                <a href="{% url 'users:applicant_users_list' %}">Applicants</a>
+              </li>
+            </ul>
+          </li>
+        {% endif %}
+
+        {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Admin' in user.all_roles %}
+          <li>
+            <a href="{% url 'users:staff_registration_list' %}">
+              <i class="ri-user-shared-line"></i>
+              <span class="menu-text">New Applicant</span>
+              {% if pending_reviews_count > 0 %}
+                <span class="badge bg-primary ms-auto">{{ pending_reviews_count }}</span>
+              {% endif %}
+            </a>
+          </li>
+        {% endif %}
+
+        {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Admin' in user.all_roles %}
+          <li class="treeview">
+            <a href="#!">
+              <i class="ri-flask-line"></i>
+              <span class="menu-text">Evaluation</span>
+            </a>
+            <ul class="treeview-menu">
+              <li>
+                <a href="{% url 'medicines:staff_preliminary_list' %}" class="d-flex align-items-center justify-content-between">
+                  <span>Preliminary Screening</span>
+                  {% if pending_preliminary_count > 0 %}
+                    <span class="badge bg-warning text-dark">{{ pending_preliminary_count }}</span>
+                  {% endif %}
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'medicines:staff_scientific_list' %}" class="d-flex align-items-center justify-content-between">
+                  <span>Scientific Evaluation</span>
+                  {% if pending_scientific_count > 0 %}
+                    <span class="badge bg-info text-white">{{ pending_scientific_count }}</span>
+                  {% endif %}
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="{% url 'medicines:inspection_dashboard' %}">
+              <i class="ri-calendar-event-line"></i>
+              <span class="menu-text">Inspections</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% if user.is_superuser or 'Finance Officer' in user.all_roles or 'Admin' in user.all_roles %}
+          <li class="treeview">
+            <a href="#!">
+              <i class="ri-money-dollar-circle-line"></i>
+              <span class="menu-text">Finances</span>
+            </a>
+            <ul class="treeview-menu">
+              <li>
+                <a href="{% url 'medicines:finance_fee_configuration' %}">Fees Configurations</a>
+              </li>
+              <li>
+                <a href="{% url 'medicines:staff_payment_list' %}">
+                  Payment Verifications
+                  {% if pending_payment_count %}
+                    <span class="badge bg-danger rounded-pill ms-2">{{ pending_payment_count }}</span>
+                  {% endif %}
+                </a>
+              </li>
+            </ul>
+          </li>
+        {% endif %}
+
+        <!-- Centralized Reports -->
+        <li class="treeview">
+          <a href="#!">
+            <i class="ri-bar-chart-box-line"></i>
+            <span class="menu-text">Reports & Registry</span>
+          </a>
+          <ul class="treeview-menu">
+            {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles %}
+            <li>
+              <a href="{% url 'reports:medicines' %}?type=CATEGORY_II">Registered Cat II Medicines</a>
+            </li>
+            <li>
+              <a href="{% url 'reports:medicines' %}?type=LISTING">Listed Traditional Medicines</a>
+            </li>
+            <li>
+              <a href="{% url 'reports:applications' %}">All Applications</a>
+            </li>
+            <li>
+              <a href="{% url 'reports:evaluations' %}">All Evaluations</a>
+            </li>
+            {% endif %}
+            
+            {% if user.is_superuser or 'Admin' in user.all_roles or 'Inspector' in user.all_roles or 'Evaluator' in user.all_roles %}
+            <li>
+              <a href="{% url 'reports:inspections' %}">All Inspections</a>
+            </li>
+            {% endif %}
+            
+            {% if user.is_superuser or 'Admin' in user.all_roles or 'Finance Officer' in user.all_roles %}
+            <li>
+              <a href="{% url 'reports:payments' %}">All Payments</a>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+
+        <!-- Audit Logs (Admin Only) -->
+        {% if user.is_superuser or 'Admin' in user.all_roles %}
+          <li>
+            <a href="#">
+              <i class="ri-history-line"></i>
+              <span class="menu-text">Audit Logs (Coming Soon)</span>
+            </a>
+          </li>
+        {% endif %}
+
+        <!-- System Configuration (Admin Only) -->
+        {% if user.is_superuser or 'Admin' in user.all_roles %}
+          <li class="treeview">
+            <a href="#!">
+              <i class="ri-settings-3-line"></i>
+              <span class="menu-text">Configuration</span>
+            </a>
+            <ul class="treeview-menu">
+              <li>
+                <a href="#">Fee Matrix (Coming Soon)</a>
+              </li>
+              <li>
+                <a href="#">Inspection Checklists (Coming Soon)</a>
+              </li>
+            </ul>
+          </li>
+        {% endif %}
+
+      {% endif %}
+
+      <!-- Applicant Navigation -->
+      {% if 'Individual Applicant' in user.all_roles or 'Company Applicant' in user.all_roles or 'Applicant' in user.all_roles or user.is_superuser or 'Admin' in user.all_roles %}
+        
+        <li class="menu-header text-uppercase fs-7 fw-bold text-muted px-3 mt-3 mb-1">Applicant Actions</li>
+
+        <li>
+          <a href="{% url 'medicines:applicant_applications' %}?filter=tasks_all">
+            <i class="ri-task-line"></i>
+            <span class="menu-text">My Tasks</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="{% url 'medicines:applicant_applications' %}?filter=apps_all">
+            <i class="ri-folder-open-line"></i>
+            <span class="menu-text">My Applications</span>
+          </a>
+        </li>
+        
+        {% if user.registration_status == 'VERIFIED' %}
+          <li class="treeview">
+            <a href="#!">
+              <i class="ri-file-add-line"></i>
+              <span class="menu-text">Apply Evaluation</span>
+            </a>
+            <ul class="treeview-menu">
+              <li>
+                <a href="{% url 'medicines:initiate_application' 'LISTING' %}">Medicine Listing</a>
+              </li>
+              <li>
+                <a href="{% url 'medicines:initiate_application' 'CATEGORY_II' %}">Category II Reg</a>
+              </li>
+            </ul>
+          </li>
+        {% endif %}
+
+        <li>
+          <a href="{% url 'medicines:applicant_payment_list' %}">
+            <i class="ri-money-dollar-circle-line"></i>
+            <span class="menu-text">My Payments</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="{% url 'medicines:applicant_certificate_list' %}">
+            <i class="ri-medal-line"></i>
+            <span class="menu-text">Certificate Directory</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="{% url 'medicines:applicant_reports' %}">
+            <i class="ri-bar-chart-2-line"></i>
+            <span class="menu-text">My Reports</span>
+          </a>
+        </li>
+
+      {% endif %}
+
+    </ul>
+  </div>
+  <!-- Sidebar menu ends -->
+
+  <!-- Sidebar contact starts -->
+  <div class="sidebar-contact">
+    <p class="fw-light mb-1 text-nowrap text-truncate">Support Contact</p>
+    <h5 class="m-0 lh-1 text-nowrap text-truncate">0987654321</h5>
+    <i class="ri-phone-line"></i>
+  </div>
+  <!-- Sidebar contact ends -->
+
+</nav>
+<!-- Sidebar wrapper ends -->

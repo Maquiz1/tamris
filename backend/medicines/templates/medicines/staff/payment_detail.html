@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Details - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="row mt-4 mb-3">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <a href="{% url 'medicines:staff_payment_list' %}" class="text-decoration-none text-muted mb-2 d-block">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+                <h2>Payment Verification Details</h2>
+                <p class="text-muted mb-0">Reviewing {{ application.get_application_type_display }}</p>
+            </div>
+            <div>
+                {% if application.status == 'FULL_REGISTRATION' %}
+                    <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-patch-check-fill me-1"></i> Full Registration</span>
+                {% elif application.status == 'PROVISIONAL_REGISTRATION' %}
+                    <span class="badge bg-primary fs-6 px-3 py-2"><i class="bi bi-clock-history me-1"></i> Provisional Registration</span>
+                {% elif application.status == 'CONDITIONS_APPLIED' %}
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="bi bi-exclamation-triangle-fill me-1"></i> Conditions for Improvement</span>
+                {% elif application.status == 'REJECTED' %}
+                    <span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-x-circle-fill me-1"></i> Rejected</span>
+                {% elif application.status == 'UNDER_REVIEW' %}
+                    <span class="badge bg-info text-dark fs-6 px-3 py-2"><i class="bi bi-search me-1"></i> Under Review</span>
+                {% else %}
+                    <span class="badge bg-secondary fs-6 px-3 py-2">Pending Review</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <!-- Left Column: Payment Details & Form -->
+    <div class="col-lg-7">
+        <!-- Payment Verification Form -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white py-3 border-bottom-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-currency-dollar me-2"></i>Payment Verification & Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-light border shadow-sm mb-4">
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Payment Information</h6>
+                    <div class="row g-3">
+                        <div class="col-md-12 border-bottom pb-2 mb-2">
+                            <p class="text-muted small mb-1 text-uppercase fw-bold">Medicine Name</p>
+                            <p class="mb-0 fs-5 fw-bold text-primary">{{ application.medicine_name }}</p>
+                        </div>
+                        <div class="col-md-12 border-bottom pb-2 mb-2">
+                            <p class="text-muted small mb-1 text-uppercase fw-bold">Application For</p>
+                            <p class="mb-0 fs-6 fw-semibold">
+                                {% if application.application_type == 'LISTING' %}
+                                    <span class="badge bg-info text-dark px-3 py-2 fs-6"><i class="bi bi-list-ul me-1"></i> Listing of Traditional Medicines</span>
+                                {% elif application.application_type == 'CATEGORY_II' %}
+                                    <span class="badge bg-warning text-dark px-3 py-2 fs-6"><i class="bi bi-shield-check me-1"></i> Registration of Category II Traditional Medicines</span>
+                                {% else %}
+                                    {{ application.get_application_type_display }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1 text-uppercase fw-bold">Fee Type</p>
+                            <p class="mb-0 fs-5">{{ payment.get_payment_type_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted small mb-1 text-uppercase fw-bold">Amount Due</p>
+                            <p class="mb-0 fs-5">{{ payment.amount }} TZS</p>
+                        </div>
+                        <div class="col-12 mt-3 pt-3 border-top">
+                            <p class="text-muted small mb-1 text-uppercase fw-bold">Applicant Submitted Receipt Number</p>
+                            <p class="mb-0 fs-4">
+                                {% if payment.receipt_number %}
+                                    <span class="fw-bold text-primary">{{ payment.receipt_number }}</span>
+                                {% else %}
+                                    <span class="text-muted fst-italic fs-6">Not yet submitted by applicant</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if payment.receipt_number %}
+                <form method="post" action="{% url 'medicines:staff_payment_detail' payment.pk %}">
+                    {% csrf_token %}
+                    
+                    <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">Verification Status</h6>
+                    
+                    <div class="mb-3 d-none">
+                        <div class="form-check form-switch mb-2">
+                            {{ payment_form.is_verified }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="remarksContainer" style="display: none;">
+                        <label class="form-label fw-bold text-danger">Reason for Rejection <span class="text-danger">*</span></label>
+                        {{ payment_form.remarks }}
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" name="action" value="mark_paid" id="verifyBtn" class="btn btn-success fw-bold py-2 w-100 mb-2">
+                            <i class="bi bi-check-circle-fill me-1"></i> Verify Payment
+                        </button>
+                        
+                        <button type="button" id="showRejectBtn" class="btn btn-warning text-dark fw-bold py-2 w-100" onclick="showRejectRemarks()">
+                            <i class="bi bi-x-circle-fill me-1"></i> Reject/Mark as Unpaid
+                        </button>
+                        
+                        <button type="submit" name="action" value="mark_unpaid" id="confirmRejectBtn" class="btn btn-danger fw-bold py-2 w-100" style="display: none;">
+                            <i class="bi bi-x-circle-fill me-1"></i> Confirm Rejection
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                    <i class="bi bi-hourglass-split fs-4 me-3"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Awaiting Applicant</h6>
+                        <span class="small">The applicant has not submitted their receipt number yet. You cannot verify this payment until they do.</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Applicant Details -->
+    <div class="col-lg-5">
+        <!-- Applicant Profile Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="fw-bold mb-0"><i class="bi bi-person-badge me-2 text-secondary"></i>Applicant Details</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        {% if 'Company Applicant' in application.applicant.all_roles %}
+                            <i class="bi bi-building text-secondary fs-4"></i>
+                        {% else %}
+                            <i class="bi bi-person-fill text-secondary fs-4"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">
+                            {% if 'Company Applicant' in application.applicant.all_roles %}
+                                {{ application.applicant.company_profile.company_name }}
+                            {% else %}
+                                {{ application.applicant.user_profile.full_name }}
+                            {% endif %}
+                        </h6>
+                        <span class="badge bg-secondary rounded-pill mt-1">{{ application.applicant.all_roles|join:", " }}</span>
+                    </div>
+                </div>
+                
+                <ul class="list-group list-group-flush mb-0">
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small"><i class="bi bi-envelope me-2"></i>Email</span>
+                        <span class="fw-medium text-break text-end ms-2">{{ application.applicant.email }}</span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small"><i class="bi bi-telephone me-2"></i>Phone</span>
+                        <span class="fw-medium">
+                            {% if 'Company Applicant' in application.applicant.all_roles %}
+                                {{ application.applicant.company_profile.phone_number }}
+                            {% else %}
+                                {{ application.applicant.user_profile.phone_number }}
+                            {% endif %}
+                        </span>
+                    </li>
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom-0 pb-0">
+                        <span class="text-muted small"><i class="bi bi-geo-alt me-2"></i>Region</span>
+                        <span class="fw-medium">
+                            {% if 'Company Applicant' in application.applicant.all_roles %}
+                                {{ application.applicant.company_profile.region }}
+                            {% else %}
+                                {{ application.applicant.user_profile.region }}
+                            {% endif %}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer bg-light p-3 border-top text-center">
+                <a href="{% url 'users:staff_registration_detail' application.applicant.pk %}" class="btn btn-sm btn-outline-secondary w-100" target="_blank">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> View Full Applicant Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showRejectRemarks() {
+        document.getElementById('remarksContainer').style.display = 'block';
+        document.getElementById('showRejectBtn').style.display = 'none';
+        document.getElementById('confirmRejectBtn').style.display = 'block';
+        document.getElementById('verifyBtn').style.display = 'none';
+        
+        // Make remarks required
+        const remarksField = document.querySelector('#remarksContainer textarea');
+        if (remarksField) {
+            remarksField.required = true;
+            remarksField.focus();
+        }
+    }
+</script>
+{% endblock %}

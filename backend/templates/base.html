@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+  
+<!-- Mirrored from www.bootstrapget.com/demos/apollo-medical-admin-template/dashboard2.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 29 Mar 2025 01:12:52 GMT -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}TAMRIS Dashboard{% endblock %}</title>
+
+    <!-- Meta -->
+    <meta name="description" content="Tanzania Medicine Registration Information System">
+    <meta property="og:title" content="TAMRIS Dashboard">
+    <meta property="og:description" content="Tanzania Medicine Registration Information System">
+    <meta property="og:type" content="Website">
+    <!-- Using the site logo as a fallback favicon since Apollo's favicon is branded -->
+    <link rel="shortcut icon" href="{% static 'apollo/images/logo.svg' %}">
+
+    <!-- *************
+		************ CSS Files *************
+	  ************* -->
+    <link rel="stylesheet" href="{% static 'apollo/fonts/remix/remixicon.css' %}">
+    <link rel="stylesheet" href="{% static 'apollo/css/main.min.css' %}">
+    <link rel="stylesheet" href="{% static 'apollo/css/tamris-custom.css' %}">
+
+    <!-- *************
+		************ Vendor Css Files *************
+	  ************ -->
+
+    <!-- Scrollbar CSS -->
+    <link rel="stylesheet" href="{% static 'apollo/vendor/overlay-scroll/OverlayScrollbars.min.css' %}">
+
+    <!-- Date Range CSS -->
+    <link rel="stylesheet" href="{% static 'apollo/vendor/daterange/daterange.css' %}">
+
+  </head>
+
+  <body>
+
+    <!-- Loading starts -->
+    <div id="loading-wrapper">
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="spin-wrapper">
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+    </div>
+    <!-- Loading ends -->
+
+    <!-- Page wrapper starts -->
+    <div class="page-wrapper">
+
+      <!-- Main container starts -->
+      <div class="main-container" {% if not user.is_authenticated or not user.is_email_verified %}style="padding-left: 0;"{% endif %}>
+
+        {% if user.is_authenticated and user.is_email_verified %}
+          {% include "partials/sidebar.html" %}
+        {% endif %}
+
+        <!-- App container starts -->
+        <div class="app-container" {% if not user.is_authenticated or not user.is_email_verified %}style="margin: 0 auto; padding: 2rem; width: 100%;"{% endif %}>
+
+          {% if user.is_authenticated and user.is_email_verified %}
+            {% include "partials/header.html" %}
+
+            <!-- App hero header starts -->
+            <div class="app-hero-header d-flex align-items-center">
+
+              <!-- Breadcrumb starts -->
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item text-primary" aria-current="page">
+                  {% block page_title %}
+                    {% if user.is_superuser or 'Admin' in user.all_roles %}
+                      Admin Dashboard
+                    {% elif 'Evaluator' in user.all_roles %}
+                      Evaluator Dashboard
+                    {% elif 'Inspector' in user.all_roles %}
+                      Inspector Dashboard
+                    {% elif 'Finance Officer' in user.all_roles %}
+                      Finance Dashboard
+                    {% elif 'Individual Applicant' in user.all_roles or 'Company Applicant' in user.all_roles %}
+                      Applicant Dashboard
+                    {% elif user.user_profile or user.company_profile %}
+                      Applicant Dashboard
+                    {% else %}
+                      TAMRIS Dashboard
+                    {% endif %}
+                  {% endblock %}
+                </li>
+              </ol>
+              <!-- Breadcrumb ends -->
+
+              <!-- Sales stats starts -->
+              <div class="ms-auto d-lg-flex d-none flex-row">
+                <div class="input-group">
+                  <span class="input-group-text bg-primary-lighten">
+                    <i class="ri-calendar-2-line text-primary"></i>
+                  </span>
+                  <input type="text" id="abc" class="form-control custom-daterange">
+                </div>
+              </div>
+              <!-- Sales stats ends -->
+
+            </div>
+            <!-- App Hero header ends -->
+          {% endif %}
+
+          <!-- App body starts -->
+          {% block content %}
+          {% endblock %}
+          <!-- App body ends -->
+
+          {% if user.is_authenticated and user.is_email_verified %}
+            {% include "partials/footer.html" %}
+          {% endif %}
+
+        </div>
+        <!-- App container ends -->
+
+      </div>
+      <!-- Main container ends -->
+
+    </div>
+    <!-- Page wrapper ends -->
+
+    <!-- *************
+			************ JavaScript Files *************
+		************* -->
+    <!-- Required jQuery first, then Bootstrap Bundle JS -->
+    <script src="{% static 'apollo/js/jquery.min.js' %}"></script>
+    <script src="{% static 'apollo/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'apollo/js/moment.min.js' %}"></script>
+
+    <!-- *************
+			************ Vendor Js Files *************
+		************* -->
+
+    <!-- Overlay Scroll JS -->
+    <script src="{% static 'apollo/vendor/overlay-scroll/jquery.overlayScrollbars.min.js' %}"></script>
+    <script src="{% static 'apollo/vendor/overlay-scroll/custom-scrollbar.js' %}"></script>
+
+    <!-- Date Range JS -->
+    <script src="{% static 'apollo/vendor/daterange/daterange.js' %}"></script>
+    <script src="{% static 'apollo/vendor/daterange/custom-daterange.js' %}"></script>
+
+    <!-- Apex Charts -->
+    <script src="{% static 'apollo/vendor/apex/apexcharts.min.js' %}"></script>
+    <script src="{% static 'apollo/vendor/apex/custom/dashboard2/patients.js' %}"></script>
+    <script src="{% static 'apollo/vendor/apex/custom/dashboard2/patients2.js' %}"></script>
+    <script src="{% static 'apollo/vendor/apex/custom/dashboard2/revenue.js' %}"></script>
+    <script src="{% static 'apollo/vendor/apex/custom/dashboard2/orders.js' %}"></script>
+
+    <!-- Raty JS -->
+    <script src="{% static 'apollo/vendor/rating/raty.js' %}"></script>
+    <script src="{% static 'apollo/vendor/rating/raty-custom.js' %}"></script>
+
+    <!-- Custom JS files -->
+    <script src="{% static 'apollo/js/custom.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+
+
+<!-- Mirrored from www.bootstrapget.com/demos/apollo-medical-admin-template/dashboard2.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 29 Mar 2025 01:13:04 GMT -->
+</html>

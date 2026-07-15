@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}My Applications - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    
+    <!-- Title / Actions Header -->
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'users:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small">
+                            <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+                        </a>
+                        <h3 class="fw-bold mb-0 mt-1 d-inline-flex align-items-center text-primary">
+                            <i class="ri-folder-open-line me-2"></i> My Applications & Tasks
+                        </h3>
+                        <p class="text-muted small mb-0 mt-1">View and manage all your traditional and alternative medicine listing & registration applications.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Navigation Cards/Tabs -->
+    <div class="row gx-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-2 d-flex flex-wrap gap-2">
+                    <a href="?filter=tasks_all" class="btn btn-sm {% if view_filter == 'tasks_all' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %} fw-bold">
+                        <i class="ri-alert-line me-1"></i> All Action Required
+                    </a>
+                    <a href="?filter=tasks_listing" class="btn btn-sm {% if view_filter == 'tasks_listing' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %} fw-bold">
+                        <i class="ri-capsule-line me-1"></i> Listing Tasks
+                    </a>
+                    <a href="?filter=tasks_cat_ii" class="btn btn-sm {% if view_filter == 'tasks_cat_ii' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %} fw-bold">
+                        <i class="ri-microscope-line me-1"></i> Category II Tasks
+                    </a>
+                    <a href="?filter=tasks_payment" class="btn btn-sm {% if view_filter == 'tasks_payment' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %} fw-bold">
+                        <i class="ri-money-dollar-circle-line me-1"></i> Payment Tasks
+                    </a>
+                    <div class="vr mx-1 d-none d-sm-block"></div>
+                    <a href="?filter=apps_all" class="btn btn-sm {% if view_filter == 'apps_all' or view_filter == 'all_inclusive' %}btn-primary{% else %}btn-outline-secondary{% endif %} fw-bold">
+                        <i class="ri-folder-line me-1"></i> All Applications
+                    </a>
+                    <a href="?filter=apps_listing" class="btn btn-sm {% if view_filter == 'apps_listing' %}btn-primary{% else %}btn-outline-secondary{% endif %} fw-bold">
+                        <i class="ri-capsule-line me-1"></i> Medicine Listings
+                    </a>
+                    <a href="?filter=apps_cat_ii" class="btn btn-sm {% if view_filter == 'apps_cat_ii' %}btn-primary{% else %}btn-outline-secondary{% endif %} fw-bold">
+                        <i class="ri-microscope-line me-1"></i> Category II Regs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row gx-3">
+        
+        <!-- Action Required Table -->
+        {% if 'tasks' in view_filter or view_filter == 'all_inclusive' %}
+            {% if action_required %}
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm border-0 border-start border-warning border-4">
+                    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center">
+                        <h5 class="mb-0 fw-bold text-warning d-inline-flex align-items-center">
+                            <i class="ri-error-warning-fill me-2"></i> 
+                            Action Required 
+                            {% if view_filter == 'tasks_listing' %}(Listed Medicines){% elif view_filter == 'tasks_cat_ii' %}(Registered Category II){% elif view_filter == 'tasks_payment' %}(Payments){% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4 py-3">Application Type</th>
+                                        <th class="py-3">Submitted On</th>
+                                        <th class="py-3">Status</th>
+                                        <th class="text-end px-4 py-3">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for med_app in action_required %}
+                                        {% include 'medicines/applicant/partials/application_row.html' %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% elif 'tasks' in view_filter %}
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5 text-muted">
+                        <div class="icon-box lg bg-success-lighten rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                            <i class="ri-checkbox-circle-line text-success fs-3"></i>
+                        </div>
+                        <p class="mb-0 fw-semibold text-secondary fs-6">You have no pending tasks in this category. Great job!</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- All Applications Table -->
+        {% if 'apps' in view_filter or view_filter == 'all_inclusive' %}
+        <div class="col-12">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-bold text-primary d-inline-flex align-items-center">
+                        <i class="ri-folder-open-fill me-2"></i> 
+                        Applications 
+                        {% if view_filter == 'apps_listing' %}(Listed Medicines){% elif view_filter == 'apps_cat_ii' %}(Registered Category II){% else %}(All){% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">Application Type</th>
+                                    <th class="py-3">Submitted On</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="text-end px-4 py-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for med_app in applications %}
+                                    {% include 'medicines/applicant/partials/application_row.html' %}
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-muted">
+                                            <i class="ri-folder-reduce-line fs-1 mb-2 d-block opacity-50 text-secondary"></i>
+                                            <p class="mb-0 fw-semibold text-secondary">No applications found.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

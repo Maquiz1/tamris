@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Initiate Application - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="mb-3">
+                <a href="{% url 'users:dashboard' %}" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                    <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+                </a>
+            </div>
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 d-inline-flex align-items-center">
+                        <i class="ri-file-add-line me-2"></i> Initiate Application
+                    </h5>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box lg bg-warning-lighten rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="ri-money-dollar-circle-line text-warning fs-1"></i>
+                    </div>
+                    
+                    <h4 class="fw-bold mb-2">Application Fee Required</h4>
+                    <p class="text-muted mb-4">
+                        To start a new application, you must first pay the following fee: <br>
+                        <strong class="d-inline-block mt-2 text-dark px-3 py-2 bg-light rounded">{{ fee_obj.short_name }}</strong>
+                    </p>
+                    
+                    <div class="alert alert-info border-0 mb-4 bg-info-lighten text-primary py-3">
+                        <strong class="d-block mb-1">Required Amount:</strong> 
+                        <span class="fs-4 fw-bold">{{ fee_amount }} TZS</span>
+                    </div>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-4 text-start">
+                            <label class="form-label fw-bold">Name of Medicine <span class="text-danger">*</span></label>
+                            {{ form.medicine_name }}
+                            {% if form.medicine_name.errors %}
+                                <div class="text-danger small mt-1"><i class="ri-error-warning-line me-1"></i>{{ form.medicine_name.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text mt-1 text-muted">Please enter the exact name of the medicine. This name must be unique.</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2.5 shadow-sm d-inline-flex align-items-center justify-content-center">
+                            <i class="ri-checkbox-circle-line me-2"></i> I Understand, Initiate Application
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

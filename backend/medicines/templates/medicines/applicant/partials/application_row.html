@@ -1,0 +1,137 @@
+<tr>
+    <td class="px-4 py-3 fw-medium">
+        <div class="d-flex align-items-center">
+            <div class="icon-box md bg-light rounded-circle me-3">
+                {% if med_app.application_type == 'LISTING' %}
+                    <i class="ri-capsule-line text-success fs-4"></i>
+                {% else %}
+                    <i class="ri-microscope-line text-warning fs-4"></i>
+                {% endif %}
+            </div>
+            <div>
+                <span class="text-dark fw-bold">{{ med_app.get_application_type_display }}</span>
+                <div class="small text-muted">{{ med_app.medicine_name }}</div>
+            </div>
+        </div>
+    </td>
+    <td class="py-3 text-muted">
+        {{ med_app.created_at|date:"M d, Y" }}
+    </td>
+    <td class="py-3">
+        {% if med_app.status == 'FULL_REGISTRATION' %}
+            <span class="badge bg-success-lighten text-success px-2 py-1"><i class="ri-checkbox-circle-fill me-1"></i> Full Registration</span>
+        {% elif med_app.status == 'PROVISIONAL_REGISTRATION' %}
+            <span class="badge bg-primary-lighten text-primary px-2 py-1"><i class="ri-time-line me-1"></i> Provisional Registration</span>
+        {% elif med_app.status == 'CONDITIONS_APPLIED' %}
+            <span class="badge bg-warning-lighten text-warning px-2 py-1"><i class="ri-error-warning-fill me-1"></i> Conditions Applied</span>
+            {% if med_app.evaluation.overall_comments %}
+            <button type="button" class="btn btn-link btn-sm text-danger p-0 mt-1 text-decoration-none fw-bold d-block text-start" data-bs-toggle="modal" data-bs-target="#conditionsModal{{ med_app.pk }}">
+                <i class="ri-alert-line"></i> View Recommendations
+            </button>
+            
+            <!-- Conditions Modal -->
+            <div class="modal fade text-start" id="conditionsModal{{ med_app.pk }}" tabindex="-1" aria-labelledby="conditionsModalLabel{{ med_app.pk }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title text-dark fw-bold" id="conditionsModalLabel{{ med_app.pk }}"><i class="ri-error-warning-fill me-2"></i>Conditions for Improvement</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted mb-2">The following recommendations must be addressed for <strong>{{ med_app.medicine_name }}</strong>:</p>
+                            <div class="bg-light p-3 rounded border text-wrap text-break" style="white-space: pre-line;">{{ med_app.evaluation.overall_comments }}</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% elif med_app.status == 'REJECTED' %}
+            <span class="badge bg-danger-lighten text-danger px-2 py-1"><i class="ri-close-circle-fill me-1"></i> Rejected</span>
+            {% if med_app.rejection_reason %}
+            <button type="button" class="btn btn-link btn-sm text-danger p-0 mt-1 text-decoration-none fw-bold d-block text-start" data-bs-toggle="modal" data-bs-target="#rejectModal{{ med_app.pk }}">
+                <i class="ri-alert-line"></i> View Feedback
+            </button>
+            
+            <!-- Reject Modal -->
+            <div class="modal fade text-start" id="rejectModal{{ med_app.pk }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ med_app.pk }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title fw-bold text-white" id="rejectModalLabel{{ med_app.pk }}"><i class="ri-close-circle-fill me-2"></i>Rejection Feedback</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted mb-2">The application for <strong>{{ med_app.medicine_name }}</strong> was rejected for the following reason:</p>
+                            <div class="bg-light p-3 rounded border text-wrap text-break" style="white-space: pre-line;">{{ med_app.rejection_reason }}</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% elif med_app.status == 'UNDER_REVIEW' or med_app.status == 'SUBMITTED' or med_app.status == 'PRELIMINARY_APPROVED' %}
+            <span class="badge bg-info-lighten text-info px-2 py-1"><i class="ri-search-line me-1"></i> Under Review</span>
+        {% elif 'PENDING' in med_app.status and 'FEE' in med_app.status %}
+            <span class="badge bg-danger-lighten text-danger px-2 py-1"><i class="ri-money-dollar-circle-line me-1"></i> Payment Required</span>
+        {% elif med_app.status == 'DRAFT' %}
+            <span class="badge bg-secondary-lighten text-secondary px-2 py-1"><i class="ri-draft-line me-1"></i> Draft (Ready to Fill)</span>
+        {% else %}
+            <span class="badge bg-secondary-lighten text-secondary px-2 py-1"><i class="ri-time-line me-1"></i> {{ med_app.get_status_display }}</span>
+        {% endif %}
+    </td>
+    <td class="text-end px-4 py-3">
+        <div class="d-flex justify-content-end gap-2 flex-wrap">
+            {% if med_app.status == 'FULL_REGISTRATION' %}
+                <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm fw-bold text-dark" target="_blank">
+                    <i class="ri-article-line me-1"></i> Certificate
+                </a>
+            {% endif %}
+            
+            {% if med_app.status in 'PROVISIONAL_REGISTRATION,PENDING_FINAL_APPROVAL,PENDING_LISTING_FEE,PENDING_REGISTRATION_FEE' %}
+                <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
+                    <i class="ri-file-text-line me-1"></i> Provisional Letter
+                </a>
+            {% endif %}
+
+            {% if med_app.status == 'CONDITIONS_APPLIED' %}
+                <a href="{% url 'medicines:edit_application' med_app.pk %}" class="btn btn-warning btn-sm rounded-pill px-3 shadow-sm fw-bold text-dark">
+                    <i class="ri-edit-line me-1"></i> Correct Application
+                </a>
+            {% endif %}
+            
+            {% if 'PENDING' in med_app.status and 'FEE' in med_app.status %}
+                {% with pending_payment=med_app.payments.last %}
+                    {% if pending_payment and not pending_payment.is_verified and not pending_payment.receipt_number %}
+                        <a href="{% url 'medicines:submit_payment' pending_payment.pk %}" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm fw-bold">
+                            <i class="ri-upload-2-line me-1"></i> Upload Receipt
+                        </a>
+                    {% elif pending_payment and pending_payment.receipt_number and not pending_payment.is_verified %}
+                        <button class="btn btn-secondary btn-sm rounded-pill px-3 shadow-sm fw-bold" disabled>
+                            <i class="ri-loader-4-line me-1"></i> Verifying Payment
+                        </button>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+            
+            {% if med_app.status == 'DRAFT' %}
+                {% if med_app.application_type == 'LISTING' %}
+                    <a href="{% url 'medicines:apply_listing' med_app.pk %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-bold">
+                        <i class="ri-edit-line me-1"></i> Fill Form
+                    </a>
+                {% else %}
+                    <a href="{% url 'medicines:apply_category_ii' med_app.pk %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-bold">
+                        <i class="ri-edit-line me-1"></i> Fill Form
+                    </a>
+                {% endif %}
+            {% endif %}
+            <a href="{% url 'medicines:applicant_application_detail' med_app.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
+                Details
+            </a>
+        </div>
+    </td>
+</tr>
