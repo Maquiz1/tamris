@@ -54,7 +54,9 @@
                                     </td>
                                     <td class="px-4 py-3 text-muted">{{ staff.phone_number|default:"-" }}</td>
                                     <td class="px-4 py-3">
-                                        {% if staff.is_active %}
+                                        {% if not staff.is_email_verified %}
+                                            <span class="text-warning fw-bold d-inline-flex align-items-center"><i class="ri-mail-unread-fill me-1"></i> Pending Activation</span>
+                                        {% elif staff.is_active %}
                                             <span class="text-success fw-bold d-inline-flex align-items-center"><i class="ri-checkbox-circle-fill me-1"></i> Active</span>
                                         {% else %}
                                             <span class="text-danger fw-bold d-inline-flex align-items-center"><i class="ri-close-circle-fill me-1"></i> Inactive</span>
@@ -62,6 +64,11 @@
                                     </td>
                                     <td class="px-4 py-3 text-end">
                                         <div class="btn-group" role="group">
+                                            {% if not staff.is_email_verified %}
+                                            <a href="{% url 'users:resend_staff_activation' staff.pk %}" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center" title="Resend Activation Email">
+                                                <i class="ri-mail-send-line me-1"></i> Resend Code
+                                            </a>
+                                            {% endif %}
                                             <a href="{% url 'users:system_user_detail' staff.pk %}" class="btn btn-sm btn-outline-info d-inline-flex align-items-center">
                                                 <i class="ri-eye-line me-1"></i> View
                                             </a>

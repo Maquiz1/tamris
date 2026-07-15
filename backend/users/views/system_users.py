@@ -121,3 +121,45 @@ def applicant_users_list_view(request):
         'query': query,
         'total_applicants': applicants.count()
     })
+
+@login_required
+def resend_staff_activation_view(request, pk):
+    is_admin = request.user.is_admin
+    if not is_admin:
+        return redirect('users:dashboard')
+        
+    staff_user = get_object_or_404(CustomUser, pk=pk)
+    
+    # Verify the user is a staff member
+    is_staff = staff_user.role and staff_user.role.name in ['Admin', 'Evaluator', 'Inspector', 'Finance Officer']
+    if not (is_staff or staff_user.is_superuser):
+        messages.error(request, "This action is only available for staff users.")
+        return redirect('users:system_users_list')
+        
+    if staff_user.is_email_verified:
+        messages.info(request, f"User {staff_user.email} is already verified and active.")
+        return redirect('users:system_users_list')
+        
+    import random
+    import string
+    import pyotp
+    from users.emails import notify_staff_account_created
+    
+    # Generate new temporary password
+    temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    staff_user.set_password(temp_password)
+    
+    # Make sure they have an OTP secret
+    if not staff_user.otp_secret:
+        staff_user.otp_secret = pyotp.random_base32()
+        
+    staff_user.save()
+    
+    # Get current OTP code
+    otp_code = pyotp.TOTP(staff_user.otp_secret).now()
+    
+    # Send email
+    notify_staff_account_created(staff_user, temp_password, otp_code)
+    
+    messages.success(request, f"Successfully reset credentials and sent a new activation email to {staff_user.email}.")
+    return redirect('users:system_users_list')
