@@ -275,7 +275,7 @@
                 </div>
             </div>
             {% endif %}
-            {% if user.review_remarks %}
+            {% if user.registration_status == 'REJECTED' and user.review_remarks %}
             <div class="card-footer bg-white border-top-0 pt-0 pb-4 px-4">
                 <div class="alert alert-info mb-0 shadow-sm border-0">
                     <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle-fill me-2"></i> Staff Remarks:</h6>
