@@ -164,7 +164,7 @@
             <span class="menu-text">Reports & Registry</span>
           </a>
           <ul class="treeview-menu">
-            {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles %}
+            {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles %}
             <li>
               <a href="{% url 'reports:medicines' %}?type=CATEGORY_II">Registered Cat II Medicines</a>
             </li>
