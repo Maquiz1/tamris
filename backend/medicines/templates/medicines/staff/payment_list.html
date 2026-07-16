@@ -99,7 +99,7 @@
                                         <td class="py-3">
                                             {% if payment.is_verified %}
                                                 <span class="badge bg-success-lighten text-success d-inline-flex align-items-center"><i class="ri-checkbox-circle-fill me-1"></i> Verified</span>
-                                            {% elif payment.receipt_number %}
+                                            {% elif payment.control_number %}
                                                 <span class="badge bg-warning-lighten text-warning d-inline-flex align-items-center"><i class="ri-time-line me-1"></i> Receipt Submitted</span>
                                             {% else %}
                                                 <span class="badge bg-danger-lighten text-danger d-inline-flex align-items-center"><i class="ri-error-warning-line me-1"></i> Awaiting Receipt</span>

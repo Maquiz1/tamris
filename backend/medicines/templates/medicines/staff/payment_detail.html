@@ -69,19 +69,26 @@
                             <p class="mb-0 fs-5">{{ payment.amount }} TZS</p>
                         </div>
                         <div class="col-12 mt-3 pt-3 border-top">
-                            <p class="text-muted small mb-1 text-uppercase fw-bold">Applicant Submitted Receipt Number</p>
+                            <p class="text-muted small mb-1 text-uppercase fw-bold">Applicant Submitted Control Number</p>
                             <p class="mb-0 fs-4">
-                                {% if payment.receipt_number %}
-                                    <span class="fw-bold text-primary">{{ payment.receipt_number }}</span>
+                                    <span class="fw-bold text-primary">{{ payment.control_number }}</span>
                                 {% else %}
                                     <span class="text-muted fst-italic fs-6">Not yet submitted by applicant</span>
                                 {% endif %}
                             </p>
+                            {% if payment.receipt_number %}
+                            <p class="text-muted small mb-1 mt-3 text-uppercase fw-bold">Receipt Number</p>
+                            <p class="mb-0 fs-5"><span class="fw-bold text-secondary">{{ payment.receipt_number }}</span></p>
+                            {% endif %}
+                            {% if payment.reference_number %}
+                            <p class="text-muted small mb-1 mt-3 text-uppercase fw-bold">Reference Number</p>
+                            <p class="mb-0 fs-5"><span class="fw-bold text-secondary">{{ payment.reference_number }}</span></p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
 
-                {% if payment.receipt_number %}
+                {% if payment.control_number %}
                 <form method="post" action="{% url 'medicines:staff_payment_detail' payment.pk %}">
                     {% csrf_token %}
                     

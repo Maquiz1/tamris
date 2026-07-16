@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import RegexValidator
 from core.models import TimeStampedModel, ActivableModel
 from core.utils.fees import FEE_TYPES
 from .applications import MedicineApplication
@@ -8,7 +9,27 @@ class Payment(TimeStampedModel):
     application = models.ForeignKey(MedicineApplication, on_delete=models.CASCADE, related_name='payments')
     payment_type = models.CharField(max_length=50, choices=FEE_TYPES)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="Kiasi (Amount in TZS)")
-    receipt_number = models.CharField(max_length=100, blank=True, null=True, verbose_name="Namba ya Risiti / Control Number")
+    control_number = models.CharField(
+        max_length=12,
+        blank=True,
+        null=True,
+        verbose_name="Control Number",
+        validators=[RegexValidator(regex=r'^\d{12}$', message='Control Number must be exactly 12 digits.')]
+    )
+    receipt_number = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,
+        verbose_name="Receipt Number",
+        validators=[RegexValidator(regex=r'^\d{15}$', message='Receipt Number must be exactly 15 digits.')]
+    )
+    reference_number = models.CharField(
+        max_length=16,
+        blank=True,
+        null=True,
+        verbose_name="Reference Number",
+        validators=[RegexValidator(regex=r'^.{16}$', message='Reference Number must be exactly 16 characters.')]
+    )
     
     is_verified = models.BooleanField(default=False, verbose_name="Imethibitishwa? (Verified?)")
     verified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_payments')

@@ -152,7 +152,7 @@ class MedicineApplication(TimeStampedModel):
             payments = list(self.payments.all())
             if payments:
                 payment = payments[-1]
-                if not payment.receipt_number and not payment.is_verified:
+                if not payment.control_number and not payment.is_verified:
                     return True
         return False
 

@@ -34,7 +34,7 @@
                             {% for payment in payments %}
                             <tr>
                                 <td class="px-4 py-3 fw-medium">
-                                    {{ payment.receipt_number|default:"<span class='text-muted fst-italic'>Not Submitted</span>"|safe }}
+                                    {{ payment.control_number|default:"<span class='text-muted fst-italic'>Not Submitted</span>"|safe }}
                                 </td>
                                 <td>
                                     <div class="fw-bold">{{ payment.application.medicine_name }}</div>
@@ -52,18 +52,18 @@
                                 <td class="text-center">
                                     {% if payment.is_verified %}
                                         <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i> Verified</span>
-                                    {% elif payment.receipt_number %}
+                                    {% elif payment.control_number %}
                                         <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-hourglass-split me-1"></i> Pending Verification</span>
                                     {% else %}
                                         <span class="badge bg-danger px-2 py-1"><i class="bi bi-exclamation-circle-fill me-1"></i> Payment Required</span>
                                     {% endif %}
                                 </td>
                                 <td class="text-end px-4 py-3">
-                                    {% if not payment.receipt_number %}
+                                    {% if not payment.control_number %}
                                         <a href="{% url 'medicines:submit_payment' payment.pk %}" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
                                             <i class="bi bi-upload me-1"></i> Upload Receipt
                                         </a>
-                                    {% elif payment.receipt_number and not payment.is_verified %}
+                                    {% elif payment.control_number and not payment.is_verified %}
                                         <button class="btn btn-secondary btn-sm rounded-pill px-3 shadow-sm" disabled>
                                             <i class="bi bi-clock me-1"></i> Processing
                                         </button>

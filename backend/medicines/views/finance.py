@@ -21,7 +21,7 @@ def staff_payment_list_view(request):
     if list_filter == 'pending':
         base_queryset = base_queryset.filter(is_verified=False)
     if query:
-        base_queryset = base_queryset.filter(Q(application__medicine_name__icontains=query) | Q(receipt_number__icontains=query) | Q(application__applicant__email__icontains=query)).distinct()
+        base_queryset = base_queryset.filter(Q(application__medicine_name__icontains=query) | Q(control_number__icontains=query) | Q(application__applicant__email__icontains=query)).distinct()
     if status_filter == 'VERIFIED':
         base_queryset = base_queryset.filter(is_verified=True)
     elif status_filter == 'PENDING':

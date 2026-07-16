@@ -28,7 +28,7 @@ class PractitionerDetailForm(forms.ModelForm):
         fields = ('full_name', 'nida_number', 'tin', 'address')
         widgets = {
             'address': forms.Textarea(attrs={'rows': 2}),
-            'nida_number': forms.TextInput(attrs={'placeholder': 'YYYYMMDD-XXXXX-XXXX-XXX (e.g. 19810822-61218-9000-125)'}),
+            'nida_number': forms.TextInput(attrs={'placeholder': 'YYYYMMDD-XXXXX-XXXXX-XX (e.g. 19501007-11101-00001-26)'}),
             'tin': forms.TextInput(attrs={'placeholder': 'XXX-XXX-XXX (e.g. 123-456-909)'})
         }
 

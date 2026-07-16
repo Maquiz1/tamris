@@ -106,11 +106,11 @@
             
             {% if 'PENDING' in med_app.status and 'FEE' in med_app.status %}
                 {% with pending_payment=med_app.payments.last %}
-                    {% if pending_payment and not pending_payment.is_verified and not pending_payment.receipt_number %}
+                    {% if pending_payment and not pending_payment.is_verified and not pending_payment.control_number %}
                         <a href="{% url 'medicines:submit_payment' pending_payment.pk %}" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm fw-bold">
                             <i class="ri-upload-2-line me-1"></i> Upload Receipt
                         </a>
-                    {% elif pending_payment and pending_payment.receipt_number and not pending_payment.is_verified %}
+                    {% elif pending_payment and pending_payment.control_number and not pending_payment.is_verified %}
                         <button class="btn btn-secondary btn-sm rounded-pill px-3 shadow-sm fw-bold" disabled>
                             <i class="ri-loader-4-line me-1"></i> Verifying Payment
                         </button>

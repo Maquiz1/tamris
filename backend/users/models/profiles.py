@@ -12,8 +12,8 @@ class UserProfile(TimeStampedModel):
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^[1-9]\d{7}-\d{5}-\d{4}-\d{3}$',
-                message='NIDA must be in the format YYYYMMDD-XXXXX-XXXX-XXX and cannot start with 0 (e.g., 19810822-61218-9000-125)'
+                regex=r'^[1-9]\d{7}-\d{5}-\d{5}-\d{2}$',
+                message='NIDA must be in the format YYYYMMDD-XXXXX-XXXXX-XX and cannot start with 0 (e.g., 19501007-11101-00001-26)'
             )
         ]
     )

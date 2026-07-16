@@ -13,9 +13,11 @@ class PaymentVerificationForm(forms.ModelForm):
 class ApplicantPaymentSubmissionForm(forms.ModelForm):
     class Meta:
         model = Payment
-        fields = ['receipt_number']
+        fields = ['control_number', 'receipt_number', 'reference_number']
         widgets = {
-            'receipt_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Bank Receipt Number or Control Number'}),
+            'control_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter 12-digit Control Number'}),
+            'receipt_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter 15-digit Receipt Number (Optional)'}),
+            'reference_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter 16-character Reference Number (Optional)'}),
         }
 
 class FeeConfigurationForm(forms.ModelForm):
