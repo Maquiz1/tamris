@@ -328,7 +328,7 @@
                                     <i class="bi bi-file-earmark-image fs-3 text-primary me-3"></i>
                                     <div>
                                         <h6 class="mb-1">Sample Label</h6>
-                                        <a href="{{ application.sample_label.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.sample_label.url }}" data-file-name="Sample Label" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
@@ -340,7 +340,7 @@
                                     <i class="bi bi-file-earmark-text fs-3 text-primary me-3"></i>
                                     <div>
                                         <h6 class="mb-1">Statement of Efficacy</h6>
-                                        <a href="{{ application.statement_of_efficacy.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.statement_of_efficacy.url }}" data-file-name="Statement of Efficacy" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
@@ -352,7 +352,7 @@
                                     <i class="bi bi-file-earmark-pdf fs-3 text-primary me-3"></i>
                                     <div>
                                         <h6 class="mb-1">Literature Review</h6>
-                                        <a href="{{ application.literature_review.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.literature_review.url }}" data-file-name="Literature Review" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
@@ -364,7 +364,7 @@
                                     <i class="bi bi-patch-check fs-3 text-primary me-3"></i>
                                     <div>
                                         <h6 class="mb-1">TAHPC Certificate</h6>
-                                        <a href="{{ application.tahpc_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.tahpc_certificate.url }}" data-file-name="TAHPC Certificate" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
@@ -376,7 +376,7 @@
                                     <i class="bi bi-file-earmark-text fs-3 text-primary me-3"></i>
                                     <div>
                                         <h6 class="mb-1">Ingredients Info Doc</h6>
-                                        <a href="{{ application.ingredients_info_doc.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.ingredients_info_doc.url }}" data-file-name="Ingredients Info Doc" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
@@ -388,7 +388,7 @@
                                     <i class="bi bi-images fs-3 text-primary me-3"></i>
                                     <div>
                                         <h6 class="mb-1">Medicine Photos</h6>
-                                        <a href="{{ application.medicine_photos.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.medicine_photos.url }}" data-file-name="Medicine Photos" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
@@ -400,7 +400,7 @@
                                     <i class="bi bi-file-earmark-text fs-3 text-primary me-3"></i>
                                     <div>
                                         <h6 class="mb-1">Instructions for Use Doc</h6>
-                                        <a href="{{ application.instructions_doc.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.instructions_doc.url }}" data-file-name="Instructions for Use" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
@@ -410,67 +410,67 @@
                                 <div class="col-12 mt-4"><h6 class="fw-bold border-bottom pb-2">Category II Laboratory Reports</h6></div>
                                 
                                 {% if application.scientific_name_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Scientific Name Report</h6><a href="{{ application.scientific_name_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Scientific Name Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.scientific_name_report.url }}" data-file-name="Scientific Name Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.heavy_metals_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Heavy Metals Report</h6><a href="{{ application.heavy_metals_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Heavy Metals Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.heavy_metals_report.url }}" data-file-name="Heavy Metals Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.pesticides_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Pesticides Report</h6><a href="{{ application.pesticides_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Pesticides Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.pesticides_report.url }}" data-file-name="Pesticides Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.toxic_chemicals_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Toxic Chemicals Report</h6><a href="{{ application.toxic_chemicals_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Toxic Chemicals Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.toxic_chemicals_report.url }}" data-file-name="Toxic Chemicals Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.conventional_drugs_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Conventional Drugs Report</h6><a href="{{ application.conventional_drugs_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Conventional Drugs Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.conventional_drugs_report.url }}" data-file-name="Conventional Drugs Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.foreign_matter_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Foreign Matter Report</h6><a href="{{ application.foreign_matter_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Foreign Matter Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.foreign_matter_report.url }}" data-file-name="Foreign Matter Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.microbes_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Microbes Report</h6><a href="{{ application.microbes_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Microbes Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.microbes_report.url }}" data-file-name="Microbes Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.aflatoxin_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Aflatoxin Report</h6><a href="{{ application.aflatoxin_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Aflatoxin Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.aflatoxin_report.url }}" data-file-name="Aflatoxin Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.toxicity_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Toxicity Results</h6><a href="{{ application.toxicity_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Toxicity Results</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.toxicity_report.url }}" data-file-name="Toxicity Results" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.stability_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Stability Report</h6><a href="{{ application.stability_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Stability Report</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.stability_report.url }}" data-file-name="Stability Report" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.moisture_analysis_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Moisture Analysis</h6><a href="{{ application.moisture_analysis_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Moisture Analysis</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.moisture_analysis_report.url }}" data-file-name="Moisture Analysis" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.ph_analysis_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">pH Analysis</h6><a href="{{ application.ph_analysis_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">pH Analysis</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.ph_analysis_report.url }}" data-file-name="pH Analysis" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.uniformity_test_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Uniformity Tests</h6><a href="{{ application.uniformity_test_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Uniformity Tests</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.uniformity_test_report.url }}" data-file-name="Uniformity Tests" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.dissolution_test_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Dissolution Tests</h6><a href="{{ application.dissolution_test_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Dissolution Tests</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.dissolution_test_report.url }}" data-file-name="Dissolution Tests" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.clinical_observation_report %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Clinical Observation</h6><a href="{{ application.clinical_observation_report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-file-earmark-medical fs-3 text-primary me-3"></i><div><h6 class="mb-1">Clinical Observation</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.clinical_observation_report.url }}" data-file-name="Clinical Observation" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                                 
                                 {% if application.manufacturing_flow_chart %}
-                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-diagram-3 fs-3 text-primary me-3"></i><div><h6 class="mb-1">Manufacturing Flow Chart</h6><a href="{{ application.manufacturing_flow_chart.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View File</a></div></div></div>
+                                <div class="col-md-6"><div class="border rounded p-3 d-flex align-items-center bg-light"><i class="bi bi-diagram-3 fs-3 text-primary me-3"></i><div><h6 class="mb-1">Manufacturing Flow Chart</h6><button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.manufacturing_flow_chart.url }}" data-file-name="Manufacturing Flow Chart" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button></div></div></div>
                                 {% endif %}
                             {% endif %}
                             
@@ -489,9 +489,9 @@
                                                         <p class="small text-muted mb-0">Completed on: {{ inspection.updated_at|date:"M d, Y" }}</p>
                                                     </div>
                                                 </div>
-                                                <a href="{{ inspection.report_file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                                    <i class="bi bi-download me-1"></i> Download Report PDF
-                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-success doc-view-btn" data-file-url="{{ inspection.report_file.url }}" data-file-name="Inspection Report - {{ inspection.inspector.user_profile.full_name }}" data-bs-toggle="modal" data-bs-target="#fileViewerModal">
+                                                    <i class="bi bi-eye me-1"></i> View Report
+                                                </button>
                                             </div>
                                             
                                             <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-card-checklist me-1"></i> Checklist Summary</h6>
@@ -744,4 +744,44 @@
         </div>
     </div>
 </div>
+<!-- File Viewer Modal -->
+<div class="modal fade" id="fileViewerModal" tabindex="-1" aria-labelledby="fileViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 90vw;">
+        <div class="modal-content" style="height: 85vh;">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title fw-bold mb-0" id="fileViewerModalLabel">
+                    <i class="bi bi-file-earmark-text me-2"></i><span id="fileViewerFileName">Document</span>
+                </h6>
+                <div>
+                    <a id="fileViewerDownloadLink" href="#" target="_blank" class="btn btn-sm btn-outline-light me-2" title="Open in new tab">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="fileViewerIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('fileViewerModal');
+    if (modal) {
+        modal.addEventListener('show.bs.modal', function(event) {
+            const btn = event.relatedTarget;
+            const fileUrl = btn.getAttribute('data-file-url');
+            const fileName = btn.getAttribute('data-file-name');
+            document.getElementById('fileViewerFileName').textContent = fileName || 'Document';
+            document.getElementById('fileViewerIframe').src = fileUrl || '';
+            document.getElementById('fileViewerDownloadLink').href = fileUrl || '#';
+        });
+        modal.addEventListener('hidden.bs.modal', function() {
+            document.getElementById('fileViewerIframe').src = '';
+        });
+    }
+});
+</script>
 {% endblock %}
