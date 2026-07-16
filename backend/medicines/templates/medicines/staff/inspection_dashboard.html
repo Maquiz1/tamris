@@ -203,7 +203,7 @@
                                             </td>
                                             <td class="text-end px-4 py-3">
                                                 <div class="d-flex justify-content-end gap-2 flex-wrap">
-                                                    <a href="{% url 'medicines:submit_inspection_report' report.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
+                                                    <a href="{% url 'medicines:inspection_detail' report.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
                                                         <i class="ri-eye-line me-1"></i> View
                                                     </a>
                                                     {% if report.report_file %}
@@ -212,7 +212,7 @@
                                                     </a>
                                                     {% endif %}
                                                     <button type="button" class="btn btn-outline-info btn-sm rounded-pill px-3 fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#remarksModal{{ report.pk }}">
-                                                        Remarks
+                                                        Summary Report
                                                     </button>
                                                 </div>
                                                 
@@ -221,7 +221,7 @@
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title fw-bold text-dark">Inspection Remarks</h5>
+                                                                <h5 class="modal-title fw-bold text-dark">Inspection Summary Report</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                             </div>
                                                             <div class="modal-body text-wrap">
@@ -344,7 +344,7 @@
                                                             Manage
                                                         </a>
                                                     {% elif inspection.status == 'COMPLETED' %}
-                                                        <a href="{% url 'medicines:submit_inspection_report' inspection.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-bold">
+                                                        <a href="{% url 'medicines:inspection_detail' inspection.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-bold">
                                                             <i class="ri-eye-line me-1"></i> View
                                                         </a>
                                                         {% if inspection.report_file %}

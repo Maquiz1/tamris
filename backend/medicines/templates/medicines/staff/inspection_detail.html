@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Inspection Detail — {{ application.medicine_name }} - TAMRIS{% endblock %}
+
+{% block content %}
+<div class="app-body">
+
+  <!-- Header -->
+  <div class="row gx-3 mb-3">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <h3 class="fw-bold mb-0 mt-1 d-inline-flex align-items-center text-primary">
+              <i class="ri-survey-line me-2"></i> Inspection Summary Report
+            </h3>
+            <p class="text-muted small mb-0 mt-1">Read-only view of completed GMP inspection for <strong>{{ application.medicine_name }}</strong>.</p>
+          </div>
+          <a href="{% url 'medicines:inspection_dashboard' %}?tab=reports" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row gx-3">
+    <!-- Left column -->
+    <div class="col-lg-4 mb-3">
+
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-white fw-bold border-bottom py-3">
+          <i class="ri-capsule-line me-2 text-primary"></i> Application Details
+        </div>
+        <div class="card-body">
+          <p class="mb-2"><strong>Medicine:</strong><br>{{ application.medicine_name }}</p>
+          <p class="mb-2"><strong>Type:</strong><br>{{ application.get_application_type_display }}</p>
+          <p class="mb-2"><strong>Applicant:</strong><br>
+            {% if 'Company Applicant' in application.applicant.all_roles %}
+              {{ application.applicant.company_profile.company_name }}
+            {% else %}
+              {{ application.applicant.user_profile.full_name }}
+            {% endif %}
+          </p>
+          <p class="mb-0"><strong>Status:</strong><br>
+            <span class="badge bg-secondary">{{ application.get_status_display }}</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-white fw-bold border-bottom py-3">
+          <i class="ri-calendar-check-line me-2 text-info"></i> Inspection Details
+        </div>
+        <div class="card-body">
+          <p class="mb-2"><strong>Start:</strong><br>{{ schedule.start_date_time|date:"d M Y H:i" }}</p>
+          <p class="mb-2"><strong>End:</strong><br>{{ schedule.end_date_time|date:"d M Y H:i" }}</p>
+          <p class="mb-2"><strong>Completed:</strong><br>{{ schedule.updated_at|date:"d M Y H:i" }}</p>
+          <p class="mb-2"><strong>GMP Status:</strong><br>
+            {% if schedule.gmp_compliant %}
+              <span class="badge bg-success-lighten text-success"><i class="ri-checkbox-circle-line me-1"></i>Compliant</span>
+            {% else %}
+              <span class="badge bg-danger-lighten text-danger"><i class="ri-close-circle-line me-1"></i>Not Compliant</span>
+            {% endif %}
+          </p>
+          <p class="mb-0"><strong>Inspectors:</strong><br>
+            {% for inspector in schedule.assigned_inspectors.all %}
+              <span class="badge bg-light text-dark border me-1 mb-1">{{ inspector.email }}</span>
+            {% empty %}<span class="text-muted small">None</span>{% endfor %}
+          </p>
+        </div>
+      </div>
+
+      {% if schedule.report_file %}
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center py-4">
+          <i class="ri-file-pdf-line fs-1 text-danger mb-2 d-block"></i>
+          <p class="fw-bold mb-3">Inspection Report PDF</p>
+          <a href="{{ schedule.report_file.url }}" class="btn btn-danger rounded-pill px-4" target="_blank">
+            <i class="ri-download-line me-1"></i> Download PDF
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Right column -->
+    <div class="col-lg-8 mb-3">
+
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-white fw-bold border-bottom py-3">
+          <i class="ri-list-check me-2 text-success"></i> Checklist Items Inspected
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0 row row-cols-1 row-cols-md-2 g-2">
+            <li class="col d-flex align-items-center gap-2">
+              {% if schedule.check_manufacturing_area %}<i class="ri-checkbox-circle-fill text-success fs-5"></i>{% else %}<i class="ri-close-circle-fill text-muted fs-5"></i>{% endif %}
+              Manufacturing Area
+            </li>
+            <li class="col d-flex align-items-center gap-2">
+              {% if schedule.check_machines %}<i class="ri-checkbox-circle-fill text-success fs-5"></i>{% else %}<i class="ri-close-circle-fill text-muted fs-5"></i>{% endif %}
+              Machines
+            </li>
+            <li class="col d-flex align-items-center gap-2">
+              {% if schedule.check_cleanliness %}<i class="ri-checkbox-circle-fill text-success fs-5"></i>{% else %}<i class="ri-close-circle-fill text-muted fs-5"></i>{% endif %}
+              Cleanliness
+            </li>
+            <li class="col d-flex align-items-center gap-2">
+              {% if schedule.check_medicine_storage %}<i class="ri-checkbox-circle-fill text-success fs-5"></i>{% else %}<i class="ri-close-circle-fill text-muted fs-5"></i>{% endif %}
+              Medicine Storage
+            </li>
+            <li class="col d-flex align-items-center gap-2">
+              {% if schedule.check_quality_control %}<i class="ri-checkbox-circle-fill text-success fs-5"></i>{% else %}<i class="ri-close-circle-fill text-muted fs-5"></i>{% endif %}
+              Quality Control System
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-white fw-bold border-bottom py-3">
+          <i class="ri-file-text-line me-2 text-warning"></i> Area Summary Reports
+        </div>
+        <div class="card-body">
+          {% if schedule.check_manufacturing_area and schedule.manufacturing_area_remarks %}
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-1">Manufacturing Area</h6>
+            <div class="p-3 bg-light rounded border text-muted" style="white-space:pre-line;">{{ schedule.manufacturing_area_remarks }}</div>
+          </div>
+          {% endif %}
+          {% if schedule.check_machines and schedule.machines_remarks %}
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-1">Machines</h6>
+            <div class="p-3 bg-light rounded border text-muted" style="white-space:pre-line;">{{ schedule.machines_remarks }}</div>
+          </div>
+          {% endif %}
+          {% if schedule.check_cleanliness and schedule.cleanliness_remarks %}
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-1">Cleanliness</h6>
+            <div class="p-3 bg-light rounded border text-muted" style="white-space:pre-line;">{{ schedule.cleanliness_remarks }}</div>
+          </div>
+          {% endif %}
+          {% if schedule.check_medicine_storage and schedule.medicine_storage_remarks %}
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-1">Medicine Storage</h6>
+            <div class="p-3 bg-light rounded border text-muted" style="white-space:pre-line;">{{ schedule.medicine_storage_remarks }}</div>
+          </div>
+          {% endif %}
+          {% if schedule.check_quality_control and schedule.quality_control_remarks %}
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-1">Quality Control System</h6>
+            <div class="p-3 bg-light rounded border text-muted" style="white-space:pre-line;">{{ schedule.quality_control_remarks }}</div>
+          </div>
+          {% endif %}
+          {% if not schedule.manufacturing_area_remarks and not schedule.machines_remarks and not schedule.cleanliness_remarks and not schedule.medicine_storage_remarks and not schedule.quality_control_remarks %}
+          <p class="text-muted text-center py-3 mb-0"><i class="ri-folder-reduce-line fs-3 d-block mb-2 opacity-50"></i>No per-area summary reports recorded.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 border-top border-primary border-3">
+        <div class="card-header bg-white fw-bold border-bottom py-3">
+          <i class="ri-article-line me-2 text-primary"></i> Overall Summary Report
+        </div>
+        <div class="card-body">
+          <div class="p-3 bg-light rounded border text-muted" style="white-space:pre-line;min-height:80px;">{{ schedule.remarks|default:"No overall summary report provided." }}</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

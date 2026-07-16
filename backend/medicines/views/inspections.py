@@ -107,3 +107,19 @@ def submit_inspection_report_view(request, pk):
         'schedule': schedule,
         'fee_not_paid': fee_not_paid,
     })
+
+@login_required
+def inspection_detail_view(request, pk):
+    """Read-only view of a completed inspection report."""
+    if not (request.user.is_inspector or request.user.is_evaluator or request.user.is_admin):
+        return redirect('users:dashboard')
+    schedule = get_object_or_404(InspectionSchedule, pk=pk)
+    # Non-admin inspectors can only view their own assigned inspections
+    if request.user.is_inspector and not (request.user.is_admin or request.user.is_evaluator):
+        if request.user not in schedule.assigned_inspectors.all():
+            messages.error(request, 'You are not assigned to this inspection.')
+            return redirect('medicines:inspection_dashboard')
+    return render(request, 'medicines/staff/inspection_detail.html', {
+        'schedule': schedule,
+        'application': schedule.application,
+    })

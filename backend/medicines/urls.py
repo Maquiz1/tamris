@@ -27,4 +27,5 @@ urlpatterns = [
     path('staff/inspections/', views.inspection_dashboard_view, name='inspection_dashboard'),
     path('staff/inspections/schedule/<int:app_id>/', views.schedule_inspection_view, name='schedule_inspection'),
     path('staff/inspections/report/<int:pk>/', views.submit_inspection_report_view, name='submit_inspection_report'),
+    path('staff/inspections/detail/<int:pk>/', views.inspection_detail_view, name='inspection_detail'),
 ]
