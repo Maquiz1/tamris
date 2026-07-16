@@ -47,6 +47,34 @@
                 </div>
                 {% endif %}
 
+                {% if fee_not_paid %}
+                {# ── Blocked: inspection fee not paid / verified ── #}
+                <div class="alert alert-danger border-0 shadow-sm d-flex align-items-start gap-3 p-4 rounded-3" role="alert">
+                    <div class="flex-shrink-0 mt-1">
+                        <i class="ri-error-warning-fill fs-3 text-danger"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Inspection Fee Not Paid or Verified</h5>
+                        <p class="mb-2">
+                            You cannot fill or submit the inspection report because the
+                            <strong>inspection fee for this application has not yet been paid or confirmed by Finance</strong>.
+                        </p>
+                        <p class="mb-0 text-muted small">
+                            <strong>Required steps before proceeding:</strong><br>
+                            1. The applicant must pay the inspection fee via the applicant portal.<br>
+                            2. The Finance team must verify the payment in the <em>Payment Verifications</em> section.<br>
+                            3. Once verified, the application status will change to <strong>Ready for Inspection</strong> and this form will unlock automatically.
+                        </p>
+                    </div>
+                </div>
+                <div class="text-end mt-3">
+                    <a href="{% url 'medicines:inspection_dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="ri-arrow-left-line me-1"></i> Back to Dashboard
+                    </a>
+                </div>
+
+                {% else %}
+                {# ── Fee paid and verified — show the report form ── #}
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
@@ -59,6 +87,7 @@
                         </button>
                     </div>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>

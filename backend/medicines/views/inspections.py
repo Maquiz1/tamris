@@ -66,13 +66,17 @@ def submit_inspection_report_view(request, pk):
     if not request.user.is_admin and request.user not in schedule.assigned_inspectors.all():
         messages.error(request, 'You are not assigned to conduct this inspection.')
         return redirect('medicines:inspection_dashboard')
+
+    # Gate: block form entirely if the inspection fee has not been paid and verified
+    fee_not_paid = schedule.application.status != 'READY_FOR_INSPECTION'
+
     if request.method == 'POST':
+        if fee_not_paid:
+            messages.error(request, "Cannot submit report. The inspection fee has not been paid or verified by Finance.")
+            return redirect('medicines:inspection_dashboard')
         form = InspectionReportForm(request.POST, request.FILES, instance=schedule)
         if form.is_valid():
             inspection = form.save(commit=False)
-            if schedule.application.status != 'READY_FOR_INSPECTION':
-                messages.error(request, "Cannot submit report. The applicant has not paid the inspection fee or it hasn't been verified by Finance.")
-                return redirect('medicines:inspection_dashboard')
             inspection.status = 'COMPLETED'
             inspection.save()
             schedule.application.status = 'INSPECTION_COMPLETED'
@@ -81,4 +85,10 @@ def submit_inspection_report_view(request, pk):
             return redirect('medicines:inspection_dashboard')
     else:
         form = InspectionReportForm(instance=schedule)
-    return render(request, 'medicines/staff/inspection_form.html', {'form': form, 'title': 'Submit Inspection Report', 'application': schedule.application, 'schedule': schedule})
+    return render(request, 'medicines/staff/inspection_form.html', {
+        'form': form,
+        'title': 'Submit Inspection Report',
+        'application': schedule.application,
+        'schedule': schedule,
+        'fee_not_paid': fee_not_paid,
+    })
