@@ -67,8 +67,23 @@ def submit_inspection_report_view(request, pk):
         messages.error(request, 'You are not assigned to conduct this inspection.')
         return redirect('medicines:inspection_dashboard')
 
-    # Gate: block form entirely if the inspection fee has not been paid and verified
-    fee_not_paid = schedule.application.status != 'READY_FOR_INSPECTION'
+    application = schedule.application
+
+    # Gate: block form if inspection fee has not been paid and verified.
+    # Primary check: a verified CAT_II_INSPECTION_FEE payment exists.
+    # Fallback: application is in READY_FOR_INSPECTION or INSPECTION_COMPLETED status.
+    has_verified_payment = application.payments.filter(
+        payment_type='CAT_II_INSPECTION_FEE', is_verified=True
+    ).exists()
+    fee_cleared = has_verified_payment or application.status in ('READY_FOR_INSPECTION', 'INSPECTION_COMPLETED')
+    fee_not_paid = not fee_cleared
+
+    # If fee is now verified but status is still PENDING_INSPECTION_FEE or PRELIMINARY_APPROVED,
+    # advance status to READY_FOR_INSPECTION automatically.
+    if has_verified_payment and application.status in ('PENDING_INSPECTION_FEE', 'PRELIMINARY_APPROVED'):
+        application.status = 'READY_FOR_INSPECTION'
+        application.save()
+        fee_not_paid = False
 
     if request.method == 'POST':
         if fee_not_paid:

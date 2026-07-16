@@ -61,7 +61,7 @@ def staff_payment_detail_view(request, pk):
                 elif payment.payment_type in ['LISTING_FEE', 'CAT_II_REGISTRATION_FEE'] and application.status in ['PENDING_LISTING_FEE', 'PENDING_REGISTRATION_FEE', 'PROVISIONAL_REGISTRATION']:
                     application.status = 'PENDING_FINAL_APPROVAL'
                     application.save()
-                elif payment.payment_type == 'CAT_II_INSPECTION_FEE' and application.status == 'PENDING_INSPECTION_FEE':
+                elif payment.payment_type == 'CAT_II_INSPECTION_FEE' and application.status in ('PENDING_INSPECTION_FEE', 'PRELIMINARY_APPROVED'):
                     application.status = 'READY_FOR_INSPECTION'
                     application.save()
                     from users.emails import notify_ready_for_inspection
