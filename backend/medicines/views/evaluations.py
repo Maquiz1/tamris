@@ -59,6 +59,8 @@ def staff_scientific_list_view(request):
     list_filter = request.GET.get('filter', 'pending')
     if list_filter == 'pending':
         base_qs = MedicineApplication.objects.filter(status__in=['PRELIMINARY_APPROVED', 'INSPECTION_COMPLETED']).order_by('-submitted_at')
+    elif list_filter == 'payment':
+        base_qs = MedicineApplication.objects.filter(status__in=['PENDING_LISTING_FEE', 'PENDING_REGISTRATION_FEE']).order_by('-submitted_at')
     elif list_filter == 'final':
         base_qs = MedicineApplication.objects.filter(status='PENDING_FINAL_APPROVAL').order_by('-submitted_at')
     elif list_filter == 'approved':
@@ -69,7 +71,18 @@ def staff_scientific_list_view(request):
     paginator = Paginator(applications_list, 10)
     page_number = request.GET.get('page')
     applications = paginator.get_page(page_number)
-    return render(request, 'medicines/staff/scientific_list.html', {'applications': applications, 'total_applications': applications_list.count(), 'query': query, 'status_filter': status_filter, 'start_date': start_date, 'end_date': end_date, 'list_filter': list_filter})
+    # Tab counts
+    pending_count = MedicineApplication.objects.filter(status__in=['PRELIMINARY_APPROVED', 'INSPECTION_COMPLETED']).count()
+    payment_count = MedicineApplication.objects.filter(status__in=['PENDING_LISTING_FEE', 'PENDING_REGISTRATION_FEE']).count()
+    final_count = MedicineApplication.objects.filter(status='PENDING_FINAL_APPROVAL').count()
+    approved_count = MedicineApplication.objects.filter(status__in=['PROVISIONAL_REGISTRATION', 'FULL_REGISTRATION']).count()
+    return render(request, 'medicines/staff/scientific_list.html', {
+        'applications': applications, 'total_applications': applications_list.count(),
+        'query': query, 'status_filter': status_filter, 'start_date': start_date, 'end_date': end_date,
+        'list_filter': list_filter,
+        'pending_count': pending_count, 'payment_count': payment_count,
+        'final_count': final_count, 'approved_count': approved_count,
+    })
 
 @login_required
 def staff_scientific_detail_view(request, pk):

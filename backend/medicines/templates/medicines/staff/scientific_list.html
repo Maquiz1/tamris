@@ -18,6 +18,39 @@
             </span>
         </div>
         
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills nav-fill mb-4 bg-white shadow-sm rounded p-2">
+            <li class="nav-item">
+                <a class="nav-link fw-bold {% if list_filter == 'pending' %}active{% else %}text-muted{% endif %}" href="?filter=pending">
+                    <i class="bi bi-hourglass-split me-1"></i> Pending Evaluation
+                    {% if pending_count %}<span class="badge {% if list_filter == 'pending' %}bg-white text-primary{% else %}bg-primary{% endif %} ms-1 rounded-pill">{{ pending_count }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold {% if list_filter == 'payment' %}active{% else %}text-muted{% endif %}" href="?filter=payment">
+                    <i class="bi bi-cash-coin me-1"></i> Awaiting Payment
+                    {% if payment_count %}<span class="badge {% if list_filter == 'payment' %}bg-white text-warning{% else %}bg-warning text-dark{% endif %} ms-1 rounded-pill">{{ payment_count }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold {% if list_filter == 'final' %}active{% else %}text-muted{% endif %}" href="?filter=final">
+                    <i class="bi bi-patch-check me-1"></i> Final Approval
+                    {% if final_count %}<span class="badge {% if list_filter == 'final' %}bg-white text-success{% else %}bg-success{% endif %} ms-1 rounded-pill">{{ final_count }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold {% if list_filter == 'approved' %}active{% else %}text-muted{% endif %}" href="?filter=approved">
+                    <i class="bi bi-trophy me-1"></i> Approved
+                    {% if approved_count %}<span class="badge {% if list_filter == 'approved' %}bg-white text-info{% else %}bg-info text-dark{% endif %} ms-1 rounded-pill">{{ approved_count }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold {% if list_filter == 'all' %}active{% else %}text-muted{% endif %}" href="?filter=all">
+                    <i class="bi bi-list-ul me-1"></i> All
+                </a>
+            </li>
+        </ul>
+        
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body py-3">
                 <form method="get" class="d-flex flex-column flex-md-row gap-3 w-100 w-md-75 ms-auto">
@@ -87,6 +120,10 @@
                                             <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i> Full Registration</span>
                                         {% elif app.status == 'PROVISIONAL_REGISTRATION' %}
                                             <span class="badge bg-primary"><i class="bi bi-clock-history me-1"></i> Provisional Registration</span>
+                                        {% elif app.status in 'PENDING_LISTING_FEE,PENDING_REGISTRATION_FEE' %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-cash-coin me-1"></i> Awaiting Payment</span>
+                                        {% elif app.status == 'PENDING_FINAL_APPROVAL' %}
+                                            <span class="badge bg-success"><i class="bi bi-patch-check me-1"></i> Ready for Full Registration</span>
                                         {% elif app.status == 'CONDITIONS_APPLIED' %}
                                             <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill me-1"></i> Conditions Applied</span>
                                         {% elif app.status == 'REJECTED' %}
