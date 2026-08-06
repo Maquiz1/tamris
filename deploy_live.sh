@@ -3,7 +3,7 @@
 # Ensure script stops on error
 set -e
 
-echo "Starting Deployment for TAMRIS on Hostinger..."
+echo "Starting Deployment for TAMRIS (LIVE) on Hostinger..."
 
 # Build and start the containers in detached mode
 echo "Bringing up Docker containers..."
