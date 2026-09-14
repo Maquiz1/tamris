@@ -1,97 +1,822 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Onboarding - TAMRIS{% endblock %}
+{% block title %}New Applicant Onboarding - TAMRIS{% endblock %}
 
 {% block content %}
-<div class="app-body">
-    <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
-            
-            <!-- Progress Bar -->
-            <div class="mb-5 position-relative">
-                <div class="progress shadow-sm" style="height: 6px; border-radius: 3px;">
-                    <div class="progress-bar bg-primary" role="progressbar" 
-                         style="width: {% widthratio step 4 100 %}%;" 
-                         aria-valuenow="{{ step }}" aria-valuemin="1" aria-valuemax="4"></div>
-                </div>
-                
-                <div class="d-flex justify-content-between position-absolute w-100" style="top: -9px;">
-                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 1 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">1</span>
-                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 2 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">2</span>
-                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 3 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">3</span>
-                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm {% if step >= 4 %}bg-primary{% else %}bg-secondary{% endif %}" style="width: 24px; height: 24px;">4</span>
-                </div>
-                
-                <div class="d-flex justify-content-between mt-2 small text-muted fw-bold">
-                    <span>Identity</span>
-                    <span>Details</span>
-                    <span>Documents</span>
-                    <span>Review</span>
-                </div>
-            </div>
+<style>
+  :root {
+    --teal-main: #0d9488;
+    --teal-dark: #0f766e;
+    --teal-light: #f0fdfa;
+    --teal-border: #99f6e4;
+    --teal-ring: rgba(13, 148, 136, 0.18);
+    --step-done: #10b981;
+  }
+  .onboarding-page { background:#f1f5f9; min-height:100vh; padding:1.5rem 1rem 3rem; }
+  .ob-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-bottom:1.25rem; }
+  .ob-header-left { display:flex; align-items:center; gap:.75rem; }
+  .ob-back-btn { width:36px; height:36px; border-radius:50%; border:1px solid #cbd5e1; background:#fff; color:#475569; display:flex; align-items:center; justify-content:center; text-decoration:none; transition:all .2s; }
+  .ob-back-btn:hover { background:var(--teal-light); border-color:var(--teal-main); color:var(--teal-dark); }
+  .ob-title { font-size:1.25rem; font-weight:700; color:#0f172a; margin:0; }
+  .ob-subtitle { font-size:.8rem; color:#64748b; margin:0; }
+  .ob-date-badge { display:flex; align-items:center; gap:.4rem; background:#fff; border:1px solid #e2e8f0; border-radius:.5rem; padding:.35rem .9rem; font-size:.8rem; font-weight:600; color:#475569; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .ob-date-badge i { color:var(--teal-main); }
+  .ob-body-card { background:#fff; border-radius:.75rem; border:1px solid #e2e8f0; box-shadow:0 1px 6px rgba(0,0,0,.07); overflow:hidden; }
+  
+  /* ── Top Stepper ── */
+  .top-stepper-wrap { position:relative; margin-bottom: 2rem; padding: 0 1rem; }
+  .stepper-line { position:absolute; top:15px; left:5%; right:5%; height:2px; background:#e2e8f0; z-index:1; }
+  .stepper-progress { position:absolute; top:0; left:0; height:100%; background:var(--teal-main); transition:width 0.3s; }
+  .stepper-container { position:relative; z-index:2; display:flex; justify-content:space-between; }
+  .step-item { display:flex; flex-direction:column; align-items:center; gap:0.5rem; background:#f1f5f9; padding:0 10px; cursor:pointer; }
+  .step-circle { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.9rem; border:2px solid #cbd5e1; background:#fff; color:#64748b; transition:all 0.2s; }
+  .step-item.active .step-circle { border-color:var(--teal-main); background:var(--teal-main); color:#fff; }
+  .step-item.done .step-circle { border-color:var(--teal-main); background:var(--teal-main); color:#fff; }
+  .step-label { font-size:0.8rem; font-weight:700; color:#64748b; }
+  .step-item.active .step-label, .step-item.done .step-label { color:var(--teal-main); }
+  
+  /* ── Sub Sidebar ── */
+  .sub-sidenav { border-right:1px solid #e2e8f0; padding:1.25rem 0.75rem; background:#fff; min-height:100%; }
+  .sub-sidenav .nav-link { display:flex; align-items:center; gap:0.6rem; padding:0.65rem 0.85rem; border-radius:0.5rem; color:#64748b; font-weight:600; font-size:0.875rem; border:none; background:transparent; width:100%; text-align:left; transition:all 0.18s; margin-bottom:0.2rem; }
+  .sub-sidenav .nav-link:hover { background:var(--teal-light); color:var(--teal-dark); }
+  .sub-sidenav .nav-link.active { background:var(--teal-light); color:var(--teal-dark); border-left:3px solid var(--teal-main); border-radius: 0 0.5rem 0.5rem 0; }
+  .sub-sidenav .nav-link i { font-size:1.05rem; }
 
-            <!-- Form Card -->
-            <div class="card shadow-sm border-0 p-4 p-md-5">
-                <h3 class="mb-2 fw-bold text-primary">{{ title }}</h3>
-                <p class="text-muted mb-4 fs-6">{{ subtitle }}</p>
-                
-                {% if step == 4 %}
-                    <!-- Step 4: Review Summary -->
-                    <div class="alert alert-info border-0 shadow-sm d-flex bg-info-lighten text-primary py-3 mb-4">
-                        <i class="ri-information-line fs-4 me-3 text-info"></i>
-                        <div>
-                            Please review your information before finalizing. You cannot change these details once submitted.
-                        </div>
-                    </div>
-                    
-                    <h5 class="border-bottom pb-2 fw-bold text-secondary mb-3">Account Details</h5>
-                    <ul class="list-unstyled mb-4">
-                        <li class="mb-2"><strong>Email:</strong> <span class="text-muted">{{ request.user.email }}</span></li>
-                        <li class="mb-2"><strong>Role:</strong> <span class="text-muted">{{ request.user.all_roles|join:", " }}</span></li>
-                    </ul>
-                    
-                    <h5 class="border-bottom pb-2 fw-bold text-secondary mb-3">Profile Details</h5>
-                    <ul class="list-unstyled mb-4">
-                        {% if 'Individual Applicant' in request.user.all_roles %}
-                            <li class="mb-2"><strong>Full Name:</strong> <span class="text-muted">{{ request.user.user_profile.full_name }}</span></li>
-                            <li class="mb-2"><strong>NIDA:</strong> <span class="text-muted">{{ request.user.user_profile.formatted_nida }}</span></li>
-                            <li class="mb-2"><strong>TIN:</strong> <span class="text-muted">{{ request.user.user_profile.formatted_tin }}</span></li>
-                        {% else %}
-                            <li class="mb-2"><strong>Company Name:</strong> <span class="text-muted">{{ request.user.company_profile.company_name }}</span></li>
-                            <li class="mb-2"><strong>BRELA:</strong> <span class="text-muted">{{ request.user.company_profile.brela_number }}</span></li>
-                            <li class="mb-2"><strong>TIN:</strong> <span class="text-muted">{{ request.user.company_profile.formatted_tin }}</span></li>
-                        {% endif %}
-                    </ul>
-                    
-                    <h5 class="border-bottom pb-2 fw-bold text-secondary mb-3">Uploaded Documents</h5>
-                    <p class="text-success fw-bold d-inline-flex align-items-center mb-4">
-                        <i class="ri-checkbox-circle-fill me-2 fs-5"></i> All mandatory documents uploaded successfully.
-                    </p>
-                    
-                    <form method="post" action="{% url 'users:onboarding' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success w-100 py-2.5 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm">
-                            <i class="ri-check-double-line me-2"></i> Submit Application & Enter Dashboard
-                        </button>
-                    </form>
+  /* ── Original Side Nav (Now unused, but keeping some styles) ── */
+  .ob-sidenav { border-right:1px solid #e2e8f0; padding:1.25rem .75rem; background:#fafafa; min-height:100%; }
+  .ob-sidenav-title { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94a3b8; padding:0 .5rem .5rem; margin-bottom:.25rem; }
+  .ob-sidenav .nav-link { display:flex; align-items:center; gap:.6rem; padding:.65rem .85rem; border-radius:.5rem; color:#64748b; font-weight:600; font-size:.875rem; border:none; background:transparent; width:100%; text-align:left; transition:all .18s; margin-bottom:.2rem; }
+  .ob-sidenav .nav-link:hover { background:var(--teal-light); color:var(--teal-dark); }
+  .ob-sidenav .nav-link.active { background:var(--teal-light); color:var(--teal-dark); border-left:3px solid var(--teal-main); }
+  .ob-sidenav .nav-link i { font-size:1.05rem; }
+  .ob-sidenav .nav-link:disabled { opacity:.5; cursor:not-allowed; }
+  .nav-badge { margin-left:auto; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:20px; }
+  .nav-badge.done { background:#d1fae5; color:#059669; }
+  .nav-badge.now { background:var(--teal-main); color:#fff; }
+  .nav-badge.todo { background:#f1f5f9; color:#64748b; }
+  .nav-badge.locked { background:#f1f5f9; color:#94a3b8; }
+  /* ── Top Tab Bar ── */
+  .ob-top-tabs { border-bottom:1px solid #e2e8f0; background:#fff; padding:0 1.5rem; display:flex; align-items:stretch; gap:0; overflow-x:auto; flex-shrink:0; }
+  .ob-top-tab { display:flex; align-items:center; gap:.4rem; padding:.85rem 1rem; border:none; background:transparent; color:#64748b; font-weight:600; font-size:.825rem; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; transition:all .2s; white-space:nowrap; text-decoration:none; }
+  .ob-top-tab i { font-size:.95rem; }
+  .ob-top-tab:hover { color:var(--teal-dark); background:var(--teal-light); }
+  .ob-top-tab.active { color:var(--teal-dark); border-bottom-color:var(--teal-main); }
+  .req-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444; margin-left:.25rem; vertical-align:middle; }
+  /* ── Content ── */
+  .ob-right { display:flex; flex-direction:column; min-height:100%; }
+  .section-wrapper { display:flex; flex-direction:column; flex:1; }
+  .ob-content { padding:1.5rem; flex:1; }
+  .ob-content-header { display:flex; align-items:center; gap:.6rem; margin-bottom:1.25rem; padding-bottom:.75rem; border-bottom:1px solid #f1f5f9; }
+  .ob-content-header i { font-size:1.5rem; color:var(--teal-main); }
+  .ob-content-header h5 { font-weight:700; color:#0f172a; margin:0; }
+  .ob-content-header p { color:#64748b; font-size:.82rem; margin:0; }
+  .section-card { border:1px solid #e2e8f0; border-radius:.6rem; margin-bottom:1.25rem; overflow:hidden; }
+  .section-card-header { background:var(--teal-light); border-bottom:1px solid var(--teal-border); padding:.55rem 1rem; display:flex; align-items:center; gap:.5rem; }
+  .section-card-header i { color:var(--teal-main); font-size:1rem; }
+  .section-card-header span { font-weight:700; color:var(--teal-dark); font-size:.875rem; }
+  .section-card-body { padding:1rem 1.1rem; }
+  /* ── Form helpers ── */
+  .form-label-sm { font-size:.78rem; font-weight:600; color:#374151; margin-bottom:.3rem; display:block; }
+  .form-label-sm .req { color:#ef4444; }
+  .input-icon-wrap { position:relative; }
+  .input-icon-wrap .form-control, .input-icon-wrap .form-select { padding-left:2.2rem; }
+  .input-icon-wrap .field-icon { position:absolute; left:.65rem; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.95rem; pointer-events:none; }
+  .form-control, .form-select { border-radius:.45rem; border:1px solid #cbd5e1; font-size:.875rem; color:#1e293b; background:#fff; transition:border-color .2s,box-shadow .2s; height:40px; }
+  .form-control:focus, .form-select:focus { border-color:var(--teal-main); box-shadow:0 0 0 3px var(--teal-ring); outline:none; }
+  textarea.form-control { height:auto; }
+  .sex-radio-row { display:flex; gap:.75rem; flex-wrap:wrap; }
+  .sex-radio-option { display:flex; align-items:center; gap:.35rem; padding:.38rem .85rem; border:1px solid #cbd5e1; border-radius:.45rem; cursor:pointer; font-size:.875rem; color:#374151; font-weight:500; transition:all .18s; user-select:none; }
+  .sex-radio-option input[type=radio] { accent-color:var(--teal-main); }
+  .sex-radio-option:has(input:checked) { border-color:var(--teal-main); background:var(--teal-light); color:var(--teal-dark); }
+  /* ── Action bar ── */
+  .ob-action-bar { border-top:1px solid #e2e8f0; padding:.9rem 1.5rem; background:#fff; display:flex; align-items:center; justify-content:flex-end; gap:.6rem; flex-wrap:wrap; flex-shrink:0; }
+  .btn-cancel { border:1px solid #cbd5e1; background:#fff; color:#475569; border-radius:.45rem; padding:.45rem 1.2rem; font-weight:600; font-size:.875rem; }
+  .btn-cancel:hover { background:#f8fafc; border-color:#94a3b8; }
+  .btn-draft { border:1px solid var(--teal-dark); background:#fff; color:var(--teal-dark); border-radius:.45rem; padding:.45rem 1.2rem; font-weight:600; font-size:.875rem; display:flex; align-items:center; gap:.35rem; }
+  .btn-draft:hover { background:var(--teal-light); }
+  .btn-continue { background:var(--teal-main); color:#fff; border:none; border-radius:.45rem; padding:.45rem 1.4rem; font-weight:600; font-size:.875rem; display:flex; align-items:center; gap:.35rem; box-shadow:0 2px 8px rgba(13,148,136,.3); }
+  .btn-continue:hover { background:var(--teal-dark); }
+  /* ── Review ── */
+  .review-section-title { font-size:.95rem; font-weight:700; color:var(--teal-dark); border-bottom:1px solid #e2e8f0; padding-bottom:.4rem; margin-bottom:.75rem; display:flex; align-items:center; gap:.4rem; }
+  .review-row { display:flex; padding:.3rem 0; border-bottom:1px solid #f8fafc; font-size:.85rem; }
+  .review-row .label { width:45%; color:#64748b; font-weight:600; }
+  .review-row .value { color:#1e293b; }
+  /* ── App type cards ── */
+  .ob-type-row { display:flex; gap:1rem; flex-wrap:wrap; }
+  .ob-type-form { flex:1 1 240px; margin:0; }
+  .ob-type-card { width:100%; display:flex; align-items:center; gap:.85rem; padding:1rem 1.15rem; background:#f8fafc; border:2px solid #e2e8f0; border-radius:.65rem; text-align:left; transition:all .2s; cursor:pointer; box-sizing:border-box; }
+  .ob-type-card:hover:not(:disabled) { background:#fff; border-color:var(--teal-dark); transform:translateY(-1px); box-shadow:0 4px 12px rgba(13,148,136,.1); }
+  .ob-type-card--active { background:#f0fdfa !important; border-color:var(--teal-dark) !important; box-shadow:0 0 0 3px rgba(13,148,136,.12); }
+  .ob-type-card:disabled { cursor:default; }
+  .ob-type-icon { width:40px; height:40px; border-radius:10px; background:#e6fffa; color:var(--teal-dark); display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0; }
+  .ob-type-card--active .ob-type-icon { background:var(--teal-dark); color:#fff; }
+  .ob-type-info { display:flex; flex-direction:column; flex-grow:1; }
+  .ob-type-info strong { display:block; color:#0f172a; font-weight:600; font-size:.925rem; }
+  .ob-type-info small { color:#64748b; font-size:.78rem; margin-top:2px; }
+  .ob-type-switch { margin-left:auto; font-weight:600; color:var(--teal-dark); font-size:.8rem; padding:.25rem .65rem; background:#fff; border:1px solid #cbd5e1; border-radius:20px; }
+  .ob-type-card:hover:not(:disabled) .ob-type-switch { background:var(--teal-dark); color:#fff; border-color:var(--teal-dark); }
+  .ob-type-badge { margin-left:auto; font-weight:600; color:#fff; background:var(--teal-dark); font-size:.75rem; padding:.25rem .65rem; border-radius:20px; display:flex; align-items:center; gap:.25rem; }
+  .ob-type-notice { font-size:.8rem; color:#64748b; margin-top:.75rem; display:flex; align-items:center; gap:.35rem; background:#f8fafc; padding:.5rem .75rem; border-radius:6px; border:1px solid #f1f5f9; }
+  /* ── Tab pane ── */
+  .ob-tab-pane { display:none; }
+  .ob-tab-pane.active { display:block; }
+  .file-upload-hint { font-size:.75rem; color:#94a3b8; margin-top:.25rem; }
+  @media (max-width:767px) {
+    .ob-sidenav { border-right:none; border-bottom:1px solid #e2e8f0; padding:.75rem; }
+    .ob-content { padding:1rem; }
+    .ob-top-tabs { padding:0 1rem; }
+  }
+</style>
 
-                {% else %}
-                    <!-- Steps 1 to 3: Render Crispy Form -->
-                    <form method="post" action="{% url 'users:onboarding' %}" {% if step == 3 %}enctype="multipart/form-data"{% endif %}>
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <button type="submit" class="btn btn-primary w-100 mt-4 py-2.5 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm">
-                            {% if step == 3 %}
-                                <i class="ri-upload-cloud-line me-2"></i> Upload & Continue
-                            {% else %}
-                                <i class="ri-save-line me-2"></i> Save & Continue
-                            {% endif %}
-                        </button>
-                    </form>
-                {% endif %}
-            </div>
-        </div>
+<div class="onboarding-page">
+<div class="container-fluid px-3 px-lg-4">
+
+  {# Page Header #}
+  <div class="ob-header">
+    <div class="ob-header-left">
+      <a href="{% url 'users:dashboard' %}" class="ob-back-btn" title="Back to Dashboard">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+      <div>
+        <h1 class="ob-title">New Applicant</h1>
+        <p class="ob-subtitle">Fill in the applicant information below</p>
+      </div>
     </div>
-</div>
+    <div class="ob-date-badge">
+      <i class="ri-calendar-event-line"></i>
+      <span>{% now "m/d/Y" %}</span>
+    </div>
+  </div>
+
+  
+  {# Top Stepper #}
+  <div class="top-stepper-wrap">
+    <div class="stepper-line">
+      <div class="stepper-progress" style="width: {% if step == 1 %}0%{% elif step == 2 %}33%{% elif step == 3 %}66%{% else %}100%{% endif %};"></div>
+    </div>
+    <div class="stepper-container">
+      <div class="step-item {% if step >= 1 %}done{% endif %} {% if step == 1 %}active{% endif %}" onclick="switchSection('role')">
+        <div class="step-circle">{% if step > 1 %}<i class="ri-check-line"></i>{% else %}1{% endif %}</div>
+        <div class="step-label">Role</div>
+      </div>
+      <div class="step-item {% if step >= 2 %}done{% endif %} {% if step == 2 %}active{% endif %}" {% if unlocked_step >= 2 %}onclick="switchSection('demographics')"{% endif %}>
+        <div class="step-circle">{% if step > 2 %}<i class="ri-check-line"></i>{% else %}2{% endif %}</div>
+        <div class="step-label">Demographic</div>
+      </div>
+      <div class="step-item {% if step >= 3 %}done{% endif %} {% if step == 3 %}active{% endif %}" {% if unlocked_step >= 3 %}onclick="switchSection('attachments')"{% endif %}>
+        <div class="step-circle">{% if step > 3 %}<i class="ri-check-line"></i>{% else %}3{% endif %}</div>
+        <div class="step-label">Documents</div>
+      </div>
+      <div class="step-item {% if step >= 4 %}done{% endif %} {% if step == 4 %}active{% endif %}" {% if unlocked_step >= 4 %}onclick="switchSection('final')"{% endif %}>
+        <div class="step-circle">{% if step > 4 %}<i class="ri-check-line"></i>{% else %}4{% endif %}</div>
+        <div class="step-label">Submit</div>
+      </div>
+    </div>
+  </div>
+
+  {# Main Card #}
+  <div class="ob-body-card">
+    <div class="row g-0" style="min-height:620px;">
+
+      {# ═══ CONTENT ═══ #}
+      <div class="col-12">
+
+        {# ─── ROLE (Step 1) ─── #}
+        <div id="section-role" class="section-wrapper {% if step != 1 %}d-none{% endif %}">
+
+          <div class="row g-0 flex-grow-1">
+            <div class="col-md-3 sub-sidenav">
+              <button class="nav-link active" id="toptab-apptype" onclick="switchTopTab('role','apptype')" type="button">
+                <i class="ri-list-settings-line"></i> Application Type
+              </button>
+            </div>
+            <div class="col-md-9 d-flex flex-column">
+
+          <div id="topPane-role-apptype" class="ob-tab-pane active" style="display:flex;flex-direction:column;flex:1;">
+            <form method="post" action="{% url 'users:onboarding' %}" novalidate
+                  style="display:flex;flex-direction:column;flex:1;">
+              {% csrf_token %}
+              <div class="ob-content">
+                <div class="ob-content-header">
+                  <i class="ri-list-settings-line"></i>
+                  <div>
+                    <h5>Applicant Type</h5>
+                    <p>Select whether you are registering as an individual or a company/institution.</p>
+                  </div>
+                </div>
+                <div class="section-card">
+                  <div class="section-card-header">
+                    <i class="ri-list-settings-line"></i>
+                    <span>Application Type / Aina ya Mwombaji</span>
+                  </div>
+                  <div class="section-card-body">
+                    <p class="text-muted mb-3" style="font-size:.85rem;">
+                      Select whether you are applying as an Individual Applicant or a Company / Institution.
+                    </p>
+                    <div class="ob-type-row">
+                      <div class="ob-type-form">
+                        <button type="{% if 'Individual Applicant' in request.user.all_roles %}button{% else %}submit{% endif %}"
+                                name="change_role" value="Individual Applicant"
+                                class="ob-type-card {% if 'Individual Applicant' in request.user.all_roles %}ob-type-card--active{% endif %}"
+                                {% if 'Individual Applicant' in request.user.all_roles %}disabled{% endif %}>
+                          <span class="ob-type-icon"><i class="ri-user-line"></i></span>
+                          <span class="ob-type-info">
+                            <strong>Individual Applicant</strong>
+                            <small>Mwombaji wa Kibinafsi</small>
+                          </span>
+                          {% if 'Individual Applicant' in request.user.all_roles %}
+                          <span class="ob-type-badge"><i class="ri-checkbox-circle-fill"></i> Selected</span>
+                          {% else %}
+                          <span class="ob-type-switch">Switch</span>
+                          {% endif %}
+                        </button>
+                      </div>
+                      <div class="ob-type-form">
+                        <button type="{% if 'Company Applicant' in request.user.all_roles %}button{% else %}submit{% endif %}"
+                                name="change_role" value="Company Applicant"
+                                class="ob-type-card {% if 'Company Applicant' in request.user.all_roles %}ob-type-card--active{% endif %}"
+                                {% if 'Company Applicant' in request.user.all_roles %}disabled{% endif %}>
+                          <span class="ob-type-icon"><i class="ri-building-line"></i></span>
+                          <span class="ob-type-info">
+                            <strong>Company Applicant</strong>
+                            <small>Mwombaji wa Kampuni/Taasisi</small>
+                          </span>
+                          {% if 'Company Applicant' in request.user.all_roles %}
+                          <span class="ob-type-badge"><i class="ri-checkbox-circle-fill"></i> Selected</span>
+                          {% else %}
+                          <span class="ob-type-switch">Switch</span>
+                          {% endif %}
+                        </button>
+                      </div>
+                    </div>
+                    <div class="ob-type-notice mt-3">
+                      <i class="ri-information-line"></i>
+                      Switching application type will clear any previously entered profile data.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ob-action-bar">
+                <a href="{% url 'users:dashboard' %}" class="btn-cancel btn">Cancel</a>
+                {% if step == 1 %}
+                <button type="submit" class="btn-continue btn">
+                  <i class="ri-arrow-right-line"></i> Save &amp; Continue
+                </button>
+                {% endif %}
+              </div>
+            </form>
+          </div>
+            </div><!-- /col-9 -->
+          </div><!-- /row -->
+        </div>
+
+        {# ─── DEMOGRAPHICS (Step 2) ─── #}
+        <div id="section-demographics" class="section-wrapper {% if step != 2 %}d-none{% endif %}">
+
+          <div class="row g-0 flex-grow-1">
+            <div class="col-md-3 sub-sidenav">
+              <button class="nav-link active" id="toptab-identity" onclick="switchTopTab('demographics','identity')" type="button">
+                <i class="ri-team-line"></i> Demographic
+              </button>
+              <button class="nav-link" id="toptab-address" onclick="switchTopTab('demographics','address')" type="button">
+                <i class="ri-map-pin-line"></i> Address
+              </button>
+              <button class="nav-link" id="toptab-contacts" onclick="switchTopTab('demographics','contacts')" type="button">
+                <i class="ri-phone-line"></i> Contacts
+              </button>
+            </div>
+            <div class="col-md-9 d-flex flex-column">
+
+
+          <form method="post" action="{% url 'users:onboarding' %}" novalidate
+                style="display:flex;flex-direction:column;flex:1;">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div style="padding:1rem 1.5rem 0;">
+              <div class="alert alert-danger rounded-3 py-2 px-3 mb-0" style="font-size:.82rem;">
+                <i class="ri-error-warning-line me-1"></i> Please correct the errors below before continuing.
+              </div>
+            </div>
+            {% endif %}
+
+            {# Pane: Identity #}
+            <div id="topPane-demographics-identity" class="ob-tab-pane active" style="flex:1;">
+              <div class="ob-content">
+                <div class="ob-content-header">
+                  <i class="ri-team-line"></i>
+                  <div>
+                    <h5>Identity / Utambulisho</h5>
+                    <p>{% if 'Individual Applicant' in request.user.all_roles %}Personal identification and registration details.{% else %}Company identity and registration details.{% endif %}</p>
+                  </div>
+                </div>
+
+                {% if 'Individual Applicant' in request.user.all_roles %}
+                <div class="section-card">
+                  <div class="section-card-header"><i class="ri-user-3-line"></i><span>Personal Identity / Utambulisho wa Kibinafsi</span></div>
+                  <div class="section-card-body">
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_surname">Surname / Jina la Ukoo</label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.surname }}</div>
+                        {% if form.surname.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.surname.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_other_names">Other Names / Majina Mengine</label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.other_names }}</div>
+                        {% if form.other_names.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.other_names.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_first_name">First Name <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.first_name }}</div>
+                        {% if form.first_name.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.first_name.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_middle_name">Middle Name</label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.middle_name }}</div>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_last_name">Last Name</label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.last_name }}</div>
+                      </div>
+                    </div>
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm">Sex / Jinsi <span class="req">*</span></label>
+                        <div class="sex-radio-row">
+                          <label class="sex-radio-option"><input type="radio" name="{{ form.sex.html_name }}" value="Male" {% if form.sex.value == 'Male' %}checked{% endif %}> Male</label>
+                          <label class="sex-radio-option"><input type="radio" name="{{ form.sex.html_name }}" value="Female" {% if form.sex.value == 'Female' %}checked{% endif %}> Female</label>
+                          <label class="sex-radio-option"><input type="radio" name="{{ form.sex.html_name }}" value="Other" {% if form.sex.value == 'Other' %}checked{% endif %}> Other</label>
+                        </div>
+                        {% if form.sex.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.sex.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_date_of_birth">Date of Birth / Tarehe ya Kuzaliwa</label>
+                        <div class="input-icon-wrap"><i class="ri-calendar-line field-icon"></i>{{ form.date_of_birth }}</div>
+                        {% if form.date_of_birth.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.date_of_birth.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-3">
+                        <label class="form-label-sm" for="id_age">Age</label>{{ form.age }}
+                      </div>
+                      <div class="col-md-9">
+                        <label class="form-label-sm" for="id_education_level">Formal Education / Elimu (Rasmi)</label>{{ form.education_level }}
+                      </div>
+                    </div>
+                    <div class="row gx-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_nida_number">NIDA Number <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-profile-line field-icon"></i>{{ form.nida_number }}</div>
+                        {% if form.nida_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.nida_number.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_tin">TIN Number <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.tin }}</div>
+                        {% if form.tin.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.tin.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% else %}
+                <div class="section-card">
+                  <div class="section-card-header"><i class="ri-building-line"></i><span>Company Identity / Utambulisho wa Kampuni</span></div>
+                  <div class="section-card-body">
+                    <div class="mb-3">
+                      <label class="form-label-sm" for="id_company_name">Company / Institution Name <span class="req">*</span> <span class="text-muted" style="font-size:.7rem;">Jina la kampuni/taasisi</span></label>
+                      <div class="input-icon-wrap"><i class="ri-building-line field-icon"></i>{{ form.company_name }}</div>
+                      {% if form.company_name.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.company_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="row gx-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_brela_number">BRELA / Registration Number <span class="req">*</span> <span class="text-muted" style="font-size:.7rem;">Namba ya usajili</span></label>
+                        <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.brela_number }}</div>
+                        {% if form.brela_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.brela_number.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_tin">TIN Number <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.tin }}</div>
+                        {% if form.tin.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.tin.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+                <div class="d-flex justify-content-end mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('demographics','address')">Next: Address <i class="ri-arrow-right-line"></i></button>
+                </div>
+              </div>
+            </div>
+
+            {# Pane: Address #}
+            <div id="topPane-demographics-address" class="ob-tab-pane" style="flex:1;">
+              <div class="ob-content">
+                <div class="ob-content-header">
+                  <i class="ri-map-pin-line"></i>
+                  <div><h5>Address / Anuani</h5><p>Provide the applicant's residential or company address details.</p></div>
+                </div>
+                <div class="section-card">
+                  <div class="section-card-header"><i class="ri-map-pin-line"></i><span>Address / Anuani</span></div>
+                  <div class="section-card-body">
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_country">Country / Utaifa <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-global-line field-icon"></i>{{ form.country }}</div>
+                        {% if form.country.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.country.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_region">Region / Mkoa <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-map-2-line field-icon"></i>{{ form.region }}</div>
+                        {% if form.region.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.region.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_district">District / Wilaya <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-map-pin-2-line field-icon"></i>{{ form.district }}</div>
+                        {% if form.district.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.district.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_ward">Ward / Kata</label>
+                        <div class="input-icon-wrap"><i class="ri-community-line field-icon"></i>{{ form.ward }}</div>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_village_street">Street / Village / Kijiji au Mtaa</label>
+                        <div class="input-icon-wrap"><i class="ri-road-map-line field-icon"></i>{{ form.village_street }}</div>
+                      </div>
+                    </div>
+                    {% if 'Individual Applicant' in request.user.all_roles %}
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_residency_duration">Residency Duration / Muda wa Kuishi Mahali Hapo</label>{{ form.residency_duration }}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_postal_address">Postal Address / Anuani ya Posta</label>{{ form.postal_address }}
+                      </div>
+                    </div>
+                    <div class="mb-0">
+                      <label class="form-label-sm" for="id_address">Physical Address</label>{{ form.address }}
+                    </div>
+                    {% else %}
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_postal_address">Postal Address / Anuani ya Posta</label>{{ form.postal_address }}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_physical_address">Physical Address</label>{{ form.physical_address }}
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('demographics','identity')"><i class="ri-arrow-left-line"></i> Previous: Identity</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('demographics','contacts')">Next: Contacts <i class="ri-arrow-right-line"></i></button>
+                </div>
+              </div>
+            </div>
+
+            {# Pane: Contacts #}
+            <div id="topPane-demographics-contacts" class="ob-tab-pane" style="flex:1;">
+              <div class="ob-content">
+                <div class="ob-content-header">
+                  <i class="ri-phone-line"></i>
+                  <div><h5>Contacts / Mawasiliano</h5><p>Provide phone and contact details for the applicant.</p></div>
+                </div>
+                <div class="section-card">
+                  <div class="section-card-header"><i class="ri-phone-line"></i><span>Contacts / Mawasiliano</span></div>
+                  <div class="section-card-body">
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_phone_number">Phone Number / Simu <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-smartphone-line field-icon"></i>{{ form.phone_number }}</div>
+                        {% if form.phone_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.phone_number.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_email">Email Address (Optional)</label>
+                        <div class="input-icon-wrap"><i class="ri-mail-line field-icon"></i>{{ form.email }}</div>
+                      </div>
+                    </div>
+                    <div class="row gx-3 mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_alternative_contact">Alternative Contact / Mawasiliano Mbadala</label>
+                        <div class="input-icon-wrap"><i class="ri-phone-line field-icon"></i>{{ form.alternative_contact }}</div>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_landline_phone">Landline / Simu ya Mezani</label>
+                        <div class="input-icon-wrap"><i class="ri-phone-line field-icon"></i>{{ form.landline_phone }}</div>
+                      </div>
+                    </div>
+                    <div class="mb-0">
+                      <label class="form-label-sm" for="id_fax">Fax / Nukushi (Faksi)</label>
+                      <div class="input-icon-wrap"><i class="ri-printer-line field-icon"></i>{{ form.fax }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-start mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('demographics','address')"><i class="ri-arrow-left-line"></i> Previous: Address</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ob-action-bar">
+              <a href="{% url 'users:dashboard' %}" class="btn-cancel btn">Cancel</a>
+              <button type="submit" name="save_draft" value="1" class="btn-draft btn">
+                <i class="ri-save-line"></i> Save Draft
+              </button>
+              <button type="submit" class="btn-continue btn">
+                <i class="ri-arrow-right-line"></i> Save &amp; Continue
+              </button>
+            </div>
+          </form>
+            </div><!-- /col-9 -->
+          </div><!-- /row -->
+        </div>
+
+        {# ─── ATTACHMENTS (Step 3) ─── #}
+        <div id="section-attachments" class="section-wrapper {% if step != 3 %}d-none{% endif %}">
+
+          <div class="row g-0 flex-grow-1">
+            <div class="col-md-3 sub-sidenav">
+              <button class="nav-link active" id="toptab-required" onclick="switchTopTab('attachments','required')" type="button">
+                <i class="ri-file-shield-2-line"></i> Required Documents
+              </button>
+              <button class="nav-link" id="toptab-optional" onclick="switchTopTab('attachments','optional')" type="button">
+                <i class="ri-file-add-line"></i> Optional Documents
+              </button>
+            </div>
+            <div class="col-md-9 d-flex flex-column">
+
+
+          <form method="post" action="{% url 'users:onboarding' %}" enctype="multipart/form-data" novalidate
+                style="display:flex;flex-direction:column;flex:1;">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div style="padding:1rem 1.5rem 0;">
+              <div class="alert alert-danger rounded-3 py-2 px-3 mb-0" style="font-size:.82rem;">
+                <i class="ri-error-warning-line me-1"></i> Please correct the errors below before continuing.
+              </div>
+            </div>
+            {% endif %}
+
+            {# Pane: Required Documents #}
+            <div id="topPane-attachments-required" class="ob-tab-pane active" style="flex:1;">
+              <div class="ob-content">
+                <div class="ob-content-header">
+                  <i class="ri-file-shield-2-line"></i>
+                  <div><h5>Required Documents</h5><p>Upload mandatory scanned copies (PDF, PNG, JPG — max 5MB each).</p></div>
+                </div>
+                <div class="section-card">
+                  <div class="section-card-header"><i class="ri-file-text-line"></i><span>Mandatory Documents / Nyaraka za Lazima</span></div>
+                  <div class="section-card-body">
+                    {% if 'Individual Applicant' in request.user.all_roles %}
+                    <div class="row gx-3 gy-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_nida_copy">NIDA Copy / Kitambulisho cha NIDA <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-file-text-line field-icon"></i>{{ form.nida_copy }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.nida_copy.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.nida_copy.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    {% else %}
+                    <div class="row gx-3 gy-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_brela_certificate">BRELA Certificate / Cheti cha BRELA <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-building-line field-icon"></i>{{ form.brela_certificate }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.brela_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.brela_certificate.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_tin_certificate">TIN Certificate / Cheti cha TIN <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-file-shield-line field-icon"></i>{{ form.tin_certificate }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.tin_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tin_certificate.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_business_license">Business License / Liseni ya Biashara <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.business_license }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.business_license.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.business_license.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('attachments','optional')">Next: Optional Documents <i class="ri-arrow-right-line"></i></button>
+                </div>
+              </div>
+            </div>
+
+            {# Pane: Optional Documents #}
+            <div id="topPane-attachments-optional" class="ob-tab-pane" style="flex:1;">
+              <div class="ob-content">
+                <div class="ob-content-header">
+                  <i class="ri-file-add-line"></i>
+                  <div><h5>Optional Documents</h5><p>Upload any additional supporting documents (not required but recommended).</p></div>
+                </div>
+                <div class="section-card">
+                  <div class="section-card-header"><i class="ri-file-add-line"></i><span>Optional Documents / Nyaraka za Ziada</span></div>
+                  <div class="section-card-body">
+                    {% if 'Individual Applicant' in request.user.all_roles %}
+                    <div class="row gx-3 gy-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_passport_photo">Passport Size Photo / Picha ya Pasipoti</label>
+                        <div class="input-icon-wrap"><i class="ri-image-line field-icon"></i>{{ form.passport_photo }}</div>
+                        <div class="file-upload-hint">Accepted: JPG, PNG</div>
+                        {% if form.passport_photo.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.passport_photo.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_tahpc_certificate">TAHPC Certificate / Cheti cha TAHPC</label>
+                        <div class="input-icon-wrap"><i class="ri-award-line field-icon"></i>{{ form.tahpc_certificate }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.tahpc_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tahpc_certificate.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_tin_certificate">TIN Certificate / Cheti cha TIN</label>
+                        <div class="input-icon-wrap"><i class="ri-file-shield-line field-icon"></i>{{ form.tin_certificate }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.tin_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tin_certificate.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    {% else %}
+                    <div class="row gx-3 gy-3">
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_tahpc_certificate">TAHPC Certificate / Cheti cha TAHPC</label>
+                        <div class="input-icon-wrap"><i class="ri-award-line field-icon"></i>{{ form.tahpc_certificate }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.tahpc_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tahpc_certificate.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_representative_nida">Representative NIDA Copy / Kitambulisho cha Mwakilishi</label>
+                        <div class="input-icon-wrap"><i class="ri-user-search-line field-icon"></i>{{ form.representative_nida }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.representative_nida.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.representative_nida.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_representative_id_image">Representative Photo / Picha ya Mwakilishi</label>
+                        <div class="input-icon-wrap"><i class="ri-image-line field-icon"></i>{{ form.representative_id_image }}</div>
+                        <div class="file-upload-hint">Accepted: JPG, PNG</div>
+                        {% if form.representative_id_image.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.representative_id_image.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="d-flex justify-content-start mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('attachments','required')"><i class="ri-arrow-left-line"></i> Previous: Required Documents</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ob-action-bar">
+              <a href="{% url 'users:dashboard' %}" class="btn-cancel btn">Cancel</a>
+              <button type="submit" name="save_draft" value="1" class="btn-draft btn">
+                <i class="ri-save-line"></i> Save Draft
+              </button>
+              <button type="submit" class="btn-continue btn">
+                <i class="ri-upload-cloud-line"></i> Upload &amp; Continue
+              </button>
+            </div>
+          </form>
+            </div><!-- /col-9 -->
+          </div><!-- /row -->
+        </div>
+
+        {# ─── FINAL (Step 4) ─── #}
+        <div id="section-final" class="section-wrapper {% if step != 4 %}d-none{% endif %}">
+
+          <div class="row g-0 flex-grow-1">
+            <div class="col-md-3 sub-sidenav">
+              <button class="nav-link active" id="toptab-submit" onclick="switchTopTab('final','submit')" type="button">
+                <i class="ri-send-plane-line"></i> Submit
+              </button>
+            </div>
+            <div class="col-md-9 d-flex flex-column">
+
+          <div id="topPane-final-submit" class="ob-tab-pane active" style="flex:1;">
+            <div class="ob-content">
+              <div class="ob-content-header">
+                <i class="ri-checkbox-circle-line"></i>
+                <div><h5>{{ title }}</h5><p>{{ subtitle }}</p></div>
+              </div>
+              <div class="alert d-flex align-items-start gap-2 mb-4 rounded-3"
+                   style="background:var(--teal-light);border:1px solid var(--teal-border);color:var(--teal-dark);">
+                <i class="ri-information-line fs-5 mt-1 flex-shrink-0" style="color:var(--teal-main)"></i>
+                <span style="font-size:.875rem;">Please review your applicant information carefully before submitting. Once submitted, profile details will be locked for review.</span>
+              </div>
+
+              <p class="review-section-title"><i class="ri-account-circle-line"></i> Account Details</p>
+              <div class="review-row"><span class="label">Email</span><span class="value">{{ request.user.email }}</span></div>
+              <div class="review-row"><span class="label">Role</span><span class="value">{{ request.user.all_roles|join:", " }}</span></div>
+
+              <p class="review-section-title mt-3"><i class="ri-profile-line"></i> Applicant Profile</p>
+              {% if 'Individual Applicant' in request.user.all_roles %}
+                <div class="review-row"><span class="label">Surname / Jina la Ukoo</span><span class="value">{{ request.user.user_profile.surname|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Other Names / Majina Mengine</span><span class="value">{{ request.user.user_profile.other_names|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Full Name</span><span class="value">{{ request.user.user_profile.full_name }}</span></div>
+                <div class="review-row"><span class="label">Sex / Jinsi</span><span class="value">{{ request.user.user_profile.sex|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">NIDA</span><span class="value">{{ request.user.user_profile.formatted_nida }}</span></div>
+                <div class="review-row"><span class="label">Date of Birth / Tarehe ya Kuzaliwa</span><span class="value">{{ request.user.user_profile.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Age</span><span class="value">{{ request.user.user_profile.age|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Education / Elimu</span><span class="value">{{ request.user.user_profile.education_level|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">TIN</span><span class="value">{{ request.user.user_profile.formatted_tin }}</span></div>
+                <div class="review-row"><span class="label">Nationality / Utaifa</span><span class="value">{{ request.user.user_profile.country|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Region / Mkoa</span><span class="value">{{ request.user.user_profile.region|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">District / Wilaya</span><span class="value">{{ request.user.user_profile.district|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Ward / Kata</span><span class="value">{{ request.user.user_profile.ward|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Village/Street / Kijiji au Mtaa</span><span class="value">{{ request.user.user_profile.village_street|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Residency Duration / Muda wa Kuishi</span><span class="value">{{ request.user.user_profile.residency_duration|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Postal Address / Anuani ya Posta</span><span class="value">{{ request.user.user_profile.postal_address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Physical Address</span><span class="value">{{ request.user.user_profile.address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Phone Number / Simu</span><span class="value">{{ request.user.phone_number|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Alternative Contact</span><span class="value">{{ request.user.user_profile.alternative_contact|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Landline / Simu ya Mezani</span><span class="value">{{ request.user.user_profile.landline_phone|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Fax / Nukushi (Faksi)</span><span class="value">{{ request.user.user_profile.fax|default:"—" }}</span></div>
+              {% else %}
+                <div class="review-row"><span class="label">Company Name / Jina la Kampuni</span><span class="value">{{ request.user.company_profile.company_name }}</span></div>
+                <div class="review-row"><span class="label">BRELA Number</span><span class="value">{{ request.user.company_profile.brela_number }}</span></div>
+                <div class="review-row"><span class="label">TIN</span><span class="value">{{ request.user.company_profile.formatted_tin }}</span></div>
+                <div class="review-row"><span class="label">Nationality / Utaifa</span><span class="value">{{ request.user.company_profile.country|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Region / Mkoa</span><span class="value">{{ request.user.company_profile.region|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">District / Wilaya</span><span class="value">{{ request.user.company_profile.district|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Ward / Kata</span><span class="value">{{ request.user.company_profile.ward|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Village/Street</span><span class="value">{{ request.user.company_profile.village_street|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Postal Address</span><span class="value">{{ request.user.company_profile.postal_address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Physical Address</span><span class="value">{{ request.user.company_profile.physical_address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Phone Number</span><span class="value">{{ request.user.phone_number|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Alternative Contact</span><span class="value">{{ request.user.company_profile.alternative_contact|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Landline</span><span class="value">{{ request.user.company_profile.landline_phone|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Fax</span><span class="value">{{ request.user.company_profile.fax|default:"—" }}</span></div>
+              {% endif %}
+
+              <p class="review-section-title mt-3"><i class="ri-file-text-line"></i> Uploaded Documents</p>
+              <p class="d-flex align-items-center gap-2 mb-0" style="color:#10b981;font-weight:600;font-size:.875rem;">
+                <i class="ri-checkbox-circle-fill fs-5"></i> All mandatory documents uploaded successfully.
+              </p>
+            </div>
+            <form method="post" action="{% url 'users:onboarding' %}">
+              {% csrf_token %}
+              <div class="ob-action-bar">
+                <a href="{% url 'users:dashboard' %}" class="btn-cancel btn">Cancel</a>
+                <button type="submit" class="btn-continue btn">
+                  <i class="ri-check-double-line"></i> Submit Application
+                </button>
+              </div>
+            </form>
+          </div>
+            </div><!-- /col-9 -->
+          </div><!-- /row -->
+        </div>
+
+      </div>{# /col 12 #}
+    </div>{# /row #}
+  </div>{# /ob-body-card #}
+</div>{# /container #}
+</div>{# /onboarding-page #}
+
+<script>
+const CURRENT_STEP = {{ step }};
+const UNLOCKED_STEP = {{ unlocked_step }};
+const SECTION_STEP = { role:1, demographics:2, attachments:3, final:4 };
+const savedTabs = JSON.parse(sessionStorage.getItem('ob_active_tabs') || '{}');
+
+function switchSection(section) {
+  const stepNum = SECTION_STEP[section];
+  if (!stepNum || stepNum > UNLOCKED_STEP) return;
+  if (stepNum !== CURRENT_STEP) {
+    window.location.href = '{% url "users:onboarding" %}?step=' + stepNum;
+    return;
+  }
+}
+
+function switchTopTab(section, tab, save) {
+  if (save === undefined) save = true;
+  var sectionEl = document.getElementById('section-' + section);
+  if (!sectionEl) return;
+  sectionEl.querySelectorAll('.nav-link').forEach(function(t) { t.classList.remove('active'); });
+  sectionEl.querySelectorAll('.ob-tab-pane').forEach(function(p) { p.classList.remove('active'); });
+  var tabBtn = document.getElementById('toptab-' + tab);
+  var tabPane = document.getElementById('topPane-' + section + '-' + tab);
+  if (tabBtn) tabBtn.classList.add('active');
+  if (tabPane) tabPane.classList.add('active');
+  if (save) {
+    savedTabs[section] = tab;
+    try { sessionStorage.setItem('ob_active_tabs', JSON.stringify(savedTabs)); } catch(e){}
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var sectionMap = {1:'role', 2:'demographics', 3:'attachments', 4:'final'};
+  var currentSection = sectionMap[CURRENT_STEP];
+  if (currentSection) {
+    var saved = savedTabs[currentSection];
+    if (saved) {
+      setTimeout(function() { switchTopTab(currentSection, saved, false); }, 30);
+    }
+  }
+});
+</script>
 {% endblock %}

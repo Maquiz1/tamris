@@ -24,10 +24,21 @@ def onboarding_wizard_view(request):
     user = request.user
     if not user.is_email_verified:
         return redirect('users:frontend_verify_otp')
-    step = user.onboarding_step
-    if step == 5:
-        return redirect('users:dashboard')
-    context = {'step': step}
+    unlocked_step = user.onboarding_step
+    if unlocked_step == 5:
+        return redirect('users:profile')
+    
+    requested_step = request.GET.get('step')
+    if requested_step and requested_step.isdigit():
+        req_step = int(requested_step)
+        if 1 <= req_step <= unlocked_step:
+            step = req_step
+        else:
+            step = unlocked_step
+    else:
+        step = unlocked_step
+
+    context = {'step': step, 'unlocked_step': unlocked_step}
     if step == 1:
         context['title'] = 'Step 1: Choose Your Identity'
         context['subtitle'] = 'Select whether you are registering as an individual practitioner or a company.'
@@ -57,21 +68,50 @@ def onboarding_wizard_view(request):
         FormClass = None
         instance = None
     if request.method == 'POST':
+        # Handle inline role-change from the step-2 type selector
+        if request.POST.get('change_role'):
+            from users.models import Role
+            new_role_name = request.POST.get('change_role')
+            try:
+                new_role = Role.objects.get(name=new_role_name)
+                user.role = new_role
+                # Delete any existing profile so step progresses correctly
+                if hasattr(user, 'user_profile'):
+                    user.user_profile.delete()
+                if hasattr(user, 'company_profile'):
+                    user.company_profile.delete()
+                user.save()
+            except Role.DoesNotExist:
+                pass
+            return redirect('users:onboarding')
         if step == 4:
             user.is_onboarding_complete = True
             user.save()
             notify_staff_new_registration(user)
             messages.success(request, 'Application submitted successfully! Welcome to your dashboard.')
             return redirect('users:dashboard')
-        form = FormClass(request.POST, request.FILES, instance=instance)
+        is_draft = bool(request.POST.get('save_draft'))
+        if step == 2:
+            form = FormClass(request.POST, request.FILES, instance=instance, user=user)
+        else:
+            form = FormClass(request.POST, request.FILES, instance=instance)
+            
+        if is_draft:
+            for f in form.fields.values():
+                f.required = False
+
         if form.is_valid():
-            obj = form.save(commit=False)
-            if step == 2:
-                obj.user = user
-            obj.save()
+            form.save()
+            if is_draft:
+                messages.success(request, 'Draft saved successfully!')
+            else:
+                messages.success(request, 'Information saved successfully!')
             return redirect('users:onboarding')
     elif FormClass:
-        form = FormClass(instance=instance)
+        if step == 2:
+            form = FormClass(instance=instance, user=user)
+        else:
+            form = FormClass(instance=instance)
     else:
         form = None
     if form:

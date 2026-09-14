@@ -23,8 +23,6 @@ from users.emails import notify_staff_new_registration, notify_applicant_registr
 def dashboard_view(request):
     if not request.user.is_email_verified:
         return redirect('users:frontend_verify_otp')
-    if request.user.onboarding_step < 5 and not request.user.is_staff_member:
-        return redirect('users:onboarding')
     context = {}
     is_superuser = request.user.is_superuser
     role_name = request.user.role.name if request.user.role else None

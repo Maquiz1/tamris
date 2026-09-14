@@ -11,12 +11,22 @@ class RoleSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['full_name', 'nida_number', 'address', 'tahpc_certificate']
+        fields = ['full_name', 'nida_number', 'address', 'tahpc_certificate', 'tin']
+
+    def validate_tin(self, value):
+        if value:
+            return value.replace('-', '').replace(' ', '')
+        return value
 
 class CompanyProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyProfile
         fields = ['company_name', 'brela_number', 'tin', 'business_license', 'physical_address']
+
+    def validate_tin(self, value):
+        if value:
+            return value.replace('-', '').replace(' ', '')
+        return value
 
 class CustomUserSerializer(serializers.ModelSerializer):
     user_profile = UserProfileSerializer(required=False)
@@ -30,6 +40,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
             'is_email_verified': {'read_only': True}
         }
+
+    def validate_phone_number(self, value):
+        if value:
+            return value.replace('-', '').replace(' ', '')
+        return value
 
     def create(self, validated_data):
         profile_data = validated_data.pop('user_profile', None)

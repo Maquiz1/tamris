@@ -9,6 +9,12 @@ class StaffUserCreationForm(forms.ModelForm):
             'phone_number': forms.TextInput(attrs={'placeholder': '0XXX-XXX-XXX (e.g. 0789-653-278)'}),
         }
 
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number')
+        if phone:
+            phone = phone.replace('-', '').replace(' ', '')
+        return phone
+
     def __init__(self, *args, request_user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -22,6 +28,12 @@ class StaffUserUpdateForm(forms.ModelForm):
             'additional_roles': forms.CheckboxSelectMultiple(),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number')
+        if phone:
+            phone = phone.replace('-', '').replace(' ', '')
+        return phone
 
     def __init__(self, *args, request_user=None, **kwargs):
         super().__init__(*args, **kwargs)

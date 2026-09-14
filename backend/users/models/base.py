@@ -41,8 +41,8 @@ class CustomUser(AbstractUser, TimeStampedModel):
         null=True,
         validators=[
             RegexValidator(
-                regex=r'^0\d{3}-\d{3}-\d{3}$',
-                message='Phone number must be in the format 0XXX-XXX-XXX (e.g., 0789-653-278)'
+                regex=r'^0\d{9}$',
+                message='Phone number must be exactly 10 digits starting with 0.'
             )
         ]
     )
@@ -100,13 +100,13 @@ class CustomUser(AbstractUser, TimeStampedModel):
         
         # Step 2: Needs Details (Profile Creation)
         if self.role.name == 'Individual Applicant':
-            if not hasattr(self, 'user_profile'):
+            if not hasattr(self, 'user_profile') or not self.user_profile.is_details_complete:
                 return 2
             # Step 3: Needs Documents
             if not self.user_profile.is_profile_complete:
                 return 3
         elif self.role.name == 'Company Applicant':
-            if not hasattr(self, 'company_profile'):
+            if not hasattr(self, 'company_profile') or not self.company_profile.is_details_complete:
                 return 2
             # Step 3: Needs Documents
             if not self.company_profile.is_profile_complete:

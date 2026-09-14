@@ -7,6 +7,11 @@ from .base import CustomUser
 class UserProfile(TimeStampedModel):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='user_profile')
     full_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="First Name")
+    middle_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Middle Name")
+    last_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Last Name")
+    surname = models.CharField(max_length=100, blank=True, null=True, verbose_name="Surname / Jina la Ukoo")
+    other_names = models.CharField(max_length=150, blank=True, null=True, verbose_name="Other Names / Majina Mengine")
     nida_number = models.CharField(
         max_length=50, 
         unique=True,
@@ -22,12 +27,42 @@ class UserProfile(TimeStampedModel):
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^[1-9]\d{2}-\d{3}-\d{3}$',
-                message='TIN must be in the format XXX-XXX-XXX and cannot start with 0 (e.g., 123-456-909)'
+                regex=r'^[1-9]\d{8}$',
+                message='TIN must be exactly 9 digits and cannot start with 0.'
             )
         ]
     )
-    address = models.TextField(blank=True, null=True)
+    
+    # Demographic
+    sex = models.CharField(
+        max_length=10, 
+        choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], 
+        blank=True, 
+        null=True
+    )
+    age = models.PositiveIntegerField(blank=True, null=True, verbose_name="Age")
+    date_of_birth = models.DateField(blank=True, null=True)
+    education_level = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        verbose_name="Formal Education / Elimu (Rasmi)"
+    )
+    
+    # Address
+    country = models.CharField(max_length=100, default='Tanzania', verbose_name="Nationality / Country / Utaifa")
+    region = models.CharField(max_length=100, blank=True, null=True, verbose_name="Region / Mkoa")
+    district = models.CharField(max_length=100, blank=True, null=True, verbose_name="District / Wilaya")
+    ward = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ward / Kata")
+    village_street = models.CharField(max_length=150, blank=True, null=True, verbose_name="Village/Street / Kijiji au Mtaa")
+    residency_duration = models.CharField(max_length=100, blank=True, null=True, verbose_name="Residency Duration / Muda wa Kuishi Mahali Hapo")
+    postal_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Postal Address / Anuani ya Posta")
+    address = models.TextField(blank=True, null=True, verbose_name="Physical Address")
+    
+    # Contacts
+    landline_phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="Telephone / Simu")
+    alternative_contact = models.CharField(max_length=50, blank=True, null=True, verbose_name="Alternative Contact")
+    fax = models.CharField(max_length=50, blank=True, null=True, verbose_name="Fax / Nukushi (Faksi)")
     
     # Documents
     nida_copy = models.FileField(
@@ -53,8 +88,15 @@ class UserProfile(TimeStampedModel):
     )
 
     @property
+    def is_details_complete(self):
+        has_name = bool(self.first_name or self.surname or self.full_name)
+        has_phone = bool(self.user and self.user.phone_number)
+        has_sex = bool(self.sex)
+        return bool(has_name and has_phone and has_sex)
+
+    @property
     def is_profile_complete(self):
-        return bool(self.nida_copy and self.passport_photo and self.tahpc_certificate and self.tin_certificate)
+        return bool(self.nida_copy)
         
     @property
     def formatted_nida(self):
@@ -86,12 +128,25 @@ class CompanyProfile(TimeStampedModel):
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^[1-9]\d{2}-\d{3}-\d{3}$',
-                message='TIN must be in the format XXX-XXX-XXX and cannot start with 0 (e.g., 123-456-909)'
+                regex=r'^[1-9]\d{8}$',
+                message='TIN must be exactly 9 digits and cannot start with 0.'
             )
         ]
     )
-    physical_address = models.TextField(blank=True, null=True)
+    
+    # Address
+    country = models.CharField(max_length=100, default='Tanzania', verbose_name="Nationality / Country / Utaifa")
+    region = models.CharField(max_length=100, blank=True, null=True, verbose_name="Region / Mkoa")
+    district = models.CharField(max_length=100, blank=True, null=True, verbose_name="District / Wilaya")
+    ward = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ward / Kata")
+    village_street = models.CharField(max_length=150, blank=True, null=True, verbose_name="Village/Street / Kijiji au Mtaa")
+    postal_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Postal Address / Anuani ya Posta")
+    physical_address = models.TextField(blank=True, null=True, verbose_name="Physical Address")
+    
+    # Contacts
+    landline_phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="Telephone / Simu")
+    alternative_contact = models.CharField(max_length=50, blank=True, null=True, verbose_name="Alternative Contact")
+    fax = models.CharField(max_length=50, blank=True, null=True, verbose_name="Fax / Nukushi (Faksi)")
     
     # Documents
     brela_certificate = models.FileField(
@@ -128,11 +183,16 @@ class CompanyProfile(TimeStampedModel):
     )
 
     @property
+    def is_details_complete(self):
+        has_name = bool(self.company_name)
+        has_phone = bool(self.user and self.user.phone_number)
+        has_tin = bool(self.tin)
+        return bool(has_name and has_phone and has_tin)
+
+    @property
     def is_profile_complete(self):
         return bool(
-            self.brela_certificate and self.tin_certificate and 
-            self.business_license and self.tahpc_certificate and
-            self.representative_nida and self.representative_id_image
+            self.brela_certificate and self.tin_certificate and self.business_license
         )
 
     @property

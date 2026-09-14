@@ -88,8 +88,16 @@
                 <div class="row">
                     {% if 'Individual Applicant' in request.user.all_roles %}
                         <div class="col-md-6 mb-3">
-                            <small class="text-muted d-block">Full Name</small>
+                            <small class="text-muted d-block">Full Name / Jina Kamili</small>
                             <strong>{{ request.user.user_profile.full_name }}</strong>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <small class="text-muted d-block">Sex / Jinsi</small>
+                            <strong>{{ request.user.user_profile.sex|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <small class="text-muted d-block">Age / Umri</small>
+                            <strong>{{ request.user.user_profile.age|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">NIDA Number</small>
@@ -99,22 +107,86 @@
                             <small class="text-muted d-block">TIN Number</small>
                             <strong>{{ request.user.user_profile.formatted_tin }}</strong>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Formal Education / Elimu (Rasmi)</small>
+                            <strong>{{ request.user.user_profile.education_level|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Residency Duration / Muda wa Kuishi</small>
+                            <strong>{{ request.user.user_profile.residency_duration|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted d-block">Country / Utaifa</small>
+                            <strong>{{ request.user.user_profile.country|default:"Tanzania" }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted d-block">Region / Mkoa</small>
+                            <strong>{{ request.user.user_profile.region|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted d-block">District / Wilaya</small>
+                            <strong>{{ request.user.user_profile.district|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Ward / Kata</small>
+                            <strong>{{ request.user.user_profile.ward|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Village/Street / Kijiji au Mtaa</small>
+                            <strong>{{ request.user.user_profile.village_street|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Postal Address / Anuani ya Posta</small>
+                            <strong>{{ request.user.user_profile.postal_address|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Landline Phone / Simu</small>
+                            <strong>{{ request.user.user_profile.landline_phone|default:"Not Provided" }}</strong>
+                        </div>
                         <div class="col-md-12 mb-3">
-                            <small class="text-muted d-block">Address</small>
+                            <small class="text-muted d-block">Physical Address / Mahali Unapoishi</small>
                             <strong>{{ request.user.user_profile.address|default:"None" }}</strong>
                         </div>
                     {% elif 'Company Applicant' in request.user.all_roles %}
                         <div class="col-md-6 mb-3">
-                            <small class="text-muted d-block">Company Name</small>
+                            <small class="text-muted d-block">Company Name / Jina la Kampuni/Taasisi</small>
                             <strong>{{ request.user.company_profile.company_name }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <small class="text-muted d-block">BRELA Number</small>
+                            <small class="text-muted d-block">BRELA Number / Namba ya Usajili</small>
                             <strong>{{ request.user.company_profile.brela_number }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">TIN Number</small>
                             <strong>{{ request.user.company_profile.formatted_tin }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted d-block">Country / Utaifa</small>
+                            <strong>{{ request.user.company_profile.country|default:"Tanzania" }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted d-block">Region / Mkoa</small>
+                            <strong>{{ request.user.company_profile.region|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted d-block">District / Wilaya</small>
+                            <strong>{{ request.user.company_profile.district|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Ward / Kata</small>
+                            <strong>{{ request.user.company_profile.ward|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Village/Street / Kijiji au Mtaa</small>
+                            <strong>{{ request.user.company_profile.village_street|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Postal Address / Anuani ya Posta</small>
+                            <strong>{{ request.user.company_profile.postal_address|default:"Not Provided" }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Fax / Nukushi (Faksi)</small>
+                            <strong>{{ request.user.company_profile.fax|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-12 mb-3">
                             <small class="text-muted d-block">Physical Address</small>

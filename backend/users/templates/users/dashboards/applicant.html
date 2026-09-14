@@ -40,7 +40,31 @@
         </div>
       </div>
     </div>
+  {% if user.onboarding_step < 5 %}
+  <!-- Complete Profile Notice Banner -->
+  <div class="row gx-3">
+    <div class="col-12 mb-4">
+      <div class="card border-0 border-start border-primary border-4 shadow-sm" style="background: #eef2ff;">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div class="d-flex align-items-start gap-3">
+            <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary" style="width:48px;height:48px;flex-shrink:0;">
+              <i class="ri-user-settings-fill text-white fs-4"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-1 text-primary"><i class="ri-information-line me-2"></i>Complete Your Profile Before Any Application</h5>
+              <p class="mb-0 text-dark">Please complete your profile details and document uploads before submitting any application for medicine listing or registration.</p>
+            </div>
+          </div>
+          <div>
+            <a href="{% url 'users:onboarding' %}" class="btn btn-primary fw-bold px-4 py-2 shadow-sm d-inline-flex align-items-center">
+              <i class="ri-user-line me-2"></i> Complete Profile
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+  {% endif %}
 
   <div class="row gx-3">
     <div class="col-xl-6 col-sm-6 col-12">

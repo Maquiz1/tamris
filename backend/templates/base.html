@@ -235,16 +235,16 @@
           });
         });
 
-        // Phone Masking: XXXX XXX XXX (e.g. 0712 345 678)
+        // Phone Masking: 0XXX-XXX-XXX (e.g. 0712-345-678)
         document.querySelectorAll('input[name="phone_number"]').forEach(function(input) {
           input.addEventListener('input', function(e) {
             let val = e.target.value.replace(/\D/g, '').substring(0, 10);
             let formatted = val;
             if (val.length > 4) {
-              formatted = val.substring(0, 4) + ' ' + val.substring(4);
+              formatted = val.substring(0, 4) + '-' + val.substring(4);
             }
             if (val.length > 7) {
-              formatted = formatted.substring(0, 8) + ' ' + val.substring(7);
+              formatted = formatted.substring(0, 8) + '-' + val.substring(7);
             }
             e.target.value = formatted;
           });
