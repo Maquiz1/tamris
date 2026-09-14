@@ -1,0 +1,48 @@
+      {# ═══ LEFT SIDE MENU ═══ #}
+      <div class="col-md-2 ob-sidenav">
+        <div class="ob-sidenav-title">Onboarding</div>
+        <nav class="nav flex-column" id="ob-sidenav">
+
+          {# 1. Role #}
+          <button class="nav-link {% if step == 1 %}active{% endif %}"
+                  id="sidenav-role" onclick="switchSection('role')" type="button">
+            <i class="ri-shield-user-line"></i> Role
+            {% if step > 1 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+            {% elif step == 1 %}<span class="nav-badge now">Now</span>
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
+
+          {# 2. Demographics #}
+          <button class="nav-link {% if step == 2 %}active{% endif %}"
+                  id="sidenav-demographics" onclick="switchSection('demographics')" type="button"
+                  {% if unlocked_step < 2 %}disabled title="Complete Role first"{% endif %}>
+            <i class="ri-user-3-line"></i> Demographics
+            {% if step > 2 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+            {% elif step == 2 %}<span class="nav-badge now">Now</span>
+            {% elif unlocked_step >= 2 %}<span class="nav-badge todo">To do</span>
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
+
+          {# 3. Attachments #}
+          <button class="nav-link {% if step == 3 %}active{% endif %}"
+                  id="sidenav-attachments" onclick="switchSection('attachments')" type="button"
+                  {% if unlocked_step < 3 %}disabled title="Complete Demographics first"{% endif %}>
+            <i class="ri-attachment-line"></i> Attachments
+            {% if step > 3 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+            {% elif step == 3 %}<span class="nav-badge now">Now</span>
+            {% elif unlocked_step >= 3 %}<span class="nav-badge todo">To do</span>
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
+
+          {# 4. Final #}
+          <button class="nav-link {% if step == 4 %}active{% endif %}"
+                  id="sidenav-final" onclick="switchSection('final')" type="button"
+                  {% if unlocked_step < 4 %}disabled title="Complete Attachments first"{% endif %}>
+            <i class="ri-send-plane-line"></i> Final
+            {% if step == 4 %}<span class="nav-badge now">Now</span>
+            {% elif unlocked_step >= 4 %}<span class="nav-badge todo">To do</span>
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
+
+        </nav>
+      </div>

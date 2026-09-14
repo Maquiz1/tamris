@@ -23,25 +23,10 @@
   .ob-date-badge { display:flex; align-items:center; gap:.4rem; background:#fff; border:1px solid #e2e8f0; border-radius:.5rem; padding:.35rem .9rem; font-size:.8rem; font-weight:600; color:#475569; box-shadow:0 1px 3px rgba(0,0,0,.06); }
   .ob-date-badge i { color:var(--teal-main); }
   .ob-body-card { background:#fff; border-radius:.75rem; border:1px solid #e2e8f0; box-shadow:0 1px 6px rgba(0,0,0,.07); overflow:hidden; }
-  
-  /* ── Top Stepper ── */
-  .top-stepper-wrap { position:relative; margin-bottom: 2rem; padding: 0 1rem; }
-  .stepper-line { position:absolute; top:15px; left:5%; right:5%; height:2px; background:#e2e8f0; z-index:1; }
-  .stepper-progress { position:absolute; top:0; left:0; height:100%; background:var(--teal-main); transition:width 0.3s; }
-  .stepper-container { position:relative; z-index:2; display:flex; justify-content:space-between; }
-  .step-item { display:flex; flex-direction:column; align-items:center; gap:0.5rem; background:#f1f5f9; padding:0 10px; cursor:pointer; text-decoration:none; }
-  .step-circle { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.9rem; border:2px solid #cbd5e1; background:#fff; color:#64748b; transition:all 0.2s; }
-  .step-item.active .step-circle { border-color:var(--teal-main); background:var(--teal-main); color:#fff; }
-  .step-item.done .step-circle { border-color:var(--teal-main); background:var(--teal-main); color:#fff; }
-  .step-label { font-size:0.8rem; font-weight:700; color:#64748b; }
-  .step-item.active .step-label, .step-item.done .step-label { color:var(--teal-main); }
-  .step-item.disabled { pointer-events: none; opacity: 0.6; }
-  
-
-  /* ── Original Side Nav ── */
+  /* ── Side Nav ── */
   .ob-sidenav { border-right:1px solid #e2e8f0; padding:1.25rem .75rem; background:#fafafa; min-height:100%; }
   .ob-sidenav-title { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94a3b8; padding:0 .5rem .5rem; margin-bottom:.25rem; }
-  .ob-sidenav .nav-link { display:flex; align-items:center; gap:.6rem; padding:.65rem .85rem; border-radius:.5rem; color:#64748b; font-weight:600; font-size:.875rem; border:none; background:transparent; width:100%; text-align:left; transition:all .18s; margin-bottom:.2rem; text-decoration:none; }
+  .ob-sidenav .nav-link { display:flex; align-items:center; gap:.6rem; padding:.65rem .85rem; border-radius:.5rem; color:#64748b; font-weight:600; font-size:.875rem; border:none; background:transparent; width:100%; text-align:left; transition:all .18s; margin-bottom:.2rem; }
   .ob-sidenav .nav-link:hover { background:var(--teal-light); color:var(--teal-dark); }
   .ob-sidenav .nav-link.active { background:var(--teal-light); color:var(--teal-dark); border-left:3px solid var(--teal-main); }
   .ob-sidenav .nav-link i { font-size:1.05rem; }
@@ -52,20 +37,12 @@
   .nav-badge.todo { background:#f1f5f9; color:#64748b; }
   .nav-badge.locked { background:#f1f5f9; color:#94a3b8; }
   /* ── Top Tab Bar ── */
-  .ob-top-tabs { background:#f1f5f9; padding:0.4rem; margin: 1.25rem 1.5rem 0.5rem 1.5rem; border-radius:0.75rem; display:flex; align-items:stretch; gap:0.4rem; overflow-x:auto; flex-shrink:0; }
-  .ob-top-tab { display:flex; align-items:center; justify-content:center; flex:1; gap:.4rem; padding:.65rem 1rem; border:none; background:transparent; color:#64748b; font-weight:600; font-size:.85rem; border-radius:0.5rem; cursor:pointer; transition:all .2s ease-in-out; white-space:nowrap; text-decoration:none; }
+  .ob-top-tabs { border-bottom:1px solid #e2e8f0; background:#fff; padding:0 1.5rem; display:flex; align-items:stretch; gap:0; overflow-x:auto; flex-shrink:0; }
+  .ob-top-tab { display:flex; align-items:center; gap:.4rem; padding:.85rem 1rem; border:none; background:transparent; color:#64748b; font-weight:600; font-size:.825rem; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; transition:all .2s; white-space:nowrap; text-decoration:none; }
   .ob-top-tab i { font-size:.95rem; }
-  .ob-top-tab:hover { color:#0f172a; background:#e2e8f0; }
-  .ob-top-tab.active { color:var(--teal-dark); background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06); }
+  .ob-top-tab:hover { color:var(--teal-dark); background:var(--teal-light); }
+  .ob-top-tab.active { color:var(--teal-dark); border-bottom-color:var(--teal-main); }
   .req-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444; margin-left:.25rem; vertical-align:middle; }
-
-  /* ── Sub Sidebar ── */
-  .sub-sidenav { border-right:1px solid #e2e8f0; padding:1.25rem 0.75rem; background:#fff; min-height:100%; }
-  .sub-sidenav .nav-link { display:flex; align-items:center; gap:0.6rem; padding:0.65rem 0.85rem; border-radius:0.5rem; color:#64748b; font-weight:600; font-size:0.875rem; border:none; background:transparent; width:100%; text-align:left; transition:all 0.18s; margin-bottom:0.2rem; }
-  .sub-sidenav .nav-link:hover { background:var(--teal-light); color:var(--teal-dark); }
-  .sub-sidenav .nav-link.active { background:var(--teal-light); color:var(--teal-dark); border-left:3px solid var(--teal-main); border-radius: 0 0.5rem 0.5rem 0; }
-  .sub-sidenav .nav-link i { font-size:1.05rem; }
-
   /* ── Content ── */
   .ob-right { display:flex; flex-direction:column; min-height:100%; }
   .section-wrapper { display:flex; flex-direction:column; flex:1; }
@@ -126,8 +103,9 @@
   .ob-tab-pane.active { display:block; }
   .file-upload-hint { font-size:.75rem; color:#94a3b8; margin-top:.25rem; }
   @media (max-width:767px) {
-    .sub-sidenav { border-right:none; border-bottom:1px solid #e2e8f0; padding:.75rem; }
+    .ob-sidenav { border-right:none; border-bottom:1px solid #e2e8f0; padding:.75rem; }
     .ob-content { padding:1rem; }
+    .ob-top-tabs { padding:0 1rem; }
   }
 </style>
 
@@ -151,67 +129,70 @@
     </div>
   </div>
 
-  
-  
   {# Main Card #}
   <div class="ob-body-card">
     <div class="row g-0" style="min-height:620px;">
-      
-      {# ═══ SIDEBAR ═══ #}
-      <div class="col-md-3">
-        <div class="ob-sidenav">
-          <div class="ob-sidenav-title">Registration Steps</div>
-          
-          <a href="{% url 'users:onboarding' %}?step=1" class="nav-link {% if step == 1 %}active{% endif %}">
-            <i class="ri-user-settings-line"></i> Role
+
+      {# ═══ LEFT SIDE MENU ═══ #}
+      <div class="col-md-2 ob-sidenav">
+        <div class="ob-sidenav-title">Onboarding</div>
+        <nav class="nav flex-column" id="ob-sidenav">
+
+          {# 1. Role #}
+          <button class="nav-link {% if step == 1 %}active{% endif %}"
+                  id="sidenav-role" onclick="switchSection('role')" type="button">
+            <i class="ri-shield-user-line"></i> Role
             {% if step > 1 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
             {% elif step == 1 %}<span class="nav-badge now">Now</span>
-            {% endif %}
-          </a>
-          
-          <a href="{% if unlocked_step >= 2 %}{% url 'users:onboarding' %}?step=2{% else %}#{% endif %}" class="nav-link {% if step == 2 %}active{% endif %}" {% if unlocked_step < 2 %}disabled{% endif %}>
-            <i class="ri-team-line"></i> Demographics
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
+
+          {# 2. Demographics #}
+          <button class="nav-link {% if step == 2 %}active{% endif %}"
+                  id="sidenav-demographics" onclick="switchSection('demographics')" type="button"
+                  {% if unlocked_step < 2 %}disabled title="Complete Role first"{% endif %}>
+            <i class="ri-user-3-line"></i> Demographics
             {% if step > 2 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
             {% elif step == 2 %}<span class="nav-badge now">Now</span>
-            {% elif unlocked_step < 2 %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>
-            {% else %}<span class="nav-badge todo">Todo</span>
-            {% endif %}
-          </a>
-          
-          <a href="{% if unlocked_step >= 3 %}{% url 'users:onboarding' %}?step=3{% else %}#{% endif %}" class="nav-link {% if step == 3 %}active{% endif %}" {% if unlocked_step < 3 %}disabled{% endif %}>
-            <i class="ri-file-shield-2-line"></i> Attachments
+            {% elif unlocked_step >= 2 %}<span class="nav-badge todo">To do</span>
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
+
+          {# 3. Attachments #}
+          <button class="nav-link {% if step == 3 %}active{% endif %}"
+                  id="sidenav-attachments" onclick="switchSection('attachments')" type="button"
+                  {% if unlocked_step < 3 %}disabled title="Complete Demographics first"{% endif %}>
+            <i class="ri-attachment-line"></i> Attachments
             {% if step > 3 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
             {% elif step == 3 %}<span class="nav-badge now">Now</span>
-            {% elif unlocked_step < 3 %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>
-            {% else %}<span class="nav-badge todo">Todo</span>
-            {% endif %}
-          </a>
-          
-          <a href="{% if unlocked_step >= 4 %}{% url 'users:onboarding' %}?step=4{% else %}#{% endif %}" class="nav-link {% if step == 4 %}active{% endif %}" {% if unlocked_step < 4 %}disabled{% endif %}>
-            <i class="ri-checkbox-circle-line"></i> Submit
-            {% if step == 4 %}<span class="nav-badge now">Now</span>
-            {% elif unlocked_step < 4 %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>
-            {% else %}<span class="nav-badge todo">Todo</span>
-            {% endif %}
-          </a>
+            {% elif unlocked_step >= 3 %}<span class="nav-badge todo">To do</span>
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
 
-        </div>
+          {# 4. Final #}
+          <button class="nav-link {% if step == 4 %}active{% endif %}"
+                  id="sidenav-final" onclick="switchSection('final')" type="button"
+                  {% if unlocked_step < 4 %}disabled title="Complete Attachments first"{% endif %}>
+            <i class="ri-send-plane-line"></i> Final
+            {% if step == 4 %}<span class="nav-badge now">Now</span>
+            {% elif unlocked_step >= 4 %}<span class="nav-badge todo">To do</span>
+            {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+          </button>
+
+        </nav>
       </div>
 
-      {# ═══ CONTENT ═══ #}
-      <div class="col-md-9 ob-right">
+      {# ═══ RIGHT CONTENT ═══ #}
+      <div class="col-md-10 ob-right">
 
-
-        
         {# ─── ROLE (Step 1) ─── #}
         <div id="section-role" class="section-wrapper {% if step != 1 %}d-none{% endif %}">
           <div class="ob-top-tabs">
-            <button class="ob-top-tab active" id="toptab-apptype" onclick="switchTopTab('role','apptype')" type="button">
-              <i class="ri-list-settings-line"></i> Applicant Type <span class="req-dot"></span>
+            <button class="ob-top-tab active" id="toptab-apptype"
+                    onclick="switchTopTab('role','apptype')" type="button">
+              <i class="ri-list-settings-line"></i> Applicant Type
             </button>
           </div>
-
-
           <div id="topPane-role-apptype" class="ob-tab-pane active" style="display:flex;flex-direction:column;flex:1;">
             <form method="post" action="{% url 'users:onboarding' %}" novalidate
                   style="display:flex;flex-direction:column;flex:1;">
@@ -286,25 +267,24 @@
               </div>
             </form>
           </div>
-
         </div>
 
-        
         {# ─── DEMOGRAPHICS (Step 2) ─── #}
         <div id="section-demographics" class="section-wrapper {% if step != 2 %}d-none{% endif %}">
           <div class="ob-top-tabs">
-            <button class="ob-top-tab active" id="toptab-identity" onclick="switchTopTab('demographics','identity')" type="button">
+            <button class="ob-top-tab active" id="toptab-identity"
+                    onclick="switchTopTab('demographics','identity')" type="button">
               <i class="ri-team-line"></i> Identity <span class="req-dot"></span>
             </button>
-            <button class="ob-top-tab" id="toptab-address" onclick="switchTopTab('demographics','address')" type="button">
+            <button class="ob-top-tab" id="toptab-address"
+                    onclick="switchTopTab('demographics','address')" type="button">
               <i class="ri-map-pin-line"></i> Address <span class="req-dot"></span>
             </button>
-            <button class="ob-top-tab" id="toptab-contacts" onclick="switchTopTab('demographics','contacts')" type="button">
+            <button class="ob-top-tab" id="toptab-contacts"
+                    onclick="switchTopTab('demographics','contacts')" type="button">
               <i class="ri-phone-line"></i> Contacts <span class="req-dot"></span>
             </button>
           </div>
-
-
 
           <form method="post" action="{% url 'users:onboarding' %}" novalidate
                 style="display:flex;flex-direction:column;flex:1;">
@@ -548,22 +528,20 @@
               </button>
             </div>
           </form>
-
         </div>
 
-        
         {# ─── ATTACHMENTS (Step 3) ─── #}
         <div id="section-attachments" class="section-wrapper {% if step != 3 %}d-none{% endif %}">
           <div class="ob-top-tabs">
-            <button class="ob-top-tab active" id="toptab-required" onclick="switchTopTab('attachments','required')" type="button">
+            <button class="ob-top-tab active" id="toptab-required"
+                    onclick="switchTopTab('attachments','required')" type="button">
               <i class="ri-file-shield-2-line"></i> Required Documents <span class="req-dot"></span>
             </button>
-            <button class="ob-top-tab" id="toptab-optional" onclick="switchTopTab('attachments','optional')" type="button">
+            <button class="ob-top-tab" id="toptab-optional"
+                    onclick="switchTopTab('attachments','optional')" type="button">
               <i class="ri-file-add-line"></i> Optional Documents
             </button>
           </div>
-
-
 
           <form method="post" action="{% url 'users:onboarding' %}" enctype="multipart/form-data" novalidate
                 style="display:flex;flex-direction:column;flex:1;">
@@ -620,109 +598,105 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-end mt-2">
-                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('attachments','optional')">Next: Optional Documents <i class="ri-arrow-right-line"></i></button>
-                </div>
-              </div>
-            </div>
-
-            {# Pane: Optional Documents #}
-            <div id="topPane-attachments-optional" class="ob-tab-pane" style="flex:1;">
-              <div class="ob-content">
-                <div class="ob-content-header">
-                  <i class="ri-file-add-line"></i>
-                  <div><h5>Optional Documents</h5><p>Upload any additional supporting documents (not required but recommended).</p></div>
-                </div>
-                <div class="section-card">
-                  <div class="section-card-header"><i class="ri-file-add-line"></i><span>Optional Documents / Nyaraka za Ziada</span></div>
-                  <div class="section-card-body">
-                    {% if 'Individual Applicant' in request.user.all_roles %}
-                    <div class="row gx-3 gy-3">
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_passport_photo">Passport Size Photo / Picha ya Pasipoti</label>
-                        <div class="input-icon-wrap"><i class="ri-image-line field-icon"></i>{{ form.passport_photo }}</div>
-                        <div class="file-upload-hint">Accepted: JPG, PNG</div>
-                        {% if form.passport_photo.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.passport_photo.errors.0 }}</div>{% endif %}
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_tahpc_certificate">TAHPC Certificate / Cheti cha TAHPC</label>
-                        <div class="input-icon-wrap"><i class="ri-award-line field-icon"></i>{{ form.tahpc_certificate }}</div>
-                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
-                        {% if form.tahpc_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tahpc_certificate.errors.0 }}</div>{% endif %}
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_tin_certificate">TIN Certificate / Cheti cha TIN</label>
-                        <div class="input-icon-wrap"><i class="ri-file-shield-line field-icon"></i>{{ form.tin_certificate }}</div>
-                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
-                        {% if form.tin_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tin_certificate.errors.0 }}</div>{% endif %}
-                      </div>
-                    </div>
-                    {% else %}
-                    <div class="row gx-3 gy-3">
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_tahpc_certificate">TAHPC Certificate / Cheti cha TAHPC</label>
-                        <div class="input-icon-wrap"><i class="ri-award-line field-icon"></i>{{ form.tahpc_certificate }}</div>
-                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
-                        {% if form.tahpc_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tahpc_certificate.errors.0 }}</div>{% endif %}
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_representative_nida">Representative NIDA Copy / Kitambulisho cha Mwakilishi</label>
-                        <div class="input-icon-wrap"><i class="ri-user-search-line field-icon"></i>{{ form.representative_nida }}</div>
-                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
-                        {% if form.representative_nida.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.representative_nida.errors.0 }}</div>{% endif %}
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_representative_id_image">Representative Photo / Picha ya Mwakilishi</label>
-                        <div class="input-icon-wrap"><i class="ri-image-line field-icon"></i>{{ form.representative_id_image }}</div>
-                        <div class="file-upload-hint">Accepted: JPG, PNG</div>
-                        {% if form.representative_id_image.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.representative_id_image.errors.0 }}</div>{% endif %}
-                      </div>
-                    </div>
-                    {% endif %}
-                  </div>
-                </div>
-                <div class="d-flex justify-content-start mt-2">
-                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchTopTab('attachments','required')"><i class="ri-arrow-left-line"></i> Previous: Required Documents</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="ob-action-bar">
-              <a href="{% url 'users:dashboard' %}" class="btn-cancel btn">Cancel</a>
-              <button type="submit" name="save_draft" value="1" class="btn-draft btn">
-                <i class="ri-save-line"></i> Save Draft
-              </button>
-              <button type="submit" class="btn-continue btn">
-                <i class="ri-upload-cloud-line"></i> Upload &amp; Continue
-              </button>
-            </div>
-          </form>
-
-        </div>
-
-        {# ─── FINAL (Step 4) ─── #}
-        <div id="section-final" class="section-wrapper {% if step != 4 %}d-none{% endif %}">
-
-          <div class="row g-0 flex-grow-1">
-            <div class="col-md-3 sub-sidenav">
-              <button class="nav-link active" id="toptab-submit" onclick="switchTopTab('final','submit')" type="button">
-                <i class="ri-send-plane-line"></i> Submit
-              </button>
-            </div>
-            <div class="col-md-9 d-flex flex-column">
-
-          <div id="topPane-final-submit" class="ob-tab-pane active" style="flex:1;">
-            <div class="ob-content">
-              <div class="ob-content-header">
-                <i class="ri-checkbox-circle-line"></i>
-                <div><h5>{{ title }}</h5><p>{{ subtitle }}</p></div>
-              </div>
-              <div class="alert d-flex align-items-start gap-2 mb-4 rounded-3"
-                   style="background:var(--teal-light);border:1px solid var(--teal-border);color:var(--teal-dark);">
-                <i class="ri-information-line fs-5 mt-1 flex-shrink-0" style="color:var(--teal-main)"></i>
-                <span style="font-size:.875rem;">Please review your applicant information carefully before submitting. Once submitted, profile details will be locked for review.</span>
-              </div>
-
-              <p class="review-section-title"><i class="ri-account-circle-line"></i> Account Details</p>
+<!-- MISSING LINE 601 -->
+<!-- MISSING LINE 602 -->
+<!-- MISSING LINE 603 -->
+<!-- MISSING LINE 604 -->
+<!-- MISSING LINE 605 -->
+<!-- MISSING LINE 606 -->
+<!-- MISSING LINE 607 -->
+<!-- MISSING LINE 608 -->
+<!-- MISSING LINE 609 -->
+<!-- MISSING LINE 610 -->
+<!-- MISSING LINE 611 -->
+<!-- MISSING LINE 612 -->
+<!-- MISSING LINE 613 -->
+<!-- MISSING LINE 614 -->
+<!-- MISSING LINE 615 -->
+<!-- MISSING LINE 616 -->
+<!-- MISSING LINE 617 -->
+<!-- MISSING LINE 618 -->
+<!-- MISSING LINE 619 -->
+<!-- MISSING LINE 620 -->
+<!-- MISSING LINE 621 -->
+<!-- MISSING LINE 622 -->
+<!-- MISSING LINE 623 -->
+<!-- MISSING LINE 624 -->
+<!-- MISSING LINE 625 -->
+<!-- MISSING LINE 626 -->
+<!-- MISSING LINE 627 -->
+<!-- MISSING LINE 628 -->
+<!-- MISSING LINE 629 -->
+<!-- MISSING LINE 630 -->
+<!-- MISSING LINE 631 -->
+<!-- MISSING LINE 632 -->
+<!-- MISSING LINE 633 -->
+<!-- MISSING LINE 634 -->
+<!-- MISSING LINE 635 -->
+<!-- MISSING LINE 636 -->
+<!-- MISSING LINE 637 -->
+<!-- MISSING LINE 638 -->
+<!-- MISSING LINE 639 -->
+<!-- MISSING LINE 640 -->
+<!-- MISSING LINE 641 -->
+<!-- MISSING LINE 642 -->
+<!-- MISSING LINE 643 -->
+<!-- MISSING LINE 644 -->
+<!-- MISSING LINE 645 -->
+<!-- MISSING LINE 646 -->
+<!-- MISSING LINE 647 -->
+<!-- MISSING LINE 648 -->
+<!-- MISSING LINE 649 -->
+<!-- MISSING LINE 650 -->
+<!-- MISSING LINE 651 -->
+<!-- MISSING LINE 652 -->
+<!-- MISSING LINE 653 -->
+<!-- MISSING LINE 654 -->
+<!-- MISSING LINE 655 -->
+<!-- MISSING LINE 656 -->
+<!-- MISSING LINE 657 -->
+<!-- MISSING LINE 658 -->
+<!-- MISSING LINE 659 -->
+<!-- MISSING LINE 660 -->
+<!-- MISSING LINE 661 -->
+<!-- MISSING LINE 662 -->
+<!-- MISSING LINE 663 -->
+<!-- MISSING LINE 664 -->
+<!-- MISSING LINE 665 -->
+<!-- MISSING LINE 666 -->
+<!-- MISSING LINE 667 -->
+<!-- MISSING LINE 668 -->
+<!-- MISSING LINE 669 -->
+<!-- MISSING LINE 670 -->
+<!-- MISSING LINE 671 -->
+<!-- MISSING LINE 672 -->
+<!-- MISSING LINE 673 -->
+<!-- MISSING LINE 674 -->
+<!-- MISSING LINE 675 -->
+<!-- MISSING LINE 676 -->
+<!-- MISSING LINE 677 -->
+<!-- MISSING LINE 678 -->
+<!-- MISSING LINE 679 -->
+<!-- MISSING LINE 680 -->
+<!-- MISSING LINE 681 -->
+<!-- MISSING LINE 682 -->
+<!-- MISSING LINE 683 -->
+<!-- MISSING LINE 684 -->
+<!-- MISSING LINE 685 -->
+<!-- MISSING LINE 686 -->
+<!-- MISSING LINE 687 -->
+<!-- MISSING LINE 688 -->
+<!-- MISSING LINE 689 -->
+<!-- MISSING LINE 690 -->
+<!-- MISSING LINE 691 -->
+<!-- MISSING LINE 692 -->
+<!-- MISSING LINE 693 -->
+<!-- MISSING LINE 694 -->
+<!-- MISSING LINE 695 -->
+<!-- MISSING LINE 696 -->
+<!-- MISSING LINE 697 -->
+<!-- MISSING LINE 698 -->
+<!-- MISSING LINE 699 -->
               <div class="review-row"><span class="label">Email</span><span class="value">{{ request.user.email }}</span></div>
               <div class="review-row"><span class="label">Role</span><span class="value">{{ request.user.all_roles|join:", " }}</span></div>
 
@@ -781,10 +755,9 @@
               </div>
             </form>
           </div>
-
         </div>
 
-      </div>{# /col 12 #}
+      </div>{# /col right #}
     </div>{# /row #}
   </div>{# /ob-body-card #}
 </div>{# /container #}
@@ -809,7 +782,7 @@ function switchTopTab(section, tab, save) {
   if (save === undefined) save = true;
   var sectionEl = document.getElementById('section-' + section);
   if (!sectionEl) return;
-  sectionEl.querySelectorAll('.nav-link').forEach(function(t) { t.classList.remove('active'); });
+  sectionEl.querySelectorAll('.ob-top-tab').forEach(function(t) { t.classList.remove('active'); });
   sectionEl.querySelectorAll('.ob-tab-pane').forEach(function(p) { p.classList.remove('active'); });
   var tabBtn = document.getElementById('toptab-' + tab);
   var tabPane = document.getElementById('topPane-' + section + '-' + tab);
@@ -833,3 +806,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

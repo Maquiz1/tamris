@@ -1,0 +1,418 @@
+Created At: 2026-09-14T22:20:59Z
+Completed At: 2026-09-14T22:20:59Z
+File Path: `file:///home/maquiz/projects/tamris/backend/users/templates/users/onboarding.html`
+Total Lines: 809
+Total Bytes: 56970
+Showing lines 1 to 200
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: {% extends 'base.html' %}
+2: {% load crispy_forms_tags %}
+3: 
+4: {% block title %}New Applicant Onboarding - TAMRIS{% endblock %}
+5: 
+6: {% block content %}
+7: <style>
+8:   :root {
+9:     --teal-main: #0d9488;
+10:     --teal-dark: #0f766e;
+11:     --teal-light: #f0fdfa;
+12:     --teal-border: #99f6e4;
+13:     --teal-ring: rgba(13, 148, 136, 0.18);
+14:     --step-done: #10b981;
+15:   }
+16:   .onboarding-page { background:#f1f5f9; min-height:100vh; padding:1.5rem 1rem 3rem; }
+17:   .ob-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-bottom:1.25rem; }
+18:   .ob-header-left { display:flex; align-items:center; gap:.75rem; }
+19:   .ob-back-btn { width:36px; height:36px; border-radius:50%; border:1px solid #cbd5e1; background:#fff; color:#475569; display:flex; align-items:center; justify-content:center; text-decoration:none; transition:all .2s; }
+20:   .ob-back-btn:hover { background:var(--teal-light); border-color:var(--teal-main); color:var(--teal-dark); }
+21:   .ob-title { font-size:1.25rem; font-weight:700; color:#0f172a; margin:0; }
+22:   .ob-subtitle { font-size:.8rem; color:#64748b; margin:0; }
+23:   .ob-date-badge { display:flex; align-items:center; gap:.4rem; background:#fff; border:1px solid #e2e8f0; border-radius:.5rem; padding:.35rem .9rem; font-size:.8rem; font-weight:600; color:#475569; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+24:   .ob-date-badge i { color:var(--teal-main); }
+25:   .ob-body-card { background:#fff; border-radius:.75rem; border:1px solid #e2e8f0; box-shadow:0 1px 6px rgba(0,0,0,.07); overflow:hidden; }
+26:   /* ── Side Nav ── */
+27:   .ob-sidenav { border-right:1px solid #e2e8f0; padding:1.25rem .75rem; background:#fafafa; min-height:100%; }
+28:   .ob-sidenav-title { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94a3b8; padding:0 .5rem .5rem; margin-bottom:.25rem; }
+29:   .ob-sidenav .nav-link { display:flex; align-items:center; gap:.6rem; padding:.65rem .85rem; border-radius:.5rem; color:#64748b; font-weight:600; font-size:.875rem; border:none; background:transparent; width:100%; text-align:left; transition:all .18s; margin-bottom:.2rem; }
+30:   .ob-sidenav .nav-link:hover { background:var(--teal-light); color:var(--teal-dark); }
+31:   .ob-sidenav .nav-link.active { background:var(--teal-light); color:var(--teal-dark); border-left:3px solid var(--teal-main); }
+32:   .ob-sidenav .nav-link i { font-size:1.05rem; }
+33:   .ob-sidenav .nav-link:disabled { opacity:.5; cursor:not-allowed; }
+34:   .nav-badge { margin-left:auto; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:20px; }
+35:   .nav-badge.done { background:#d1fae5; color:#059669; }
+36:   .nav-badge.now { background:var(--teal-main); color:#fff; }
+37:   .nav-badge.todo { background:#f1f5f9; color:#64748b; }
+38:   .nav-badge.locked { background:#f1f5f9; color:#94a3b8; }
+39:   /* ── Top Tab Bar ── */
+40:   .ob-top-tabs { border-bottom:1px solid #e2e8f0; background:#fff; padding:0 1.5rem; display:flex; align-items:stretch; gap:0; overflow-x:auto; flex-shrink:0; }
+41:   .ob-top-tab { display:flex; align-items:center; gap:.4rem; padding:.85rem 1rem; border:none; background:transparent; color:#64748b; font-weight:600; font-size:.825rem; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; transition:all .2s; white-space:nowrap; text-decoration:none; }
+42:   .ob-top-tab i { font-size:.95rem; }
+43:   .ob-top-tab:hover { color:var(--teal-dark); background:var(--teal-light); }
+44:   .ob-top-tab.active { color:var(--teal-dark); border-bottom-color:var(--teal-main); }
+45:   .req-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444; margin-left:.25rem; vertical-align:middle; }
+46:   /* ── Content ── */
+47:   .ob-right { display:flex; flex-direction:column; min-height:100%; }
+48:   .section-wrapper { display:flex; flex-direction:column; flex:1; }
+49:   .ob-content { padding:1.5rem; flex:1; }
+50:   .ob-content-header { display:flex; align-items:center; gap:.6rem; margin-bottom:1.25rem; padding-bottom:.75rem; border-bottom:1px solid #f1f5f9; }
+51:   .ob-content-header i { font-size:1.5rem; color:var(--teal-main); }
+52:   .ob-content-header h5 { font-weight:700; color:#0f172a; margin:0; }
+53:   .ob-content-header p { color:#64748b; font-size:.82rem; margin:0; }
+54:   .section-card { border:1px solid #e2e8f0; border-radius:.6rem; margin-bottom:1.25rem; overflow:hidden; }
+55:   .section-card-header { background:var(--teal-light); border-bottom:1px solid var(--teal-border); padding:.55rem 1rem; display:flex; align-items:center; gap:.5rem; }
+56:   .section-card-header i { color:var(--teal-main); font-size:1rem; }
+57:   .section-card-header span { font-weight:700; color:var(--teal-dark); font-size:.875rem; }
+58:   .section-card-body { padding:1rem 1.1rem; }
+59:   /* ── Form helpers ── */
+60:   .form-label-sm { font-size:.78rem; font-weight:600; color:#374151; margin-bottom:.3rem; display:block; }
+61:   .form-label-sm .req { color:#ef4444; }
+62:   .input-icon-wrap { position:relative; }
+63:   .input-icon-wrap .form-control, .input-icon-wrap .form-select { padding-left:2.2rem; }
+64:   .input-icon-wrap .field-icon { position:absolute; left:.65rem; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.95rem; pointer-events:none; }
+65:   .form-control, .form-select { border-radius:.45rem; border:1px solid #cbd5e1; font-size:.875rem; color:#1e293b; background:#fff; transition:border-color .2s,box-shadow .2s; height:40px; }
+66:   .form-control:focus, .form-select:focus { border-color:var(--teal-main); box-shadow:0 0 0 3px var(--teal-ring); outline:none; }
+67:   textarea.form-control { height:auto; }
+68:   .sex-radio-row { display:flex; gap:.75rem; flex-wrap:wrap; }
+69:   .sex-radio-option { display:flex; align-items:center; gap:.35rem; padding:.38rem .85rem; border:1px solid #cbd5e1; border-radius:.45rem; cursor:pointer; font-size:.875rem; color:#374151; font-weight:500; transition:all .18s; user-select:none; }
+70:   .sex-radio-option input[type=radio] { accent-color:var(--teal-main); }
+71:   .sex-radio-option:has(input:checked) { border-color:var(--teal-main); background:var(--teal-light); color:var(--teal-dark); }
+72:   /* ── Action bar ── */
+73:   .ob-action-bar { border-top:1px solid #e2e8f0; padding:.9rem 1.5rem; background:#fff; display:flex; align-items:center; justify-content:flex-end; gap:.6rem; flex-wrap:wrap; flex-shrink:0; }
+74:   .btn-cancel { border:1px solid #cbd5e1; background:#fff; color:#475569; border-radius:.45rem; padding:.45rem 1.2rem; font-weight:600; font-size:.875rem; }
+75:   .btn-cancel:hover { background:#f8fafc; border-color:#94a3b8; }
+76:   .btn-draft { border:1px solid var(--teal-dark); background:#fff; color:var(--teal-dark); border-radius:.45rem; padding:.45rem 1.2rem; font-weight:600; font-size:.875rem; display:flex; align-items:center; gap:.35rem; }
+77:   .btn-draft:hover { background:var(--teal-light); }
+78:   .btn-continue { background:var(--teal-main); color:#fff; border:none; border-radius:.45rem; padding:.45rem 1.4rem; font-weight:600; font-size:.875rem; display:flex; align-items:center; gap:.35rem; box-shadow:0 2px 8px rgba(13,148,136,.3); }
+79:   .btn-continue:hover { background:var(--teal-dark); }
+80:   /* ── Review ── */
+81:   .review-section-title { font-size:.95rem; font-weight:700; color:var(--teal-dark); border-bottom:1px solid #e2e8f0; padding-bottom:.4rem; margin-bottom:.75rem; display:flex; align-items:center; gap:.4rem; }
+82:   .review-row { display:flex; padding:.3rem 0; border-bottom:1px solid #f8fafc; font-size:.85rem; }
+83:   .review-row .label { width:45%; color:#64748b; font-weight:600; }
+84:   .review-row .value { color:#1e293b; }
+85:   /* ── App type cards ── */
+86:   .ob-type-row { display:flex; gap:1rem; flex-wrap:wrap; }
+87:   .ob-type-form { flex:1 1 240px; margin:0; }
+88:   .ob-type-card { width:100%; display:flex; align-items:center; gap:.85rem; padding:1rem 1.15rem; background:#f8fafc; border:2px solid #e2e8f0; border-radius:.65rem; text-align:left; transition:all .2s; cursor:pointer; box-sizing:border-box; }
+89:   .ob-type-card:hover:not(:disabled) { background:#fff; border-color:var(--teal-dark); transform:translateY(-1px); box-shadow:0 4px 12px rgba(13,148,136,.1); }
+90:   .ob-type-card--active { background:#f0fdfa !important; border-color:var(--teal-dark) !important; box-shadow:0 0 0 3px rgba(13,148,136,.12); }
+91:   .ob-type-card:disabled { cursor:default; }
+92:   .ob-type-icon { width:40px; height:40px; border-radius:10px; background:#e6fffa; color:var(--teal-dark); display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0; }
+93:   .ob-type-card--active .ob-type-icon { background:var(--teal-dark); color:#fff; }
+94:   .ob-type-info { display:flex; flex-direction:column; flex-grow:1; }
+95:   .ob-type-info strong { display:block; color:#0f172a; font-weight:600; font-size:.925rem; }
+96:   .ob-type-info small { color:#64748b; font-size:.78rem; margin-top:2px; }
+97:   .ob-type-switch { margin-left:auto; font-weight:600; color:var(--teal-dark); font-size:.8rem; padding:.25rem .65rem; background:#fff; border:1px solid #cbd5e1; border-radius:20px; }
+98:   .ob-type-card:hover:not(:disabled) .ob-type-switch { background:var(--teal-dark); color:#fff; border-color:var(--teal-dark); }
+99:   .ob-type-badge { margin-left:auto; font-weight:600; color:#fff; background:var(--teal-dark); font-size:.75rem; padding:.25rem .65rem; border-radius:20px; display:flex; align-items:center; gap:.25rem; }
+100:   .ob-type-notice { font-size:.8rem; color:#64748b; margin-top:.75rem; display:flex; align-items:center; gap:.35rem; background:#f8fafc; padding:.5rem .75rem; border-radius:6px; border:1px solid #f1f5f9; }
+101:   /* ── Tab pane ── */
+102:   .ob-tab-pane { display:none; }
+103:   .ob-tab-pane.active { display:block; }
+104:   .file-upload-hint { font-size:.75rem; color:#94a3b8; margin-top:.25rem; }
+105:   @media (max-width:767px) {
+106:     .ob-sidenav { border-right:none; border-bottom:1px solid #e2e8f0; padding:.75rem; }
+107:     .ob-content { padding:1rem; }
+108:     .ob-top-tabs { padding:0 1rem; }
+109:   }
+110: </style>
+111: 
+112: <div class="onboarding-page">
+113: <div class="container-fluid px-3 px-lg-4">
+114: 
+115:   {# Page Header #}
+116:   <div class="ob-header">
+117:     <div class="ob-header-left">
+118:       <a href="{% url 'users:dashboard' %}" class="ob-back-btn" title="Back to Dashboard">
+119:         <i class="ri-arrow-left-line"></i>
+120:       </a>
+121:       <div>
+122:         <h1 class="ob-title">New Applicant</h1>
+123:         <p class="ob-subtitle">Fill in the applicant information below</p>
+124:       </div>
+125:     </div>
+126:     <div class="ob-date-badge">
+127:       <i class="ri-calendar-event-line"></i>
+128:       <span>{% now "m/d/Y" %}</span>
+129:     </div>
+130:   </div>
+131: 
+132:   {# Main Card #}
+133:   <div class="ob-body-card">
+134:     <div class="row g-0" style="min-height:620px;">
+135: 
+136:       {# ═══ LEFT SIDE MENU ═══ #}
+137:       <div class="col-md-2 ob-sidenav">
+138:         <div class="ob-sidenav-title">Onboarding</div>
+139:         <nav class="nav flex-column" id="ob-sidenav">
+140: 
+141:           {# 1. Role #}
+142:           <button class="nav-link {% if step == 1 %}active{% endif %}"
+143:                   id="sidenav-role" onclick="switchSection('role')" type="button">
+144:             <i class="ri-shield-user-line"></i> Role
+145:             {% if step > 1 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+146:             {% elif step == 1 %}<span class="nav-badge now">Now</span>
+147:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+148:           </button>
+149: 
+150:           {# 2. Demographics #}
+151:           <button class="nav-link {% if step == 2 %}active{% endif %}"
+152:                   id="sidenav-demographics" onclick="switchSection('demographics')" type="button"
+153:                   {% if unlocked_step < 2 %}disabled title="Complete Role first"{% endif %}>
+154:             <i class="ri-user-3-line"></i> Demographics
+155:             {% if step > 2 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+156:             {% elif step == 2 %}<span class="nav-badge now">Now</span>
+157:             {% elif unlocked_step >= 2 %}<span class="nav-badge todo">To do</span>
+158:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+159:           </button>
+160: 
+161:           {# 3. Attachments #}
+162:           <button class="nav-link {% if step == 3 %}active{% endif %}"
+163:                   id="sidenav-attachments" onclick="switchSection('attachments')" type="button"
+164:                   {% if unlocked_step < 3 %}disabled title="Complete Demographics first"{% endif %}>
+165:             <i class="ri-attachment-line"></i> Attachments
+166:             {% if step > 3 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+167:             {% elif step == 3 %}<span class="nav-badge now">Now</span>
+168:             {% elif unlocked_step >= 3 %}<span class="nav-badge todo">To do</span>
+169:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+170:           </button>
+171: 
+172:           {# 4. Final #}
+173:           <button class="nav-link {% if step == 4 %}active{% endif %}"
+174:                   id="sidenav-final" onclick="switchSection('final')" type="button"
+175:                   {% if unlocked_step < 4 %}disabled title="Complete Attachments first"{% endif %}>
+176:             <i class="ri-send-plane-line"></i> Final
+177:             {% if step == 4 %}<span class="nav-badge now">Now</span>
+178:             {% elif unlocked_step >= 4 %}<span class="nav-badge todo">To do</span>
+179:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+180:           </button>
+181: 
+182:         </nav>
+183:       </div>
+184: 
+185:       {# ═══ RIGHT CONTENT ═══ #}
+186:       <div class="col-md-10 ob-right">
+187: 
+188:         {# ─── ROLE (Step 1) ─── #}
+189:         <div id="section-role" class="section-wrapper {% if step != 1 %}d-none{% endif %}">
+190:           <div class="ob-top-tabs">
+191:             <button class="ob-top-tab active" id="toptab-apptype"
+192:                     onclick="switchTopTab('role','apptype')" type="button">
+193:               <i class="ri-list-settings-line"></i> Applicant Type
+194:             </button>
+195:           </div>
+196:           <div id="topPane-role-apptype" class="ob-tab-pane active" style="display:flex;flex-direction:column;flex:1;">
+197:             <form method="post" action="{% url 'users:onboarding' %}" novalidate
+198:                   style="display:flex;flex-direction:column;flex:1;">
+199:               {% csrf_token %}
+200:               <div class="ob-content">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+Created At: 2026-09-14T22:20:59Z
+Completed At: 2026-09-14T22:20:59Z
+File Path: `file:///home/maquiz/projects/tamris/backend/users/templates/users/onboarding.html`
+Total Lines: 809
+Total Bytes: 56970
+Showing lines 1 to 200
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: {% extends 'base.html' %}
+2: {% load crispy_forms_tags %}
+3: 
+4: {% block title %}New Applicant Onboarding - TAMRIS{% endblock %}
+5: 
+6: {% block content %}
+7: <style>
+8:   :root {
+9:     --teal-main: #0d9488;
+10:     --teal-dark: #0f766e;
+11:     --teal-light: #f0fdfa;
+12:     --teal-border: #99f6e4;
+13:     --teal-ring: rgba(13, 148, 136, 0.18);
+14:     --step-done: #10b981;
+15:   }
+16:   .onboarding-page { background:#f1f5f9; min-height:100vh; padding:1.5rem 1rem 3rem; }
+17:   .ob-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-bottom:1.25rem; }
+18:   .ob-header-left { display:flex; align-items:center; gap:.75rem; }
+19:   .ob-back-btn { width:36px; height:36px; border-radius:50%; border:1px solid #cbd5e1; background:#fff; color:#475569; display:flex; align-items:center; justify-content:center; text-decoration:none; transition:all .2s; }
+20:   .ob-back-btn:hover { background:var(--teal-light); border-color:var(--teal-main); color:var(--teal-dark); }
+21:   .ob-title { font-size:1.25rem; font-weight:700; color:#0f172a; margin:0; }
+22:   .ob-subtitle { font-size:.8rem; color:#64748b; margin:0; }
+23:   .ob-date-badge { display:flex; align-items:center; gap:.4rem; background:#fff; border:1px solid #e2e8f0; border-radius:.5rem; padding:.35rem .9rem; font-size:.8rem; font-weight:600; color:#475569; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+24:   .ob-date-badge i { color:var(--teal-main); }
+25:   .ob-body-card { background:#fff; border-radius:.75rem; border:1px solid #e2e8f0; box-shadow:0 1px 6px rgba(0,0,0,.07); overflow:hidden; }
+26:   /* ── Side Nav ── */
+27:   .ob-sidenav { border-right:1px solid #e2e8f0; padding:1.25rem .75rem; background:#fafafa; min-height:100%; }
+28:   .ob-sidenav-title { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94a3b8; padding:0 .5rem .5rem; margin-bottom:.25rem; }
+29:   .ob-sidenav .nav-link { display:flex; align-items:center; gap:.6rem; padding:.65rem .85rem; border-radius:.5rem; color:#64748b; font-weight:600; font-size:.875rem; border:none; background:transparent; width:100%; text-align:left; transition:all .18s; margin-bottom:.2rem; }
+30:   .ob-sidenav .nav-link:hover { background:var(--teal-light); color:var(--teal-dark); }
+31:   .ob-sidenav .nav-link.active { background:var(--teal-light); color:var(--teal-dark); border-left:3px solid var(--teal-main); }
+32:   .ob-sidenav .nav-link i { font-size:1.05rem; }
+33:   .ob-sidenav .nav-link:disabled { opacity:.5; cursor:not-allowed; }
+34:   .nav-badge { margin-left:auto; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:20px; }
+35:   .nav-badge.done { background:#d1fae5; color:#059669; }
+36:   .nav-badge.now { background:var(--teal-main); color:#fff; }
+37:   .nav-badge.todo { background:#f1f5f9; color:#64748b; }
+38:   .nav-badge.locked { background:#f1f5f9; color:#94a3b8; }
+39:   /* ── Top Tab Bar ── */
+40:   .ob-top-tabs { border-bottom:1px solid #e2e8f0; background:#fff; padding:0 1.5rem; display:flex; align-items:stretch; gap:0; overflow-x:auto; flex-shrink:0; }
+41:   .ob-top-tab { display:flex; align-items:center; gap:.4rem; padding:.85rem 1rem; border:none; background:transparent; color:#64748b; font-weight:600; font-size:.825rem; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; transition:all .2s; white-space:nowrap; text-decoration:none; }
+42:   .ob-top-tab i { font-size:.95rem; }
+43:   .ob-top-tab:hover { color:var(--teal-dark); background:var(--teal-light); }
+44:   .ob-top-tab.active { color:var(--teal-dark); border-bottom-color:var(--teal-main); }
+45:   .req-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444; margin-left:.25rem; vertical-align:middle; }
+46:   /* ── Content ── */
+47:   .ob-right { display:flex; flex-direction:column; min-height:100%; }
+48:   .section-wrapper { display:flex; flex-direction:column; flex:1; }
+49:   .ob-content { padding:1.5rem; flex:1; }
+50:   .ob-content-header { display:flex; align-items:center; gap:.6rem; margin-bottom:1.25rem; padding-bottom:.75rem; border-bottom:1px solid #f1f5f9; }
+51:   .ob-content-header i { font-size:1.5rem; color:var(--teal-main); }
+52:   .ob-content-header h5 { font-weight:700; color:#0f172a; margin:0; }
+53:   .ob-content-header p { color:#64748b; font-size:.82rem; margin:0; }
+54:   .section-card { border:1px solid #e2e8f0; border-radius:.6rem; margin-bottom:1.25rem; overflow:hidden; }
+55:   .section-card-header { background:var(--teal-light); border-bottom:1px solid var(--teal-border); padding:.55rem 1rem; display:flex; align-items:center; gap:.5rem; }
+56:   .section-card-header i { color:var(--teal-main); font-size:1rem; }
+57:   .section-card-header span { font-weight:700; color:var(--teal-dark); font-size:.875rem; }
+58:   .section-card-body { padding:1rem 1.1rem; }
+59:   /* ── Form helpers ── */
+60:   .form-label-sm { font-size:.78rem; font-weight:600; color:#374151; margin-bottom:.3rem; display:block; }
+61:   .form-label-sm .req { color:#ef4444; }
+62:   .input-icon-wrap { position:relative; }
+63:   .input-icon-wrap .form-control, .input-icon-wrap .form-select { padding-left:2.2rem; }
+64:   .input-icon-wrap .field-icon { position:absolute; left:.65rem; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.95rem; pointer-events:none; }
+65:   .form-control, .form-select { border-radius:.45rem; border:1px solid #cbd5e1; font-size:.875rem; color:#1e293b; background:#fff; transition:border-color .2s,box-shadow .2s; height:40px; }
+66:   .form-control:focus, .form-select:focus { border-color:var(--teal-main); box-shadow:0 0 0 3px var(--teal-ring); outline:none; }
+67:   textarea.form-control { height:auto; }
+68:   .sex-radio-row { display:flex; gap:.75rem; flex-wrap:wrap; }
+69:   .sex-radio-option { display:flex; align-items:center; gap:.35rem; padding:.38rem .85rem; border:1px solid #cbd5e1; border-radius:.45rem; cursor:pointer; font-size:.875rem; color:#374151; font-weight:500; transition:all .18s; user-select:none; }
+70:   .sex-radio-option input[type=radio] { accent-color:var(--teal-main); }
+71:   .sex-radio-option:has(input:checked) { border-color:var(--teal-main); background:var(--teal-light); color:var(--teal-dark); }
+72:   /* ── Action bar ── */
+73:   .ob-action-bar { border-top:1px solid #e2e8f0; padding:.9rem 1.5rem; background:#fff; display:flex; align-items:center; justify-content:flex-end; gap:.6rem; flex-wrap:wrap; flex-shrink:0; }
+74:   .btn-cancel { border:1px solid #cbd5e1; background:#fff; color:#475569; border-radius:.45rem; padding:.45rem 1.2rem; font-weight:600; font-size:.875rem; }
+75:   .btn-cancel:hover { background:#f8fafc; border-color:#94a3b8; }
+76:   .btn-draft { border:1px solid var(--teal-dark); background:#fff; color:var(--teal-dark); border-radius:.45rem; padding:.45rem 1.2rem; font-weight:600; font-size:.875rem; display:flex; align-items:center; gap:.35rem; }
+77:   .btn-draft:hover { background:var(--teal-light); }
+78:   .btn-continue { background:var(--teal-main); color:#fff; border:none; border-radius:.45rem; padding:.45rem 1.4rem; font-weight:600; font-size:.875rem; display:flex; align-items:center; gap:.35rem; box-shadow:0 2px 8px rgba(13,148,136,.3); }
+79:   .btn-continue:hover { background:var(--teal-dark); }
+80:   /* ── Review ── */
+81:   .review-section-title { font-size:.95rem; font-weight:700; color:var(--teal-dark); border-bottom:1px solid #e2e8f0; padding-bottom:.4rem; margin-bottom:.75rem; display:flex; align-items:center; gap:.4rem; }
+82:   .review-row { display:flex; padding:.3rem 0; border-bottom:1px solid #f8fafc; font-size:.85rem; }
+83:   .review-row .label { width:45%; color:#64748b; font-weight:600; }
+84:   .review-row .value { color:#1e293b; }
+85:   /* ── App type cards ── */
+86:   .ob-type-row { display:flex; gap:1rem; flex-wrap:wrap; }
+87:   .ob-type-form { flex:1 1 240px; margin:0; }
+88:   .ob-type-card { width:100%; display:flex; align-items:center; gap:.85rem; padding:1rem 1.15rem; background:#f8fafc; border:2px solid #e2e8f0; border-radius:.65rem; text-align:left; transition:all .2s; cursor:pointer; box-sizing:border-box; }
+89:   .ob-type-card:hover:not(:disabled) { background:#fff; border-color:var(--teal-dark); transform:translateY(-1px); box-shadow:0 4px 12px rgba(13,148,136,.1); }
+90:   .ob-type-card--active { background:#f0fdfa !important; border-color:var(--teal-dark) !important; box-shadow:0 0 0 3px rgba(13,148,136,.12); }
+91:   .ob-type-card:disabled { cursor:default; }
+92:   .ob-type-icon { width:40px; height:40px; border-radius:10px; background:#e6fffa; color:var(--teal-dark); display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0; }
+93:   .ob-type-card--active .ob-type-icon { background:var(--teal-dark); color:#fff; }
+94:   .ob-type-info { display:flex; flex-direction:column; flex-grow:1; }
+95:   .ob-type-info strong { display:block; color:#0f172a; font-weight:600; font-size:.925rem; }
+96:   .ob-type-info small { color:#64748b; font-size:.78rem; margin-top:2px; }
+97:   .ob-type-switch { margin-left:auto; font-weight:600; color:var(--teal-dark); font-size:.8rem; padding:.25rem .65rem; background:#fff; border:1px solid #cbd5e1; border-radius:20px; }
+98:   .ob-type-card:hover:not(:disabled) .ob-type-switch { background:var(--teal-dark); color:#fff; border-color:var(--teal-dark); }
+99:   .ob-type-badge { margin-left:auto; font-weight:600; color:#fff; background:var(--teal-dark); font-size:.75rem; padding:.25rem .65rem; border-radius:20px; display:flex; align-items:center; gap:.25rem; }
+100:   .ob-type-notice { font-size:.8rem; color:#64748b; margin-top:.75rem; display:flex; align-items:center; gap:.35rem; background:#f8fafc; padding:.5rem .75rem; border-radius:6px; border:1px solid #f1f5f9; }
+101:   /* ── Tab pane ── */
+102:   .ob-tab-pane { display:none; }
+103:   .ob-tab-pane.active { display:block; }
+104:   .file-upload-hint { font-size:.75rem; color:#94a3b8; margin-top:.25rem; }
+105:   @media (max-width:767px) {
+106:     .ob-sidenav { border-right:none; border-bottom:1px solid #e2e8f0; padding:.75rem; }
+107:     .ob-content { padding:1rem; }
+108:     .ob-top-tabs { padding:0 1rem; }
+109:   }
+110: </style>
+111: 
+112: <div class="onboarding-page">
+113: <div class="container-fluid px-3 px-lg-4">
+114: 
+115:   {# Page Header #}
+116:   <div class="ob-header">
+117:     <div class="ob-header-left">
+118:       <a href="{% url 'users:dashboard' %}" class="ob-back-btn" title="Back to Dashboard">
+119:         <i class="ri-arrow-left-line"></i>
+120:       </a>
+121:       <div>
+122:         <h1 class="ob-title">New Applicant</h1>
+123:         <p class="ob-subtitle">Fill in the applicant information below</p>
+124:       </div>
+125:     </div>
+126:     <div class="ob-date-badge">
+127:       <i class="ri-calendar-event-line"></i>
+128:       <span>{% now "m/d/Y" %}</span>
+129:     </div>
+130:   </div>
+131: 
+132:   {# Main Card #}
+133:   <div class="ob-body-card">
+134:     <div class="row g-0" style="min-height:620px;">
+135: 
+136:       {# ═══ LEFT SIDE MENU ═══ #}
+137:       <div class="col-md-2 ob-sidenav">
+138:         <div class="ob-sidenav-title">Onboarding</div>
+139:         <nav class="nav flex-column" id="ob-sidenav">
+140: 
+141:           {# 1. Role #}
+142:           <button class="nav-link {% if step == 1 %}active{% endif %}"
+143:                   id="sidenav-role" onclick="switchSection('role')" type="button">
+144:             <i class="ri-shield-user-line"></i> Role
+145:             {% if step > 1 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+146:             {% elif step == 1 %}<span class="nav-badge now">Now</span>
+147:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+148:           </button>
+149: 
+150:           {# 2. Demographics #}
+151:           <button class="nav-link {% if step == 2 %}active{% endif %}"
+152:                   id="sidenav-demographics" onclick="switchSection('demographics')" type="button"
+153:                   {% if unlocked_step < 2 %}disabled title="Complete Role first"{% endif %}>
+154:             <i class="ri-user-3-line"></i> Demographics
+155:             {% if step > 2 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+156:             {% elif step == 2 %}<span class="nav-badge now">Now</span>
+157:             {% elif unlocked_step >= 2 %}<span class="nav-badge todo">To do</span>
+158:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+159:           </button>
+160: 
+161:           {# 3. Attachments #}
+162:           <button class="nav-link {% if step == 3 %}active{% endif %}"
+163:                   id="sidenav-attachments" onclick="switchSection('attachments')" type="button"
+164:                   {% if unlocked_step < 3 %}disabled title="Complete Demographics first"{% endif %}>
+165:             <i class="ri-attachment-line"></i> Attachments
+166:             {% if step > 3 %}<span class="nav-badge done"><i class="ri-check-line"></i></span>
+167:             {% elif step == 3 %}<span class="nav-badge now">Now</span>
+168:             {% elif unlocked_step >= 3 %}<span class="nav-badge todo">To do</span>
+169:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+170:           </button>
+171: 
+172:           {# 4. Final #}
+173:           <button class="nav-link {% if step == 4 %}active{% endif %}"
+174:                   id="sidenav-final" onclick="switchSection('final')" type="button"
+175:                   {% if unlocked_step < 4 %}disabled title="Complete Attachments first"{% endif %}>
+176:             <i class="ri-send-plane-line"></i> Final
+177:             {% if step == 4 %}<span class="nav-badge now">Now</span>
+178:             {% elif unlocked_step >= 4 %}<span class="nav-badge todo">To do</span>
+179:             {% else %}<span class="nav-badge locked"><i class="ri-lock-line"></i></span>{% endif %}
+180:           </button>
+181: 
+182:         </nav>
+183:       </div>
+184: 
+185:       {# ═══ RIGHT CONTENT ═══ #}
+186:       <div class="col-md-10 ob-right">
+187: 
+188:         {# ─── ROLE (Step 1) ─── #}
+189:         <div id="section-role" class="section-wrapper {% if step != 1 %}d-none{% endif %}">
+190:           <div class="ob-top-tabs">
+191:             <button class="ob-top-tab active" id="toptab-apptype"
+192:                     onclick="switchTopTab('role','apptype')" type="button">
+193:               <i class="ri-list-settings-line"></i> Applicant Type
+194:             </button>
+195:           </div>
+196:           <div id="topPane-role-apptype" class="ob-tab-pane active" style="display:flex;flex-direction:column;flex:1;">
+197:             <form method="post" action="{% url 'users:onboarding' %}" novalidate
+198:                   style="display:flex;flex-direction:column;flex:1;">
+199:               {% csrf_token %}
+200:               <div class="ob-content">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
