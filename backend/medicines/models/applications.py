@@ -71,6 +71,7 @@ class MedicineApplication(TimeStampedModel):
     medicine_name = models.CharField(max_length=255, verbose_name="Medicine Name (Jina la dawa)")
     dosage_form = models.CharField(max_length=100, choices=DOSAGE_FORM_CHOICES, verbose_name="Hali ya dawa (Dosage form)")
     dosage_form_other = models.CharField(max_length=100, blank=True, null=True, verbose_name="Taja Hali ya dawa")
+    empty_packaging_size = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Ujazo wa kifungashio kabla ya kuweka dawa")
     net_weight_volume = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Kiasi (Net Weight/Net Volume)")
     
     UNIT_CHOICES = [('g', 'g'), ('mL', 'mL')]
@@ -84,13 +85,13 @@ class MedicineApplication(TimeStampedModel):
     packaging_size = models.CharField(max_length=100, blank=True, null=True, verbose_name="Saizi ya Kifungashio")
     packaging_color = models.CharField(max_length=100, blank=True, null=True, verbose_name="Rangi ya kifungashio")
     lid_color = models.CharField(max_length=100, blank=True, null=True, verbose_name="Rangi ya kifuniko")
-    other_appearance_instructions = models.TextField(blank=True, null=True, verbose_name="Maelekezo mengine ya muonekano")
+    other_appearance_instructions = models.TextField(blank=True, null=True, verbose_name="Maelekezo mengine")
     
     # Ingredients Information
     ingredients_table = models.TextField(blank=True, null=True, verbose_name="Mchanganyiko wa dawa (Ingredients Table)")
     active_ingredients = models.TextField(blank=True, null=True, verbose_name="Viambato vikuu (Active ingredients)")
     excipients = models.TextField(blank=True, null=True, verbose_name="Viambato vidogo (Excipients)")
-    ingredients = models.TextField(verbose_name="Medicine ingredients information (Taarifa za viambato vya dawa)", help_text="List of raw materials or herbs used")
+    ingredients = models.TextField(blank=True, null=True, verbose_name="Medicine ingredients information (Taarifa za viambato vya dawa)", help_text="List of raw materials or herbs used")
     
     # Usage and Safety Details
     ROUTE_CHOICES = [
@@ -108,10 +109,10 @@ class MedicineApplication(TimeStampedModel):
     directions_for_use = models.TextField(verbose_name="Directions for use (Namna ya matumizi)", default="")
     
     known_side_effects = models.BooleanField(default=False, verbose_name="Je, dawa ina madhara yanayojulikana?")
-    possible_side_effects = models.TextField(verbose_name="Possible side effects (Madhara yanayoweza kutokea)", default="")
+    possible_side_effects = models.TextField(verbose_name="Possible side effects (Madhara yanayoweza kutokea)", blank=True, null=True, default="")
     
     precautions = models.TextField(verbose_name="Precautions (Tahadhari)", default="")
-    instructions_for_use = models.TextField(verbose_name="Instructions for use (Maelekezo ya matumizi)", default="")
+    instructions_for_use = models.TextField(verbose_name="Instructions for use (Maelekezo ya matumizi)", blank=True, null=True, default="")
     
     STORAGE_CHOICES = [
         ('JOTO_LA_KAWAIDA', 'Joto la kawaida (Room Temperature)'),
@@ -120,7 +121,8 @@ class MedicineApplication(TimeStampedModel):
     storage_conditions = models.CharField(max_length=50, choices=STORAGE_CHOICES, verbose_name="Storage conditions (Masharti ya utunzaji)", default="JOTO_LA_KAWAIDA")
     storage_conditions_other = models.TextField(blank=True, null=True, verbose_name="Iwapo mazingira maalum, elezea:")
     
-    shelf_life = models.CharField(max_length=100, blank=True, null=True, verbose_name="Muda wa matumizi wa dawa (Shelf life)")
+    shelf_life = models.IntegerField(blank=True, null=True, verbose_name="Muda wa matumizi wa dawa (Shelf life)")
+    shelf_life_duration_type = models.CharField(max_length=20, choices=DURATION_CHOICES, blank=True, null=True, verbose_name="Aina ya muda (Shelf life)")
     dosage = models.CharField(max_length=255, blank=True, null=True, verbose_name="Kipimo cha matumizi (Dosage)")
     
     # Raw Material Sources (Vyanzo vya dawa ghafi)
@@ -155,6 +157,13 @@ class MedicineApplication(TimeStampedModel):
         ('MDOGO_SANA', 'Upatikanaji mdogo sana'),
     ]
     local_abundance = models.CharField(max_length=50, choices=ABUNDANCE_CHOICES, blank=True, null=True, verbose_name="Hali ya upatikanaji (Local)")
+    
+    foreign_source_countries = models.CharField(max_length=255, blank=True, null=True, verbose_name="Nchi zinakotoka (Countries of origin)")
+    foreign_harvest_season = models.CharField(max_length=50, choices=SEASON_CHOICES, blank=True, null=True, verbose_name="Msimu wa kuvuna (Foreign)")
+    foreign_harvested_part = models.CharField(max_length=50, choices=PLANT_PART_CHOICES, blank=True, null=True, verbose_name="Sehemu inayovunwa (Foreign)")
+    foreign_harvested_part_other = models.CharField(max_length=100, blank=True, null=True, verbose_name="Sehemu nyingine (Foreign)")
+    foreign_cultivated_or_wild = models.CharField(max_length=20, choices=CULTIVATION_CHOICES, blank=True, null=True)
+    foreign_abundance = models.CharField(max_length=50, choices=ABUNDANCE_CHOICES, blank=True, null=True, verbose_name="Hali ya upatikanaji (Foreign)")
 
     # Manufacturing Information (Hatua ya 3)
     harvesting_method = models.TextField(verbose_name="Method of harvesting raw materials (Namna ya uvunaji wa malighafi)", blank=True, null=True)
@@ -164,18 +173,19 @@ class MedicineApplication(TimeStampedModel):
     
     LOCATION_CHOICES = [('NDANI_YA_NYUMBA', 'Ndani ya nyumba ya kuishi'), ('LIMEJITENGA', 'Limejitenga na nyumba')]
     manufacturing_location_type = models.CharField(max_length=20, choices=LOCATION_CHOICES, blank=True, null=True)
-    manufacturing_area_size = models.CharField(max_length=100, blank=True, null=True, verbose_name="Saizi ya eneo/jengo")
+    manufacturing_area_size = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Saizi ya eneo/jengo")
     manufacturing_procedures = models.TextField(verbose_name="Manufacturing procedures (Hatua za utengenezaji)", blank=True, null=True)
     equipment_used = models.TextField(verbose_name="Equipment used (Vifaa vinavyotumika)", blank=True, null=True)
     manufacturing_area = models.CharField(max_length=255, verbose_name="Manufacturing area (Eneo la uzalishaji)", blank=True, null=True)
     packaging_procedures = models.TextField(verbose_name="Packaging procedures (Namna ya ufungashaji)", blank=True, null=True)
     quality_control_procedures = models.TextField(verbose_name="Taratibu za udhibiti wa ubora (Quality control procedures)", blank=True, null=True)
+    storage_environment = models.TextField(verbose_name="Mazingira ya utunzaji dawa iliyokwisha tengenezwa", blank=True, null=True)
     in_process_control_procedures = models.TextField(verbose_name="Hatua za udhibiti wakati wa uzalishaji (In-process control procedures)", blank=True, null=True)
     manufacturing_flow_chart = models.FileField(upload_to=medicine_document_path, verbose_name="Mchoro wa hatua za uzalishaji (Manufacturing flow chart)", blank=True, null=True)
     
     # Attachments (Hatua ya 4)
     # Note: "Sampuli tatu za dawa" is physical
-    sample_label = models.FileField(upload_to=medicine_document_path, verbose_name="Sample medicine label (Mfano wa lebo ya dawa)", blank=True, null=True)
+    # sample_label is now handled by MedicineLabelAttachment model
     statement_of_efficacy = models.FileField(upload_to=medicine_document_path, verbose_name="Statement of efficacy (Taarifa ya ufanisi wa dawa)", blank=True, null=True)
     literature_review = models.FileField(upload_to=medicine_document_path, verbose_name="Literature review on efficacy (Mapitio ya maandiko kuhusu ufanisi)", blank=True, null=True)
     tahpc_certificate = models.FileField(upload_to=medicine_document_path, verbose_name="TAHPC practitioner certificate (Cheti cha mganga kutoka TAHPC)", blank=True, null=True)
@@ -232,3 +242,10 @@ class MedicineApplication(TimeStampedModel):
     class Meta:
         ordering = ['-created_at']
 
+class MedicineLabelAttachment(models.Model):
+    application = models.ForeignKey(MedicineApplication, on_delete=models.CASCADE, related_name='label_attachments')
+    file = models.FileField(upload_to=medicine_document_path, verbose_name="Sample medicine label attachment")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Label for {self.application.medicine_name}"

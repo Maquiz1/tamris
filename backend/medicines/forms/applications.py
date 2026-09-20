@@ -14,7 +14,7 @@ class BaseMedicineForm(forms.ModelForm):
                 'application_type': 'BASIC_DETAILS',
                 'medicine_name': 'BASIC_DETAILS', 'dosage_form': 'BASIC_DETAILS', 'dosage_form_other': 'BASIC_DETAILS', 'indications': 'BASIC_DETAILS',
                 'directions_for_use': 'BASIC_DETAILS', 'possible_side_effects': 'BASIC_DETAILS', 'precautions': 'BASIC_DETAILS',
-                'instructions_for_use': 'BASIC_DETAILS', 'storage_conditions': 'BASIC_DETAILS', 'net_weight_volume': 'BASIC_DETAILS',
+                'instructions_for_use': 'BASIC_DETAILS', 'storage_conditions': 'BASIC_DETAILS', 'empty_packaging_size': 'BASIC_DETAILS', 'net_weight_volume': 'BASIC_DETAILS',
                 'medicine_color': 'BASIC_DETAILS', 'medicine_smell': 'BASIC_DETAILS', 'medicine_taste': 'BASIC_DETAILS',
                 'medicine_texture': 'BASIC_DETAILS', 'packaging_size': 'BASIC_DETAILS', 'packaging_color': 'BASIC_DETAILS',
                 'lid_color': 'BASIC_DETAILS', 'other_appearance_instructions': 'BASIC_DETAILS', 'route_of_administration': 'BASIC_DETAILS',
@@ -24,7 +24,9 @@ class BaseMedicineForm(forms.ModelForm):
                 
                 'ingredients': 'INGREDIENTS', 'ingredients_table': 'INGREDIENTS', 'active_ingredients': 'INGREDIENTS', 'excipients': 'INGREDIENTS',
                 'local_harvest_season': 'INGREDIENTS', 'local_harvested_part': 'INGREDIENTS', 'local_harvested_part_other': 'INGREDIENTS',
-                'local_cultivated_or_wild': 'INGREDIENTS', 'local_abundance': 'INGREDIENTS',
+                'local_cultivated_or_wild': 'INGREDIENTS', 'local_abundance': 'INGREDIENTS', 'foreign_source_countries': 'INGREDIENTS',
+                'foreign_harvest_season': 'INGREDIENTS', 'foreign_harvested_part': 'INGREDIENTS', 'foreign_harvested_part_other': 'INGREDIENTS',
+                'foreign_cultivated_or_wild': 'INGREDIENTS', 'foreign_abundance': 'INGREDIENTS',
                 
                 'does_dry_raw_materials': 'MANUFACTURING', 'drying_area': 'MANUFACTURING', 'drying_equipment': 'MANUFACTURING',
                 'manufacturing_location_type': 'MANUFACTURING', 'manufacturing_area_size': 'MANUFACTURING', 'manufacturing_area': 'MANUFACTURING',
@@ -45,14 +47,36 @@ class BaseMedicineForm(forms.ModelForm):
                     # Remove the required attribute for disabled fields so the form can still submit valid data
                     field.required = False
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = [single_file_clean(data, initial)] if data else []
+        return result
+
 class MasterMedicineApplicationForm(BaseMedicineForm):
+    sample_label = MultipleFileField(
+        widget=MultipleFileInput(attrs={'class': 'form-control', 'accept': 'image/*,.pdf', 'multiple': True}),
+        label="Sample medicine label (Mfano wa lebo ya dawa)",
+        required=False
+    )
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         app_type = getattr(self.instance, 'application_type', None)
         
         # Define fields that are exclusively for Category II
         cat2_only_fields = [
-            'shelf_life', 'dosage', 'quality_control_procedures', 
+            'shelf_life', 'shelf_life_duration_type', 'dosage', 'quality_control_procedures', 'storage_environment',
             'in_process_control_procedures', 'manufacturing_flow_chart',
             'brela_registration_name', 'scientific_name_report', 
             'heavy_metals_report', 'pesticides_report', 'toxic_chemicals_report', 
@@ -89,11 +113,12 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'ingredients',
             'traditional_medicine_skills', 'traditional_medicine_skills_other',
             'training_institution', 'training_duration', 'training_duration_type', 'inherited_from', 'inherited_duration', 'inherited_duration_type',
-            'net_weight_volume', 'medicine_color', 'medicine_smell', 'medicine_taste', 'medicine_texture',
+            'empty_packaging_size', 'net_weight_volume', 'medicine_color', 'medicine_smell', 'medicine_taste', 'medicine_texture',
             'packaging_size', 'packaging_color', 'lid_color', 'other_appearance_instructions',
             'ingredients_table', 'active_ingredients', 'excipients',
             'route_of_administration', 'route_of_administration_other',
-            'local_harvest_season', 'local_harvested_part', 'local_harvested_part_other', 'local_cultivated_or_wild', 'local_abundance',
+            'local_harvest_season', 'local_harvested_part', 'local_harvested_part_other', 'local_cultivated_or_wild', 'local_abundance', 'foreign_source_countries',
+            'foreign_harvest_season', 'foreign_harvested_part', 'foreign_harvested_part_other', 'foreign_cultivated_or_wild', 'foreign_abundance',
             'does_dry_raw_materials', 'drying_area', 'drying_equipment',
             'manufacturing_location_type', 'manufacturing_area_size', 'manufacturing_area',
             'manufacturing_procedures', 'harvesting_method', 'equipment_used', 'packaging_procedures',
@@ -104,10 +129,10 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'precautions',
             'instructions_for_use',
             'storage_conditions', 'storage_conditions_other',
-            'shelf_life',
+            'shelf_life', 'shelf_life_duration_type',
             'dosage',
             
-            'quality_control_procedures',
+            'quality_control_procedures', 'storage_environment',
             'in_process_control_procedures',
             'manufacturing_flow_chart',
 
@@ -130,7 +155,6 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'brela_registration_name',
             
             # Common file fields
-            'sample_label',
             'statement_of_efficacy',
             'literature_review',
             'tahpc_certificate',
@@ -151,7 +175,8 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'instructions_for_use': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Specific instructions for use'}),
             'storage_conditions': forms.Select(attrs={'class': 'form-select', 'onchange': 'toggleStorageConditionsOther()'}),
             'storage_conditions_other': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Elezea mazingira maalum'}),
-            'shelf_life': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 12 months, 2 years'}),
+            'shelf_life': forms.NumberInput(attrs={'class': 'form-control'}),
+            'shelf_life_duration_type': forms.Select(attrs={'class': 'form-select'}),
             'dosage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 2 tablets twice a day, 5ml every 8 hours'}),
             
             # Skills
@@ -165,6 +190,7 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'inherited_duration_type': forms.Select(attrs={'class': 'form-select'}),
             
             # Appearance
+            'empty_packaging_size': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'net_weight_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'medicine_color': forms.TextInput(attrs={'class': 'form-control'}),
             'medicine_smell': forms.TextInput(attrs={'class': 'form-control'}),
@@ -190,6 +216,12 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'local_harvested_part_other': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Please specify'}),
             'local_cultivated_or_wild': forms.Select(attrs={'class': 'form-select'}),
             'local_abundance': forms.Select(attrs={'class': 'form-select'}),
+            'foreign_source_countries': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Kenya, India'}),
+            'foreign_harvest_season': forms.Select(attrs={'class': 'form-select'}),
+            'foreign_harvested_part': forms.Select(attrs={'class': 'form-select'}),
+            'foreign_harvested_part_other': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Please specify'}),
+            'foreign_cultivated_or_wild': forms.Select(attrs={'class': 'form-select'}),
+            'foreign_abundance': forms.Select(attrs={'class': 'form-select'}),
             
             # Manufacturing Info
             'harvesting_method': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe how raw materials are harvested'}),
@@ -197,12 +229,13 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'drying_area': forms.TextInput(attrs={'class': 'form-control'}),
             'drying_equipment': forms.TextInput(attrs={'class': 'form-control'}),
             'manufacturing_location_type': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-            'manufacturing_area_size': forms.TextInput(attrs={'class': 'form-control'}),
+            'manufacturing_area_size': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'e.g. 50.5'}),
             'manufacturing_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Provide step-by-step manufacturing procedures'}),
             'equipment_used': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'List all equipment used in production'}),
             'manufacturing_area': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Where is the medicine manufactured?'}),
             'packaging_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe how the final product is packaged'}),
             'quality_control_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Quality control procedures'}),
+            'storage_environment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Mazingira ya utunzaji'}),
             'in_process_control_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'In-process control procedures'}),
             'manufacturing_flow_chart': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*,.pdf'}),
             
@@ -225,7 +258,6 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'clinical_observation_report': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
 
             # Attachments
-            'sample_label': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*,.pdf'}),
             'statement_of_efficacy': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
             'literature_review': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
             'tahpc_certificate': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*,.pdf'}),

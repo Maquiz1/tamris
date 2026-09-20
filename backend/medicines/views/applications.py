@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from medicines.forms import MasterMedicineApplicationForm, PreliminaryEvaluationForm, ScientificEvaluationForm, PaymentVerificationForm, ApplicantPaymentSubmissionForm, FeeConfigurationForm, InitiateApplicationForm, InspectionScheduleForm, InspectionReportForm
 from django.utils import timezone
-from medicines.models import MedicineApplication, MedicineEvaluation, Payment, FeeConfiguration, InspectionSchedule, FeeInactiveError
+from medicines.models import MedicineApplication, MedicineEvaluation, Payment, FeeConfiguration, InspectionSchedule, FeeInactiveError, MedicineLabelAttachment
 from django.core.paginator import Paginator
 from django.db.models import Q
 from users.emails import notify_finance_pending_payment, notify_evaluator_payment_verified, notify_applicant_application_status
@@ -66,6 +66,10 @@ def medicine_master_apply_view(request, pk):
             app.submitted_at = timezone.now()
             app.save()
             
+            # Handle multiple sample label attachments
+            for f in request.FILES.getlist('sample_label'):
+                MedicineLabelAttachment.objects.create(application=app, file=f)
+            
             # Determine fee based on application type
             try:
                 if app.application_type == 'LISTING':
@@ -115,6 +119,10 @@ def medicine_application_edit_view(request, pk):
             app.status = 'UNDER_REVIEW'
             app.submitted_at = timezone.now()
             app.save()
+            
+            # Handle multiple sample label attachments
+            for f in request.FILES.getlist('sample_label'):
+                MedicineLabelAttachment.objects.create(application=app, file=f)
             messages.success(request, 'Your corrected application has been resubmitted for review.')
             return redirect('users:dashboard')
         else:

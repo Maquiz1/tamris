@@ -142,25 +142,25 @@
                             <div class="row g-3 mb-4 p-3 bg-light rounded">
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold text-muted">2.1 Aina ya Mwombaji:</label>
-                                    <span class="fw-bold ms-2">{{ application.applicant.applicant_type }}</span>
+                                    <span class="fw-bold ms-2">{{ request.user.applicant_profile.applicant_type }}</span>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold text-muted">2.2 Taarifa za Mwombaji:</label>
-                                    {% if application.applicant.applicant_type == 'Individual' %}
+                                    {% if request.user.applicant_profile.applicant_type == 'Individual' %}
                                         <div class="row g-2 mt-1">
-                                            <div class="col-md-4"><span class="text-muted">Jina Kamili:</span> <strong>{{ application.applicant.individual.full_name }}</strong></div>
-                                            <div class="col-md-4"><span class="text-muted">Jinsia:</span> <strong>{{ application.applicant.individual.sex|default:"-" }}</strong></div>
-                                            <div class="col-md-4"><span class="text-muted">Tarehe ya kuzaliwa:</span> <strong>{{ application.applicant.individual.date_of_birth|default:"-" }}</strong></div>
-                                            <div class="col-md-4"><span class="text-muted">Namba ya utambulisho:</span> <strong>{{ application.applicant.identity_obj.identity_number|default:"-" }}</strong></div>
+                                            <div class="col-md-4"><span class="text-muted">Jina Kamili:</span> <strong>{{ request.user.applicant_profile.individual.full_name }}</strong></div>
+                                            <div class="col-md-4"><span class="text-muted">Jinsia:</span> <strong>{{ request.user.applicant_profile.individual.sex|default:"-" }}</strong></div>
+                                            <div class="col-md-4"><span class="text-muted">Tarehe ya kuzaliwa:</span> <strong>{{ request.user.applicant_profile.individual.date_of_birth|default:"-" }}</strong></div>
+                                            <div class="col-md-4"><span class="text-muted">Namba ya utambulisho:</span> <strong>{{ request.user.applicant_profile.identity_obj.identity_number|default:"-" }}</strong></div>
                                         </div>
                                     {% else %}
                                         <div class="row g-2 mt-1">
-                                            <div class="col-md-6"><span class="text-muted">Jina la Taasisi/Kampuni:</span> <strong>{{ application.applicant.organization.organization_name }}</strong></div>
-                                            <div class="col-md-6"><span class="text-muted">Namba ya Usajili BRELA:</span> <strong>{{ application.applicant.organization.registration_number|default:"-" }}</strong></div>
-                                            <div class="col-md-6"><span class="text-muted">Tarehe ya Usajili:</span> <strong>{{ application.applicant.organization.date_registered|default:"-" }}</strong></div>
-                                            <div class="col-md-6"><span class="text-muted">TIN:</span> <strong>{{ application.applicant.organization.tin|default:"-" }}</strong></div>
+                                            <div class="col-md-6"><span class="text-muted">Jina la Taasisi/Kampuni:</span> <strong>{{ request.user.applicant_profile.organization.organization_name }}</strong></div>
+                                            <div class="col-md-6"><span class="text-muted">Namba ya Usajili BRELA:</span> <strong>{{ request.user.applicant_profile.organization.registration_number|default:"-" }}</strong></div>
+                                            <div class="col-md-6"><span class="text-muted">Tarehe ya Usajili:</span> <strong>{{ request.user.applicant_profile.organization.date_registered|default:"-" }}</strong></div>
+                                            <div class="col-md-6"><span class="text-muted">TIN:</span> <strong>{{ request.user.applicant_profile.organization.tin|default:"-" }}</strong></div>
                                         </div>
-                                        {% with rep=application.applicant.organization.representatives.first %}
+                                        {% with rep=request.user.applicant_profile.organization.representatives.first %}
                                         {% if rep %}
                                         <div class="mt-3 border-top pt-2">
                                             <span class="fw-bold d-block mb-1 text-primary">Taarifa za mwakilishi:</span>
@@ -249,7 +249,15 @@
                                     </div>
                                 </div>
                                 
-                                <div class="col-md-12 mt-3 border-top pt-3">
+                                <div class="col-md-6 mt-3 border-top pt-3">
+                                    <label class="form-label fw-bold">{{ form.empty_packaging_size.label }} <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        {{ form.empty_packaging_size }}
+                                        <span class="input-group-text fw-bold">g / mL</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mt-3 border-top pt-3">
                                     <label class="form-label fw-bold">4.3 Ujazo/Kiasi cha dawa kilichopo kwenye kifungashio (Packaging size) <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {{ form.net_weight_volume }}
@@ -258,46 +266,69 @@
                                     <div style="display:none;">{{ form.net_weight_volume_unit }}</div>
                                 </div>
 
-                                <div class="col-md-6 mt-3">
+                                <div class="col-md-12 mt-3">
                                     <label class="form-label fw-bold">4.4 Muda wa matumizi wa dawa (Shelf life) <span class="text-danger">*</span></label>
-                                    {{ form.shelf_life }}
+                                    <div class="row g-2 mt-1">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small mb-1">Idadi ya muda</label>
+                                            {{ form.shelf_life }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small mb-1">Aina ya muda</label>
+                                            {{ form.shelf_life_duration_type }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
                             <h6 class="fw-bold text-muted mt-3">Sifa za muonekano wa dawa:</h6>
                             <div class="mb-4 border p-3 bg-light rounded">
                                 <div class="row g-3">
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <label class="form-label fw-bold">{{ form.medicine_color.label }}</label>
                                         {{ form.medicine_color }}
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <label class="form-label fw-bold">{{ form.medicine_smell.label }}</label>
                                         {{ form.medicine_smell }}
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <label class="form-label fw-bold">{{ form.medicine_taste.label }}</label>
                                         {{ form.medicine_taste }}
                                     </div>
-                                    <div class="col-md-3">
+                                    
+                                    <div class="col-md-12 mt-3">
                                         <label class="form-label fw-bold">{{ form.medicine_texture.label }}</label>
                                         {{ form.medicine_texture }}
                                     </div>
-                                    
-                                    <div class="col-md-6 mt-3">
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold text-muted mt-3">Sifa za muonekano wa kifungashio:</h6>
+                            <div class="mb-4 border p-3 bg-light rounded">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">{{ form.packaging_size.label }}</label>
+                                        <div class="input-group">
+                                            {{ form.packaging_size }}
+                                            <span class="input-group-text fw-bold">Ml/G</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
                                         <label class="form-label fw-bold">{{ form.packaging_color.label }}</label>
                                         {{ form.packaging_color }}
                                     </div>
-                                    <div class="col-md-6 mt-3">
+                                    <div class="col-md-4">
                                         <label class="form-label fw-bold">{{ form.lid_color.label }}</label>
                                         {{ form.lid_color }}
                                     </div>
                                     
-                                    <div class="col-md-12 mt-3">
-                                        <label class="form-label fw-bold">{{ form.other_appearance_instructions.label }}</label>
-                                        {{ form.other_appearance_instructions }}
-                                    </div>
                                 </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="form-label fw-bold">{{ form.other_appearance_instructions.label }}</label>
+                                {{ form.other_appearance_instructions }}
                             </div>
                         </div>
 
@@ -316,11 +347,10 @@
                                         <table class="table table-sm table-bordered align-middle mb-2" id="dynamicIngredientsTable">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Jina la Kienyeji</th>
-                                                    <th>Jina la Kiswahili</th>
-                                                    <th>Jina la Kitaalam (Botanical)</th>
-                                                    <th>Sehemu inayotumika</th>
-                                                    <th>Kiasi/Asilimia</th>
+                                                    <th>Jina (Kiswahili/kikabila)</th>
+                                                    <th>Jina (Kiingereza/Kilatini)</th>
+                                                    <th>Mkoa au nchi Inakopatikana mikoa</th>
+                                                    <th>Sehemu ya mmea inayotumika</th>
                                                     <th style="width: 50px;"></th>
                                                 </tr>
                                             </thead>
@@ -333,26 +363,30 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
-                                    <label class="form-label fw-bold">Au eleza hapa (Mchanganyiko) <span class="text-danger">*</span></label>
-                                    {{ form.ingredients }}
-                                </div>
+
                             </div>
 
                             <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-5">8. VIAMBATO VIKUU NA 9. VIAMBATO VIDOGO</h5>
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">8. {{ form.active_ingredients.label }} <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-bold">8. Ni vipi viambato vikuu (vyenye uwezo wa kimatibabu) <span class="text-danger">*</span></label>
                                     {{ form.active_ingredients }}
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">9. {{ form.excipients.label }} <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-bold">9. Ni vipi viambato vidogo ( Viambato visivyo na uwezo wa kimatibabu ila vinasaidia dawa mfano; isiharibike haraka, isiwe radha mbaya, isiwe na harufu mbaya isiwe na rangi mbaya, ishikamane vema, nk) <span class="text-danger">*</span></label>
                                     {{ form.excipients }}
                                 </div>
                             </div>
 
-                            <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-5">10. VYANZO VYA DAWA GHAFI (Raw Material Sources)</h5>
+                            </div>
+
+                        <!-- STEP 3: Manufacturing -->
+                        <div class="step-container" id="step-3">
+                            <h4 class="fw-bold text-primary mb-4">Hatua ya 3: Hatua za Uzalishaji au Utengenezaji</h4>
+                            
+                            <h5 class="fw-bold border-bottom pb-2 mb-4 text-dark mt-4">10. VYANZO VYA DAWA GHAFI (Raw Material Sources)</h5>
                             <div class="row g-3 mb-4 border p-3 bg-light rounded">
+                                <h6 class="fw-bold text-primary mb-3">A. Zinatoka nchini(Tanzania)</h6>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">10.1 {{ form.local_harvest_season.label }}</label>
                                     {{ form.local_harvest_season }}
@@ -375,9 +409,39 @@
                                     <label class="form-label fw-bold">10.4 {{ form.local_abundance.label }}</label>
                                     {{ form.local_abundance }}
                                 </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="fw-bold text-primary mb-3">B. Kutoka nje ya nchi(Outside the Country)</h6>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">{{ form.foreign_source_countries.label }}</label>
+                                    {{ form.foreign_source_countries }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">10.5 {{ form.foreign_harvest_season.label }}</label>
+                                    {{ form.foreign_harvest_season }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">10.6 {{ form.foreign_harvested_part.label }}</label>
+                                    {{ form.foreign_harvested_part }}
+                                </div>
+                                <div class="col-md-12 mt-2" id="foreign-harvested-part-other-container" style="display: none;">
+                                    <div class="p-3 bg-white rounded border border-warning">
+                                        <label class="form-label fw-bold">Iwapo nyingine, Elezea (Foreign)</label>
+                                        {{ form.foreign_harvested_part_other }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">10.7 Mimea inalimwa au ni asili (porini)? (Foreign)</label>
+                                    {{ form.foreign_cultivated_or_wild }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">10.8 {{ form.foreign_abundance.label }}</label>
+                                    {{ form.foreign_abundance }}
+                                </div>
                             </div>
                             
-                            <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-5">11. UKAUSHAJI</h5>
+                            <h5 class="fw-bold border-bottom pb-2 mb-4 text-dark mt-5">11. UKAUSHAJI</h5>
                             <div class="row g-3 mb-4 border p-3 bg-light rounded">
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold">11.1 Je, una kausha dawa ghafi?</label>
@@ -405,13 +469,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- STEP 3: Manufacturing -->
-                        <div class="step-container" id="step-3">
-                            <h4 class="fw-bold text-primary mb-4">Hatua ya 3: Utaratibu wa Uzalishaji</h4>
-                            
-                            <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-4">12. UTARATIBU WA UZALISHAJI (Manufacturing Process)</h5>
+                            <h5 class="fw-bold border-bottom pb-2 mb-4 text-dark mt-4">12. UTARATIBU WA UZALISHAJI (Manufacturing Process)</h5>
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Mahali pa kuzalishia dawa</label>
@@ -426,10 +484,13 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">{{ form.manufacturing_area_size.label }}</label>
-                                    {{ form.manufacturing_area_size }}
+                                    <div class="input-group">
+                                        {{ form.manufacturing_area_size }}
+                                        <span class="input-group-text">m² (Square meters)</span>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 mt-3">
-                                    <label class="form-label fw-bold">Maelezo ya Utaratibu (Procedures) <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-bold">Maelezo kamili na ya kina ya taratibu za utengenezaji wa bidhaa kuanzia dawaghafi hadi bidhaa ya mwisho, ikijumuisha taratibu zote za udhibiti wa ubora zinazofanyika katika kila hatua ya uzalishaji pamoja na vifaa, mitambo na maeneo yanayotumika katika kila hatua ya mchakato wa utengenezaji <span class="text-danger">*</span></label>
                                     {{ form.manufacturing_procedures }}
                                 </div>
                                 
@@ -439,6 +500,10 @@
                                     {{ form.quality_control_procedures }}
                                 </div>
                                 <div class="col-md-6 mt-3">
+                                    <label class="form-label fw-bold">Mazingira ya utunzaji dawa iliyokwisha tengenezwa <span class="text-danger">*</span></label>
+                                    {{ form.storage_environment }}
+                                </div>
+                                <div class="col-md-12 mt-3">
                                     <label class="form-label fw-bold">Hatua za udhibiti wakati wa uzalishaji (In-process control procedures) <span class="text-danger">*</span></label>
                                     {{ form.in_process_control_procedures }}
                                 </div>
@@ -452,8 +517,26 @@
                             <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-4">5. MAGONJWA/DALILI</h5>
                             <div class="row g-3 mb-4">
                                 <div class="col-md-12">
-                                    <label class="form-label fw-bold">5.1 Dawa inatibu magonjwa / dalili gani? <span class="text-danger">*</span></label>
-                                    {{ form.indications }}
+                                    <label class="form-label fw-bold">Orodhesha magonjwa / dalili zinazotibiwa <span class="text-danger">*</span></label>
+                                    <div style="display: none;">
+                                        {{ form.indications }}
+                                    </div>
+                                    <div class="table-responsive border rounded p-2 mb-3 bg-white">
+                                        <table class="table table-sm table-bordered align-middle mb-2" id="dynamicIndicationsTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Ugonjwa / Dalili (Disease / Symptom)</th>
+                                                    <th style="width: 50px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Rows injected by JS -->
+                                            </tbody>
+                                        </table>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="addIndicationBtn">
+                                            <i class="ri-add-line me-1"></i> Ongeza Ugonjwa / Dalili
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -469,6 +552,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">6.2 Kipimo na muda (Dosage & Duration) <span class="text-danger">*</span></label>
+                                    <small class="text-muted d-block mb-2" style="font-size: 0.85rem;">Eleza kiasi cha dawa anachotakiwa kutumia mgonjwa (Kipimo / Dosage) na kwa muda gani (Muda / Duration). Mfano: Vijiko 2 kutwa mara 3 kwa siku 5.</small>
                                     {{ form.dosage }}
                                 </div>
                                 <div class="col-md-12 mt-3">
@@ -504,7 +588,7 @@
                                 </div>
                                 <div class="col-md-12 mt-3" id="side-effects-container" style="display: none;">
                                     <div class="p-3 bg-light rounded border border-warning">
-                                        <label class="form-label fw-bold">Iwapo Ndiyo, eleza:</label>
+                                        <label class="form-label fw-bold">Taja athari au madhara ambayo yanaweza kusababishwa na matumizi ya dawa hii</label>
                                         {{ form.possible_side_effects }}
                                     </div>
                                 </div>
@@ -607,6 +691,16 @@
                                     <label class="form-label fw-bold" id="sample-label-text">16. {{ form.sample_label.label }} <span class="text-danger">*</span></label>
                                     <small class="d-block text-muted mb-2" id="sample-logic-text"></small>
                                     {{ form.sample_label }}
+                                    {% if application and application.label_attachments.exists %}
+                                        <div class="mt-2">
+                                            <p class="mb-1 fw-bold text-success" style="font-size: 0.85rem;"><i class="fas fa-check-circle"></i> Zilizopakiwa tayari:</p>
+                                            <ul class="list-unstyled mb-0" style="font-size: 0.85rem;">
+                                                {% for attachment in application.label_attachments.all %}
+                                                    <li><i class="fas fa-file text-secondary me-1"></i> <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name|slice:"19:" }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">17. {{ form.tahpc_certificate.label }} <span class="text-danger">*</span></label>
@@ -630,7 +724,7 @@
                             
                             <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-5">19. MAPITIO NA UTHIBITISHO WA MWOMBAJI</h5>
                             <div class="alert alert-warning">
-                                <strong>Thibitisha:</strong> Mimi <span class="text-decoration-underline fw-bold">{% if application.applicant.applicant_type == 'Individual' %}{{ application.applicant.individual.full_name }}{% else %}{{ application.applicant.organization.representatives.first.first_name }} {{ application.applicant.organization.representatives.first.last_name }}{% endif %}</span>
+                                <strong>Thibitisha:</strong> Mimi <span class="text-decoration-underline fw-bold">{% if request.user.applicant_profile.applicant_type == 'Individual' %}{{ request.user.applicant_profile.individual.full_name }}{% else %}{{ request.user.applicant_profile.organization.representatives.first.first_name }} {{ request.user.applicant_profile.organization.representatives.first.last_name }}{% endif %}</span>
                                 ninathibitisha kwamba taarifa zote nilizotoa kwenye fomu hii ni sahihi na za kweli kwa kadiri ya uelewa wangu. 
                                 Nipo tayari kuwajibika kisheria endapo itabainika vinginevyo.
                             </div>
@@ -814,6 +908,21 @@
         if(harvestedPartSelect) harvestedPartSelect.addEventListener('change', window.toggleHarvestedPartOther);
         window.toggleHarvestedPartOther();
 
+        window.toggleForeignHarvestedPartOther = function() {
+            var el = document.getElementById('id_foreign_harvested_part');
+            var cont = document.getElementById('foreign-harvested-part-other-container');
+            if(el && cont) {
+                if(el.value === 'MENGINEYO') {
+                    cont.style.display = 'block';
+                } else {
+                    cont.style.display = 'none';
+                }
+            }
+        }
+        const foreignHarvestedPartSelect = document.getElementById('id_foreign_harvested_part');
+        if(foreignHarvestedPartSelect) foreignHarvestedPartSelect.addEventListener('change', window.toggleForeignHarvestedPartOther);
+        window.toggleForeignHarvestedPartOther();
+
         window.toggleRouteOther = function() {
             var el = document.getElementById('id_route_of_administration');
             var cont = document.getElementById('route-other-container');
@@ -896,7 +1005,6 @@
             data.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><input type="text" class="form-control form-control-sm" value="${row.local || ''}" onchange="updateIngredient(${index}, 'local', this.value)"></td>
                     <td><input type="text" class="form-control form-control-sm" value="${row.swahili || ''}" onchange="updateIngredient(${index}, 'swahili', this.value)"></td>
                     <td><input type="text" class="form-control form-control-sm" value="${row.botanical || ''}" onchange="updateIngredient(${index}, 'botanical', this.value)"></td>
                     <td><input type="text" class="form-control form-control-sm" value="${row.part || ''}" onchange="updateIngredient(${index}, 'part', this.value)"></td>
@@ -934,11 +1042,70 @@
             addIngredientBtn.addEventListener('click', function() {
                 let data = [];
                 try { if(ingredientsInput.value) data = JSON.parse(ingredientsInput.value); } catch(e) {}
-                data.push({local: '', swahili: '', botanical: '', part: '', quantity: ''});
+                data.push({swahili: '', botanical: '', part: '', quantity: ''});
                 ingredientsInput.value = JSON.stringify(data);
                 renderIngredientsTable();
             });
             renderIngredientsTable();
+        }
+
+        // Dynamic Indications Table Logic
+        const indicationsInput = document.getElementById('id_indications');
+        const indicationsTbody = document.querySelector('#dynamicIndicationsTable tbody');
+        const addIndicationBtn = document.getElementById('addIndicationBtn');
+        
+        function renderIndicationsTable() {
+            if (!indicationsTbody) return;
+            indicationsTbody.innerHTML = '';
+            let data = [];
+            try {
+                if(indicationsInput && indicationsInput.value) data = JSON.parse(indicationsInput.value);
+            } catch(e) {}
+            
+            if(!Array.isArray(data)) data = [];
+            
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" class="form-control form-control-sm" value="${row.disease || ''}" onchange="updateIndication(${index}, 'disease', this.value)"></td>
+                    <td><button type="button" class="btn btn-sm btn-danger px-2 py-1" onclick="removeIndication(${index})"><i class="ri-delete-bin-line"></i></button></td>
+                `;
+                indicationsTbody.appendChild(tr);
+            });
+            
+            if (data.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="2" class="text-center text-muted small py-3">Hakuna ugonjwa uliowekwa. Bonyeza "Ongeza Ugonjwa / Dalili" kuanza.</td>`;
+                indicationsTbody.appendChild(tr);
+            }
+        }
+        
+        window.updateIndication = function(index, field, value) {
+            let data = [];
+            try { if(indicationsInput.value) data = JSON.parse(indicationsInput.value); } catch(e) {}
+            if(data[index]) {
+                data[index][field] = value;
+                indicationsInput.value = JSON.stringify(data);
+            }
+        };
+        
+        window.removeIndication = function(index) {
+            let data = [];
+            try { if(indicationsInput.value) data = JSON.parse(indicationsInput.value); } catch(e) {}
+            data.splice(index, 1);
+            indicationsInput.value = JSON.stringify(data);
+            renderIndicationsTable();
+        };
+        
+        if (addIndicationBtn && indicationsInput) {
+            addIndicationBtn.addEventListener('click', function() {
+                let data = [];
+                try { if(indicationsInput.value) data = JSON.parse(indicationsInput.value); } catch(e) {}
+                data.push({disease: ''});
+                indicationsInput.value = JSON.stringify(data);
+                renderIndicationsTable();
+            });
+            renderIndicationsTable();
         }
     });
 </script>
