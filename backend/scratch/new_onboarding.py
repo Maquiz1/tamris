@@ -16,8 +16,8 @@ from django.conf import settings
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from users.forms import CustomUserCreationForm, CustomAuthenticationForm, OTPVerificationForm, PractitionerDocumentForm, CompanyDocumentForm, RoleSelectionForm
-from users.forms.profiles import IndividualForm, OrganizationForm, ApplicantIdentityFormSet, ApplicantAddressFormSet, ApplicantContactForm, EducationFormSet, OrganizationRepresentativeFormSet
-from users.models import Applicant, Individual, Organization, ApplicantIdentity
+from users.forms.profiles import IndividualForm, OrganizationForm, ApplicantIdentityFormSet
+from users.models import Applicant, Individual, Organization
 from users.emails import notify_staff_new_registration, notify_applicant_registration_status
 
 @login_required
@@ -57,19 +57,16 @@ def onboarding_wizard_view(request):
             instance, _ = Individual.objects.get_or_create(applicant=applicant)
         else:
             FormClass = OrganizationForm
-            instance, _ = Organization.objects.get_or_create(
-                applicant=applicant,
-                defaults={'organization_name': f'Temp Org {applicant.id}', 'registration_number': f'TEMP-{applicant.id}'}
-            )
+            instance, _ = Organization.objects.get_or_create(applicant=applicant)
     elif step == 3:
         context['title'] = 'Step 3: Document Uploads'
         context['subtitle'] = 'Please upload scanned copies of your mandatory certificates.'
         if user.role.name == 'Individual Applicant':
             FormClass = PractitionerDocumentForm
-            instance = user.applicant_profile
+            instance = user.user_profile
         else:
             FormClass = CompanyDocumentForm
-            instance = user.applicant_profile
+            instance = user.company_profile
     elif step == 4:
         context['title'] = 'Step 4: Review & Submit'
         context['subtitle'] = 'Review your application details. Once submitted, these details will be locked.'
@@ -85,7 +82,7 @@ def onboarding_wizard_view(request):
                 user.role = new_role
                 # Delete any existing profile so step progresses correctly
                 if hasattr(user, 'applicant_profile'):
-                    user.applicant_profile.hard_delete()
+                    user.applicant_profile.delete()
                 user.save()
             except Role.DoesNotExist:
                 pass
@@ -99,62 +96,31 @@ def onboarding_wizard_view(request):
         is_draft = bool(request.POST.get('save_draft'))
         
         formset = None
-        address_formset = None
-        contact_formset = None
-        education_formset = None
-        rep_formset = None
         if step == 2:
             form = FormClass(request.POST, request.FILES, instance=instance)
-            address_formset = ApplicantAddressFormSet(request.POST, instance=instance.applicant)
-            contact_formset = ApplicantContactForm(request.POST, instance=getattr(instance.applicant, 'contact', None), prefix='contact')
-            if user.role.name == 'Individual Applicant':
-                id_qs = ApplicantIdentity.objects.filter(
-                    id__in=ApplicantIdentity.objects.filter(applicant=instance.applicant).order_by('id').values('id')[:1]
-                )
-                formset = ApplicantIdentityFormSet(request.POST, instance=instance.applicant, queryset=id_qs)
-                education_formset = EducationFormSet(request.POST, instance=instance.applicant)
-            else:
-                rep_formset = OrganizationRepresentativeFormSet(request.POST, instance=instance)
+            formset = ApplicantIdentityFormSet(request.POST, instance=instance.applicant)
         else:
             form = FormClass(request.POST, request.FILES, instance=instance)
             
         if is_draft:
             for f in form.fields.values():
                 f.required = False
-            for fset in [formset, address_formset, education_formset, rep_formset]:
-                if fset:
-                    for fset_form in fset.forms:
-                        for f in fset_form.fields.values():
-                            f.required = False
-            if contact_formset:
-                for f in contact_formset.fields.values():
-                    f.required = False
+            if formset:
+                for fset_form in formset.forms:
+                    for f in fset_form.fields.values():
+                        f.required = False
 
-        if form.is_valid() and (not contact_formset or contact_formset.is_valid()):
-            all_formsets_valid = True
-            for fset in [formset, address_formset, education_formset, rep_formset]:
-                if fset and not fset.is_valid():
-                    all_formsets_valid = False
-                    messages.error(request, f"Formset error: {fset.errors} {fset.non_form_errors()}")
+        if form.is_valid():
+            is_formset_valid = True
+            if formset:
+                is_formset_valid = formset.is_valid()
                 
-            if all_formsets_valid:
+            if is_formset_valid:
                 saved_instance = form.save()
-                if contact_formset:
-                    contact_instance = contact_formset.save(commit=False)
-                    contact_instance.applicant = instance.applicant
-                    contact_instance.save()
-                for fset in [formset, address_formset, education_formset]:
-                    if fset:
-                        fset.instance = instance.applicant
-                        fset.save()
-                if rep_formset:
-                    rep_formset.instance = instance
-                    rep_formset.save()
+                if formset:
+                    formset.instance = saved_instance
+                    formset.save()
                     
-                # The onboarding_step is calculated dynamically based on profile completeness.
-                # Just save the user to ensure any other updates are persisted.
-                user.save()
-
                 if is_draft:
                     messages.success(request, 'Draft saved successfully!')
                 else:
@@ -162,64 +128,21 @@ def onboarding_wizard_view(request):
                 return redirect('users:onboarding')
             else:
                 context['formset'] = formset
-                context['address_formset'] = address_formset
-                context['contact_formset'] = contact_formset
-                context['education_formset'] = education_formset
-                context['rep_formset'] = rep_formset
-        else:
-            if not form.is_valid():
-                messages.error(request, f"Form error: {form.errors}")
-            if contact_formset and not contact_formset.is_valid():
-                messages.error(request, f"Contact Form error: {contact_formset.errors}")
-            context['formset'] = formset
-            context['address_formset'] = address_formset
-            context['contact_formset'] = contact_formset
-            context['education_formset'] = education_formset
-            context['rep_formset'] = rep_formset
     elif FormClass:
         formset = None
-        address_formset = None
-        contact_formset = None
-        education_formset = None
-        rep_formset = None
         if step == 2:
             form = FormClass(instance=instance)
-            address_formset = ApplicantAddressFormSet(instance=instance.applicant)
-            contact_formset = ApplicantContactForm(
-                instance=getattr(instance.applicant, 'contact', None), 
-                initial={'email': request.user.email},
-                prefix='contact'
-            )
-            if user.role.name == 'Individual Applicant':
-                id_qs = ApplicantIdentity.objects.filter(
-                    id__in=ApplicantIdentity.objects.filter(applicant=instance.applicant).order_by('id').values('id')[:1]
-                )
-                formset = ApplicantIdentityFormSet(instance=instance.applicant, queryset=id_qs)
-                education_formset = EducationFormSet(instance=instance.applicant)
-            else:
-                rep_formset = OrganizationRepresentativeFormSet(instance=instance)
+            formset = ApplicantIdentityFormSet(instance=instance.applicant)
         else:
             form = FormClass(instance=instance)
     else:
         form = None
         formset = None
-        address_formset = None
-        contact_formset = None
-        education_formset = None
-        rep_formset = None
         
     if form:
         context['form'] = form
     if formset:
         context['formset'] = formset
-    if address_formset:
-        context['address_formset'] = address_formset
-    if contact_formset:
-        context['contact_formset'] = contact_formset
-    if education_formset:
-        context['education_formset'] = education_formset
-    if rep_formset:
-        context['rep_formset'] = rep_formset
     return render(request, 'users/onboarding.html', context)
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404

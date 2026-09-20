@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Role, UserProfile, CompanyProfile
+from .models import CustomUser, Role, Applicant, Individual, Organization
 from rest_framework_simplejwt.tokens import RefreshToken
 import pyotp
 
@@ -8,34 +8,36 @@ class RoleSerializer(serializers.ModelSerializer):
         model = Role
         fields = ['id', 'name', 'description']
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class IndividualSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserProfile
-        fields = ['full_name', 'nida_number', 'address', 'tahpc_certificate', 'tin']
+        model = Individual
+        fields = ['first_name', 'last_name', 'sex', 'date_of_birth']
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ['organization_name', 'organization_type', 'registration_number', 'tin']
 
     def validate_tin(self, value):
         if value:
             return value.replace('-', '').replace(' ', '')
         return value
 
-class CompanyProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyProfile
-        fields = ['company_name', 'brela_number', 'tin', 'business_license', 'physical_address']
+class ApplicantSerializer(serializers.ModelSerializer):
+    individual = IndividualSerializer(required=False)
+    organization = OrganizationSerializer(required=False)
 
-    def validate_tin(self, value):
-        if value:
-            return value.replace('-', '').replace(' ', '')
-        return value
+    class Meta:
+        model = Applicant
+        fields = ['applicant_type', 'application_no', 'status', 'individual', 'organization']
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    user_profile = UserProfileSerializer(required=False)
-    company_profile = CompanyProfileSerializer(required=False)
+    applicant_profile = ApplicantSerializer(required=False)
     role = serializers.SlugRelatedField(slug_field='name', queryset=Role.objects.all())
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'phone_number', 'role', 'is_email_verified', 'user_profile', 'company_profile', 'password']
+        fields = ['id', 'email', 'phone_number', 'role', 'is_email_verified', 'applicant_profile', 'password']
         extra_kwargs = {
             'password': {'write_only': True},
             'is_email_verified': {'read_only': True}
@@ -47,8 +49,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        profile_data = validated_data.pop('user_profile', None)
-        company_data = validated_data.pop('company_profile', None)
+        applicant_data = validated_data.pop('applicant_profile', None)
         password = validated_data.pop('password')
         
         user = CustomUser(**validated_data)
@@ -57,11 +58,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.otp_secret = pyotp.random_base32()
         user.save()
 
-        # Handle nested profiles based on role
-        if profile_data and user.role.name == 'Individual Applicant': # Example logic
-            UserProfile.objects.create(user=user, **profile_data)
-        elif company_data and user.role.name == 'Company Applicant':
-            CompanyProfile.objects.create(user=user, **company_data)
+        if applicant_data:
+            individual_data = applicant_data.pop('individual', None)
+            organization_data = applicant_data.pop('organization', None)
+            applicant = Applicant.objects.create(user=user, **applicant_data)
+            if applicant.applicant_type == 'Individual' and individual_data:
+                Individual.objects.create(applicant=applicant, **individual_data)
+            elif applicant.applicant_type == 'Organization' and organization_data:
+                Organization.objects.create(applicant=applicant, **organization_data)
 
         # In a real app, you would trigger an email/SMS sending the OTP here
         print(f"DEBUG: Generated OTP for user {user.email} is {pyotp.TOTP(user.otp_secret).now()}")

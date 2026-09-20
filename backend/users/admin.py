@@ -1,13 +1,17 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Role, UserProfile, CompanyProfile
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .models import (
+    CustomUser, Role, StaffProfile,
+    Applicant, Individual, Organization,
+    ApplicantIdentity, ApplicantAddress, ApplicantContact,
+    Education, OrganizationRepresentative, ApplicantDocument
+)
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
     search_fields = ('name',)
-
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 class AdminUserCreationForm(UserCreationForm):
     class Meta:
@@ -23,7 +27,6 @@ class AdminUserChangeForm(UserChangeForm):
 class CustomUserAdmin(UserAdmin):
     add_form = AdminUserCreationForm
     form = AdminUserChangeForm
-    # Customize the admin since we removed the 'username' field
     ordering = ('email',)
     list_display = ('email', 'role', 'is_staff', 'is_superuser', 'is_email_verified')
     search_fields = ('email', 'phone_number')
@@ -42,17 +45,29 @@ class CustomUserAdmin(UserAdmin):
         }),
     )
 
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'user', 'nida_number', 'tin')
-    search_fields = ('full_name', 'user__email', 'nida_number', 'tin')
+@admin.register(Applicant)
+class ApplicantAdmin(admin.ModelAdmin):
+    list_display = ('user', 'applicant_type', 'application_no', 'status')
+    search_fields = ('user__email', 'application_no')
+    list_filter = ('applicant_type', 'status')
 
-@admin.register(CompanyProfile)
-class CompanyProfileAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'user', 'tin', 'brela_number')
-    search_fields = ('company_name', 'user__email', 'tin', 'brela_number')
+@admin.register(Individual)
+class IndividualAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'applicant')
+    search_fields = ('first_name', 'last_name', 'applicant__user__email')
 
-from .models import StaffProfile
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = ('organization_name', 'registration_number', 'tin', 'applicant')
+    search_fields = ('organization_name', 'tin', 'registration_number', 'applicant__user__email')
+
+@admin.register(ApplicantIdentity)
+class ApplicantIdentityAdmin(admin.ModelAdmin):
+    list_display = ('applicant', 'identity_type', 'identity_number', 'is_primary')
+
+@admin.register(OrganizationRepresentative)
+class OrganizationRepresentativeAdmin(admin.ModelAdmin):
+    list_display = ('organization', 'first_name', 'last_name', 'position', 'is_primary')
 
 @admin.register(StaffProfile)
 class StaffProfileAdmin(admin.ModelAdmin):

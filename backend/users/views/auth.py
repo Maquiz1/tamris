@@ -16,7 +16,7 @@ from django.conf import settings
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from users.forms import CustomUserCreationForm, CustomAuthenticationForm, OTPVerificationForm, PractitionerDocumentForm, CompanyDocumentForm, RoleSelectionForm, PractitionerDetailForm, CompanyDetailForm
-from users.models import UserProfile, CompanyProfile
+from users.models import Applicant, Individual, Organization
 from users.emails import notify_staff_new_registration, notify_applicant_registration_status
 
 class RegisterView(generics.CreateAPIView):

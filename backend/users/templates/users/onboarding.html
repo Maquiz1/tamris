@@ -309,6 +309,9 @@
           <form method="post" action="{% url 'users:onboarding' %}" novalidate
                 style="display:flex;flex-direction:column;flex:1;">
             {% csrf_token %}
+            {% if address_formset %}{{ address_formset.management_form }}{% endif %}
+            {% if contact_formset %}{{ contact_formset.management_form }}{% endif %}
+            {% if education_formset %}{{ education_formset.management_form }}{% endif %}
             {% if form.errors %}
             <div style="padding:1rem 1.5rem 0;">
               <div class="alert alert-danger rounded-3 py-2 px-3 mb-0" style="font-size:.82rem;">
@@ -333,18 +336,6 @@
                   <div class="section-card-header"><i class="ri-user-3-line"></i><span>Personal Identity / Utambulisho wa Kibinafsi</span></div>
                   <div class="section-card-body">
                     <div class="row gx-3 mb-3">
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_surname">Surname / Jina la Ukoo</label>
-                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.surname }}</div>
-                        {% if form.surname.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.surname.errors.0 }}</div>{% endif %}
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_other_names">Other Names / Majina Mengine</label>
-                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.other_names }}</div>
-                        {% if form.other_names.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.other_names.errors.0 }}</div>{% endif %}
-                      </div>
-                    </div>
-                    <div class="row gx-3 mb-3">
                       <div class="col-md-4">
                         <label class="form-label-sm" for="id_first_name">First Name <span class="req">*</span></label>
                         <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.first_name }}</div>
@@ -355,7 +346,7 @@
                         <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.middle_name }}</div>
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label-sm" for="id_last_name">Last Name</label>
+                        <label class="form-label-sm" for="id_last_name">Last Name <span class="req">*</span></label>
                         <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ form.last_name }}</div>
                       </div>
                     </div>
@@ -365,36 +356,59 @@
                         <div class="sex-radio-row">
                           <label class="sex-radio-option"><input type="radio" name="{{ form.sex.html_name }}" value="Male" {% if form.sex.value == 'Male' %}checked{% endif %}> Male</label>
                           <label class="sex-radio-option"><input type="radio" name="{{ form.sex.html_name }}" value="Female" {% if form.sex.value == 'Female' %}checked{% endif %}> Female</label>
-                          <label class="sex-radio-option"><input type="radio" name="{{ form.sex.html_name }}" value="Other" {% if form.sex.value == 'Other' %}checked{% endif %}> Other</label>
                         </div>
                         {% if form.sex.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.sex.errors.0 }}</div>{% endif %}
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_date_of_birth">Date of Birth / Tarehe ya Kuzaliwa</label>
+                        <label class="form-label-sm" for="id_date_of_birth">Date of Birth / Tarehe ya Kuzaliwa <span class="req">*</span></label>
                         <div class="input-icon-wrap"><i class="ri-calendar-line field-icon"></i>{{ form.date_of_birth }}</div>
                         {% if form.date_of_birth.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.date_of_birth.errors.0 }}</div>{% endif %}
                       </div>
                     </div>
                     <div class="row gx-3 mb-3">
-                      <div class="col-md-3">
-                        <label class="form-label-sm" for="id_age">Age</label>{{ form.age }}
-                      </div>
-                      <div class="col-md-9">
-                        <label class="form-label-sm" for="id_education_level">Formal Education / Elimu (Rasmi)</label>{{ form.education_level }}
-                      </div>
-                    </div>
-                    <div class="row gx-3">
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_nida_number">NIDA Number <span class="req">*</span></label>
-                        <div class="input-icon-wrap"><i class="ri-profile-line field-icon"></i>{{ form.nida_number }}</div>
-                        {% if form.nida_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.nida_number.errors.0 }}</div>{% endif %}
-                      </div>
                       <div class="col-md-6">
                         <label class="form-label-sm" for="id_tin">TIN Number <span class="req">*</span></label>
                         <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.tin }}</div>
                         {% if form.tin.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.tin.errors.0 }}</div>{% endif %}
                       </div>
+                      <div class="col-md-6">
+                        {{ education_formset.forms.0.id }}
+                        <label class="form-label-sm" for="id_education_level">Formal Education / Elimu (Rasmi) <span class="req">*</span></label>{{ education_formset.forms.0.education_level }}
+                      </div>
                     </div>
+                  </div>
+                </div>
+
+                <div class="section-card">
+                  <div class="section-card-header d-flex justify-content-between align-items-center">
+                    <div><i class="ri-profile-line"></i><span>Identification Documents / Nyaraka za Utambulisho</span></div>
+                  </div>
+                  <div class="section-card-body" id="id-formset-container">
+                    {{ formset.management_form }}
+                    {% for id_form in formset.forms %}
+                    <div class="id-form-row mb-3 pb-3 border-bottom position-relative">
+                      {{ id_form.id }}
+
+                      <div class="row gx-3">
+                        <div class="col-md-5">
+                          <label class="form-label-sm">ID Type <span class="req">*</span></label>
+                          <div class="input-icon-wrap"><i class="ri-profile-line field-icon"></i>{{ id_form.identity_type }}</div>
+                          {% if id_form.identity_type.errors %}<div class="text-danger" style="font-size:.75rem;">{{ id_form.identity_type.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-7">
+                          <label class="form-label-sm">ID Number <span class="req">*</span></label>
+                          <div class="input-icon-wrap"><i class="ri-hashtag field-icon"></i>{{ id_form.identity_number }}</div>
+                          {% if id_form.identity_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ id_form.identity_number.errors.0 }}</div>{% endif %}
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+
+                </div>
+                
+                <div class="section-card" style="display:none;">
+                  <div class="section-card-body">
                   </div>
                 </div>
                 {% else %}
@@ -402,20 +416,57 @@
                   <div class="section-card-header"><i class="ri-building-line"></i><span>Company Identity / Utambulisho wa Kampuni</span></div>
                   <div class="section-card-body">
                     <div class="mb-3">
-                      <label class="form-label-sm" for="id_company_name">Company / Institution Name <span class="req">*</span> <span class="text-muted" style="font-size:.7rem;">Jina la kampuni/taasisi</span></label>
-                      <div class="input-icon-wrap"><i class="ri-building-line field-icon"></i>{{ form.company_name }}</div>
-                      {% if form.company_name.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.company_name.errors.0 }}</div>{% endif %}
+                      <label class="form-label-sm" for="id_organization_name">Company / Institution Name <span class="req">*</span> <span class="text-muted" style="font-size:.7rem;">Jina la kampuni/taasisi</span></label>
+                      <div class="input-icon-wrap"><i class="ri-building-line field-icon"></i>{{ form.organization_name }}</div>
+                      {% if form.organization_name.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.organization_name.errors.0 }}</div>{% endif %}
                     </div>
                     <div class="row gx-3">
-                      <div class="col-md-6">
-                        <label class="form-label-sm" for="id_brela_number">BRELA / Registration Number <span class="req">*</span> <span class="text-muted" style="font-size:.7rem;">Namba ya usajili</span></label>
-                        <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.brela_number }}</div>
-                        {% if form.brela_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.brela_number.errors.0 }}</div>{% endif %}
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_registration_number">BRELA / Registration Number <span class="req">*</span> <span class="text-muted" style="font-size:.7rem;">Namba ya usajili</span></label>
+                        <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.registration_number }}</div>
+                        {% if form.registration_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.registration_number.errors.0 }}</div>{% endif %}
                       </div>
-                      <div class="col-md-6">
+                      <div class="col-md-4">
+                        <label class="form-label-sm" for="id_date_registered">Date Registered <span class="req">*</span> <span class="text-muted" style="font-size:.7rem;">Tarehe ya usajili</span></label>
+                        <div class="input-icon-wrap"><i class="ri-calendar-line field-icon"></i>{{ form.date_registered }}</div>
+                        {% if form.date_registered.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.date_registered.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-4">
                         <label class="form-label-sm" for="id_tin">TIN Number <span class="req">*</span></label>
                         <div class="input-icon-wrap"><i class="ri-file-list-3-line field-icon"></i>{{ form.tin }}</div>
                         {% if form.tin.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.tin.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="section-card mt-3">
+                  <div class="section-card-header"><i class="ri-user-line"></i><span>Representative Identity / Utambulisho wa Mwakilishi</span></div>
+                  <div class="section-card-body">
+                    {{ rep_formset.management_form }}
+                    {{ rep_formset.forms.0.id }}
+                    <div class="row gx-3">
+                      <div class="col-md-4">
+                        <label class="form-label-sm">First Name <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ rep_formset.forms.0.first_name }}</div>
+                        {% if rep_formset.forms.0.first_name.errors %}<div class="text-danger" style="font-size:.75rem;">{{ rep_formset.forms.0.first_name.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label-sm">Middle Name</label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ rep_formset.forms.0.middle_name }}</div>
+                        {% if rep_formset.forms.0.middle_name.errors %}<div class="text-danger" style="font-size:.75rem;">{{ rep_formset.forms.0.middle_name.errors.0 }}</div>{% endif %}
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label-sm">Last Name <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-user-line field-icon"></i>{{ rep_formset.forms.0.last_name }}</div>
+                        {% if rep_formset.forms.0.last_name.errors %}<div class="text-danger" style="font-size:.75rem;">{{ rep_formset.forms.0.last_name.errors.0 }}</div>{% endif %}
+                      </div>
+                    </div>
+                    <div class="row gx-3 mt-3">
+                      <div class="col-md-12">
+                        <label class="form-label-sm">Position <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-briefcase-line field-icon"></i>{{ rep_formset.forms.0.position }}</div>
+                        {% if rep_formset.forms.0.position.errors %}<div class="text-danger" style="font-size:.75rem;">{{ rep_formset.forms.0.position.errors.0 }}</div>{% endif %}
                       </div>
                     </div>
                   </div>
@@ -437,52 +488,61 @@
                 <div class="section-card">
                   <div class="section-card-header"><i class="ri-map-pin-line"></i><span>Address / Anuani</span></div>
                   <div class="section-card-body">
+                    {{ address_formset.forms.0.id }}
                     <div class="row gx-3 mb-3">
                       <div class="col-md-4">
                         <label class="form-label-sm" for="id_country">Country / Utaifa <span class="req">*</span></label>
-                        <div class="input-icon-wrap"><i class="ri-global-line field-icon"></i>{{ form.country }}</div>
-                        {% if form.country.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.country.errors.0 }}</div>{% endif %}
+                        <div class="input-icon-wrap"><i class="ri-global-line field-icon"></i>{{ address_formset.forms.0.country }}</div>
+                        {% if address_formset.forms.0.country.errors %}<div class="text-danger" style="font-size:.75rem;">{{ address_formset.forms.0.country.errors.0 }}</div>{% endif %}
                       </div>
                       <div class="col-md-4">
                         <label class="form-label-sm" for="id_region">Region / Mkoa <span class="req">*</span></label>
-                        <div class="input-icon-wrap"><i class="ri-map-2-line field-icon"></i>{{ form.region }}</div>
-                        {% if form.region.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.region.errors.0 }}</div>{% endif %}
+                        <div class="input-icon-wrap"><i class="ri-map-2-line field-icon"></i>{{ address_formset.forms.0.region }}</div>
+                        {% if address_formset.forms.0.region.errors %}<div class="text-danger" style="font-size:.75rem;">{{ address_formset.forms.0.region.errors.0 }}</div>{% endif %}
                       </div>
                       <div class="col-md-4">
                         <label class="form-label-sm" for="id_district">District / Wilaya <span class="req">*</span></label>
-                        <div class="input-icon-wrap"><i class="ri-map-pin-2-line field-icon"></i>{{ form.district }}</div>
-                        {% if form.district.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.district.errors.0 }}</div>{% endif %}
+                        <div class="input-icon-wrap"><i class="ri-map-pin-2-line field-icon"></i>{{ address_formset.forms.0.district }}</div>
+                        {% if address_formset.forms.0.district.errors %}<div class="text-danger" style="font-size:.75rem;">{{ address_formset.forms.0.district.errors.0 }}</div>{% endif %}
                       </div>
                     </div>
                     <div class="row gx-3 mb-3">
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_ward">Ward / Kata</label>
-                        <div class="input-icon-wrap"><i class="ri-community-line field-icon"></i>{{ form.ward }}</div>
+                        <label class="form-label-sm" for="id_ward">Ward / Kata <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-community-line field-icon"></i>{{ address_formset.forms.0.ward }}</div>
+                        {% if address_formset.forms.0.ward.errors %}<div class="text-danger" style="font-size:.75rem;">{{ address_formset.forms.0.ward.errors.0 }}</div>{% endif %}
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_village_street">Street / Village / Kijiji au Mtaa</label>
-                        <div class="input-icon-wrap"><i class="ri-road-map-line field-icon"></i>{{ form.village_street }}</div>
+                        <label class="form-label-sm" for="id_village_street">Street / Village / Kijiji au Mtaa <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-road-map-line field-icon"></i>{{ address_formset.forms.0.street }}</div>
+                        {% if address_formset.forms.0.street.errors %}<div class="text-danger" style="font-size:.75rem;">{{ address_formset.forms.0.street.errors.0 }}</div>{% endif %}
                       </div>
                     </div>
                     {% if 'Individual Applicant' in request.user.all_roles %}
                     <div class="row gx-3 mb-3">
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_residency_duration">Residency Duration / Muda wa Kuishi Mahali Hapo</label>{{ form.residency_duration }}
+                        <label class="form-label-sm" for="id_residency_duration">Residency Duration / Muda wa Kuishi Mahali Hapo <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-time-line field-icon"></i>{{ address_formset.forms.0.residency_duration }}</div>
+                        {% if address_formset.forms.0.residency_duration.errors %}<div class="text-danger" style="font-size:.75rem;">{{ address_formset.forms.0.residency_duration.errors.0 }}</div>{% endif %}
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_postal_address">Postal Address / Anuani ya Posta</label>{{ form.postal_address }}
+                        <label class="form-label-sm" for="id_postal_address">Postal Address / Anuani ya Posta</label>
+                        <div class="input-icon-wrap"><i class="ri-mail-send-line field-icon"></i>{{ address_formset.forms.0.postal_address }}</div>
                       </div>
                     </div>
                     <div class="mb-0">
-                      <label class="form-label-sm" for="id_address">Physical Address</label>{{ form.address }}
+                        <label class="form-label-sm" for="id_physical_address">Physical Address</label>
+                        {{ address_formset.forms.0.physical_address }}
                     </div>
                     {% else %}
                     <div class="row gx-3 mb-3">
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_postal_address">Postal Address / Anuani ya Posta</label>{{ form.postal_address }}
+                        <label class="form-label-sm" for="id_postal_address">Postal Address / Anuani ya Posta</label>
+                        <div class="input-icon-wrap"><i class="ri-mail-send-line field-icon"></i>{{ address_formset.forms.0.postal_address }}</div>
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_physical_address">Physical Address</label>{{ form.physical_address }}
+                        <label class="form-label-sm" for="id_physical_address">Physical Address</label>
+                        {{ address_formset.forms.0.physical_address }}
                       </div>
                     </div>
                     {% endif %}
@@ -503,32 +563,33 @@
                   <div><h5>Contacts / Mawasiliano</h5><p>Provide phone and contact details for the applicant.</p></div>
                 </div>
                 <div class="section-card">
-                  <div class="section-card-header"><i class="ri-phone-line"></i><span>Contacts / Mawasiliano</span></div>
+                  <div class="section-card-header">
+                    <i class="ri-phone-line"></i><span>Contacts / Mawasiliano</span>
+                  </div>
                   <div class="section-card-body">
                     <div class="row gx-3 mb-3">
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_phone_number">Phone Number / Simu <span class="req">*</span></label>
-                        <div class="input-icon-wrap"><i class="ri-smartphone-line field-icon"></i>{{ form.phone_number }}</div>
-                        {% if form.phone_number.errors %}<div class="text-danger" style="font-size:.75rem;">{{ form.phone_number.errors.0 }}</div>{% endif %}
+                        <label class="form-label-sm">Mobile Phone <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-smartphone-line field-icon"></i>{{ contact_formset.mobile_phone }}</div>
+                        {% if contact_formset.mobile_phone.errors %}<div class="text-danger" style="font-size:.75rem;">{{ contact_formset.mobile_phone.errors.0 }}</div>{% endif %}
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_email">Email Address (Optional)</label>
-                        <div class="input-icon-wrap"><i class="ri-mail-line field-icon"></i>{{ form.email }}</div>
+                        <label class="form-label-sm">Landline</label>
+                        <div class="input-icon-wrap"><i class="ri-phone-line field-icon"></i>{{ contact_formset.landline }}</div>
+                        {% if contact_formset.landline.errors %}<div class="text-danger" style="font-size:.75rem;">{{ contact_formset.landline.errors.0 }}</div>{% endif %}
                       </div>
                     </div>
-                    <div class="row gx-3 mb-3">
+                    <div class="row gx-3">
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_alternative_contact">Alternative Contact / Mawasiliano Mbadala</label>
-                        <div class="input-icon-wrap"><i class="ri-phone-line field-icon"></i>{{ form.alternative_contact }}</div>
+                        <label class="form-label-sm">Fax</label>
+                        <div class="input-icon-wrap"><i class="ri-printer-line field-icon"></i>{{ contact_formset.fax }}</div>
+                        {% if contact_formset.fax.errors %}<div class="text-danger" style="font-size:.75rem;">{{ contact_formset.fax.errors.0 }}</div>{% endif %}
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label-sm" for="id_landline_phone">Landline / Simu ya Mezani</label>
-                        <div class="input-icon-wrap"><i class="ri-phone-line field-icon"></i>{{ form.landline_phone }}</div>
+                        <label class="form-label-sm">Email <span class="req">*</span></label>
+                        <div class="input-icon-wrap"><i class="ri-mail-line field-icon"></i>{{ contact_formset.email }}</div>
+                        {% if contact_formset.email.errors %}<div class="text-danger" style="font-size:.75rem;">{{ contact_formset.email.errors.0 }}</div>{% endif %}
                       </div>
-                    </div>
-                    <div class="mb-0">
-                      <label class="form-label-sm" for="id_fax">Fax / Nukushi (Faksi)</label>
-                      <div class="input-icon-wrap"><i class="ri-printer-line field-icon"></i>{{ form.fax }}</div>
                     </div>
                   </div>
                 </div>
@@ -540,7 +601,7 @@
 
             <div class="ob-action-bar">
               <a href="{% url 'users:dashboard' %}" class="btn-cancel btn">Cancel</a>
-              <button type="submit" name="save_draft" value="1" class="btn-draft btn">
+              <button type="submit" name="save_draft" value="1" class="btn-draft btn" formnovalidate="formnovalidate">
                 <i class="ri-save-line"></i> Save Draft
               </button>
               <button type="submit" class="btn-continue btn">
@@ -655,6 +716,12 @@
                         <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
                         {% if form.tin_certificate.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.tin_certificate.errors.0 }}</div>{% endif %}
                       </div>
+                      <div class="col-md-6">
+                        <label class="form-label-sm" for="id_passport_document">Passport Document / Hati ya kusafiria</label>
+                        <div class="input-icon-wrap"><i class="ri-passport-line field-icon"></i>{{ form.passport_document }}</div>
+                        <div class="file-upload-hint">Accepted: PDF, JPG, PNG</div>
+                        {% if form.passport_document.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.passport_document.errors.0 }}</div>{% endif %}
+                      </div>
                     </div>
                     {% else %}
                     <div class="row gx-3 gy-3">
@@ -688,7 +755,7 @@
 
             <div class="ob-action-bar">
               <a href="{% url 'users:dashboard' %}" class="btn-cancel btn">Cancel</a>
-              <button type="submit" name="save_draft" value="1" class="btn-draft btn">
+              <button type="submit" name="save_draft" value="1" class="btn-draft btn" formnovalidate="formnovalidate">
                 <i class="ri-save-line"></i> Save Draft
               </button>
               <button type="submit" class="btn-continue btn">
@@ -728,42 +795,40 @@
 
               <p class="review-section-title mt-3"><i class="ri-profile-line"></i> Applicant Profile</p>
               {% if 'Individual Applicant' in request.user.all_roles %}
-                <div class="review-row"><span class="label">Surname / Jina la Ukoo</span><span class="value">{{ request.user.user_profile.surname|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Other Names / Majina Mengine</span><span class="value">{{ request.user.user_profile.other_names|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Full Name</span><span class="value">{{ request.user.user_profile.full_name }}</span></div>
-                <div class="review-row"><span class="label">Sex / Jinsi</span><span class="value">{{ request.user.user_profile.sex|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">NIDA</span><span class="value">{{ request.user.user_profile.formatted_nida }}</span></div>
-                <div class="review-row"><span class="label">Date of Birth / Tarehe ya Kuzaliwa</span><span class="value">{{ request.user.user_profile.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Age</span><span class="value">{{ request.user.user_profile.age|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Education / Elimu</span><span class="value">{{ request.user.user_profile.education_level|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">TIN</span><span class="value">{{ request.user.user_profile.formatted_tin }}</span></div>
-                <div class="review-row"><span class="label">Nationality / Utaifa</span><span class="value">{{ request.user.user_profile.country|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Region / Mkoa</span><span class="value">{{ request.user.user_profile.region|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">District / Wilaya</span><span class="value">{{ request.user.user_profile.district|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Ward / Kata</span><span class="value">{{ request.user.user_profile.ward|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Village/Street / Kijiji au Mtaa</span><span class="value">{{ request.user.user_profile.village_street|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Residency Duration / Muda wa Kuishi</span><span class="value">{{ request.user.user_profile.residency_duration|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Postal Address / Anuani ya Posta</span><span class="value">{{ request.user.user_profile.postal_address|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Physical Address</span><span class="value">{{ request.user.user_profile.address|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Phone Number / Simu</span><span class="value">{{ request.user.phone_number|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Alternative Contact</span><span class="value">{{ request.user.user_profile.alternative_contact|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Landline / Simu ya Mezani</span><span class="value">{{ request.user.user_profile.landline_phone|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Fax / Nukushi (Faksi)</span><span class="value">{{ request.user.user_profile.fax|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Full Name</span><span class="value">{{ request.user.applicant_profile.individual.full_name }}</span></div>
+                <div class="review-row"><span class="label">Sex / Jinsi</span><span class="value">{{ request.user.applicant_profile.individual.sex|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">NIDA</span><span class="value">{{ request.user.applicant_profile.identity_obj.identity_number|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Date of Birth / Tarehe ya Kuzaliwa</span><span class="value">{{ request.user.applicant_profile.individual.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
+
+                <div class="review-row"><span class="label">Education / Elimu</span><span class="value">{{ request.user.applicant_profile.education_obj.highest_level|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">TIN</span><span class="value">{{ request.user.applicant_profile.individual.tin|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Nationality / Utaifa</span><span class="value">{{ request.user.applicant_profile.address_obj.country|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Region / Mkoa</span><span class="value">{{ request.user.applicant_profile.address_obj.region|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">District / Wilaya</span><span class="value">{{ request.user.applicant_profile.address_obj.district|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Ward / Kata</span><span class="value">{{ request.user.applicant_profile.address_obj.ward|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Village/Street / Kijiji au Mtaa</span><span class="value">{{ request.user.applicant_profile.address_obj.street|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Residency Duration / Muda wa Kuishi</span><span class="value">{{ request.user.applicant_profile.address_obj.residency_duration|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Postal Address / Anuani ya Posta</span><span class="value">{{ request.user.applicant_profile.address_obj.postal_address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Physical Address</span><span class="value">{{ request.user.applicant_profile.address_obj.physical_address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Phone Number / Simu</span><span class="value">{{ request.user.applicant_profile.contact_obj.mobile_phone|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Alternative Contact</span><span class="value">{{ request.user.applicant_profile.contact_obj.email|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Landline / Simu ya Mezani</span><span class="value">{{ request.user.applicant_profile.contact_obj.landline|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Fax / Nukushi (Faksi)</span><span class="value">{{ request.user.applicant_profile.contact_obj.fax|default:"—" }}</span></div>
               {% else %}
-                <div class="review-row"><span class="label">Company Name / Jina la Kampuni</span><span class="value">{{ request.user.company_profile.company_name }}</span></div>
-                <div class="review-row"><span class="label">BRELA Number</span><span class="value">{{ request.user.company_profile.brela_number }}</span></div>
-                <div class="review-row"><span class="label">TIN</span><span class="value">{{ request.user.company_profile.formatted_tin }}</span></div>
-                <div class="review-row"><span class="label">Nationality / Utaifa</span><span class="value">{{ request.user.company_profile.country|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Region / Mkoa</span><span class="value">{{ request.user.company_profile.region|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">District / Wilaya</span><span class="value">{{ request.user.company_profile.district|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Ward / Kata</span><span class="value">{{ request.user.company_profile.ward|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Village/Street</span><span class="value">{{ request.user.company_profile.village_street|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Postal Address</span><span class="value">{{ request.user.company_profile.postal_address|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Physical Address</span><span class="value">{{ request.user.company_profile.physical_address|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Phone Number</span><span class="value">{{ request.user.phone_number|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Alternative Contact</span><span class="value">{{ request.user.company_profile.alternative_contact|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Landline</span><span class="value">{{ request.user.company_profile.landline_phone|default:"—" }}</span></div>
-                <div class="review-row"><span class="label">Fax</span><span class="value">{{ request.user.company_profile.fax|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Company Name / Jina la Kampuni</span><span class="value">{{ request.user.applicant_profile.organization.organization_name }}</span></div>
+                <div class="review-row"><span class="label">Registration Number (BRELA)</span><span class="value">{{ request.user.applicant_profile.organization.registration_number|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">TIN</span><span class="value">{{ request.user.applicant_profile.organization.tin|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Nationality / Utaifa</span><span class="value">{{ request.user.applicant_profile.address_obj.country|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Region / Mkoa</span><span class="value">{{ request.user.applicant_profile.address_obj.region|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">District / Wilaya</span><span class="value">{{ request.user.applicant_profile.address_obj.district|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Ward / Kata</span><span class="value">{{ request.user.applicant_profile.address_obj.ward|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Village/Street</span><span class="value">{{ request.user.applicant_profile.address_obj.street|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Postal Address</span><span class="value">{{ request.user.applicant_profile.address_obj.postal_address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Physical Address</span><span class="value">{{ request.user.applicant_profile.address_obj.physical_address|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Phone Number</span><span class="value">{{ request.user.applicant_profile.contact_obj.mobile_phone|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Alternative Contact</span><span class="value">{{ request.user.applicant_profile.contact_obj.email|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Landline</span><span class="value">{{ request.user.applicant_profile.contact_obj.landline|default:"—" }}</span></div>
+                <div class="review-row"><span class="label">Fax</span><span class="value">{{ request.user.applicant_profile.contact_obj.fax|default:"—" }}</span></div>
               {% endif %}
 
               <p class="review-section-title mt-3"><i class="ri-file-text-line"></i> Uploaded Documents</p>
@@ -805,31 +870,379 @@ function switchSection(section) {
   }
 }
 
-function switchTopTab(section, tab, save) {
-  if (save === undefined) save = true;
+function switchTopTab(section, tab) {
   var sectionEl = document.getElementById('section-' + section);
   if (!sectionEl) return;
   sectionEl.querySelectorAll('.nav-link').forEach(function(t) { t.classList.remove('active'); });
+  sectionEl.querySelectorAll('.ob-top-tab').forEach(function(t) { t.classList.remove('active'); });
   sectionEl.querySelectorAll('.ob-tab-pane').forEach(function(p) { p.classList.remove('active'); });
   var tabBtn = document.getElementById('toptab-' + tab);
   var tabPane = document.getElementById('topPane-' + section + '-' + tab);
   if (tabBtn) tabBtn.classList.add('active');
   if (tabPane) tabPane.classList.add('active');
-  if (save) {
-    savedTabs[section] = tab;
-    try { sessionStorage.setItem('ob_active_tabs', JSON.stringify(savedTabs)); } catch(e){}
-  }
 }
 
+
 document.addEventListener('DOMContentLoaded', function() {
-  var sectionMap = {1:'role', 2:'demographics', 3:'attachments', 4:'final'};
-  var currentSection = sectionMap[CURRENT_STEP];
-  if (currentSection) {
-    var saved = savedTabs[currentSection];
-    if (saved) {
-      setTimeout(function() { switchTopTab(currentSection, saved, false); }, 30);
+    function updateTabStatus() {
+        const panes = document.querySelectorAll('.ob-tab-pane');
+        let allPanesValid = true;
+        let anyPaneProcessed = false;
+
+        panes.forEach(pane => {
+            const paneIdParts = pane.id.split('-');
+            if (paneIdParts.length < 3) return;
+            const tabName = paneIdParts[2];
+            const tabBtn = document.getElementById('toptab-' + tabName);
+            if (!tabBtn) return;
+            
+            anyPaneProcessed = true;
+
+            let isValid = true;
+            let hasRequired = false;
+
+            if (tabName === 'apptype') {
+                hasRequired = true;
+                isValid = pane.querySelector('.ob-type-card--active') !== null;
+            } else {
+                const requiredFields = pane.querySelectorAll('input[required], select[required], textarea[required]');
+                hasRequired = requiredFields.length > 0;
+                
+                if (tabName === 'optional') {
+                    isValid = true;
+                    hasRequired = true;
+                } else {
+                    requiredFields.forEach(field => {
+                        if (field.type === 'radio' || field.type === 'checkbox') {
+                            const name = field.name;
+                            const checked = pane.querySelector(`input[name="${name}"]:checked`);
+                            if (!checked) {
+                                isValid = false;
+                            }
+                        } else if (field.type === 'file') {
+                            if (!field.value) {
+                                const parent = field.closest('.input-icon-wrap') || field.parentElement;
+                                const hasExistingFile = parent.querySelector('a') !== null || parent.innerHTML.includes('Currently:');
+                                if (!hasExistingFile) {
+                                    isValid = false;
+                                }
+                            }
+                        } else {
+                            if (!field.value.trim()) {
+                                isValid = false;
+                            }
+                        }
+                    });
+                }
+            }
+
+            let tickIcon = tabBtn.querySelector('.tab-completion-tick');
+            if (isValid && hasRequired) {
+                if (!tickIcon) {
+                    tickIcon = document.createElement('i');
+                    tickIcon.className = 'ri-checkbox-circle-fill text-success tab-completion-tick';
+                    tickIcon.style.marginLeft = '4px';
+                    tickIcon.style.fontSize = '1.05rem';
+                    tickIcon.style.color = '#10b981'; 
+                    tickIcon.style.opacity = '0';
+                    tickIcon.style.transform = 'scale(0.5)';
+                    tickIcon.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    
+                    const reqDot = tabBtn.querySelector('.req-dot');
+                    if (reqDot) {
+                        reqDot.style.display = 'none'; 
+                        tabBtn.insertBefore(tickIcon, reqDot);
+                    } else {
+                        tabBtn.appendChild(tickIcon);
+                    }
+                    
+                    setTimeout(() => {
+                        tickIcon.style.opacity = '1';
+                        tickIcon.style.transform = 'scale(1)';
+                    }, 10);
+                }
+            } else {
+                if (tickIcon) {
+                    tickIcon.remove();
+                    const reqDot = tabBtn.querySelector('.req-dot');
+                    if (reqDot) {
+                        reqDot.style.display = 'inline-block';
+                    }
+                }
+                if (hasRequired) {
+                    allPanesValid = false;
+                }
+            }
+        });
+
+        if (anyPaneProcessed) {
+            const activeSidebarLink = document.querySelector('.ob-sidenav .nav-link.active');
+            if (activeSidebarLink) {
+                let badge = activeSidebarLink.querySelector('.nav-badge');
+                if (badge) {
+                    if (allPanesValid) {
+                        badge.innerHTML = '<i class="ri-check-double-line"></i> Done';
+                        badge.className = 'nav-badge done';
+                        badge.style.background = '#d1fae5';
+                        badge.style.color = '#059669';
+                    } else {
+                        badge.innerHTML = 'Now';
+                        badge.className = 'nav-badge now';
+                        badge.style.background = 'var(--teal-main)';
+                        badge.style.color = '#fff';
+                    }
+                }
+            }
+        }
     }
-  }
+
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('input', updateTabStatus);
+        form.addEventListener('change', updateTabStatus);
+        updateTabStatus();
+    }
+
+    // --- Static Form Validations ---
+    const tinInput = document.getElementById('id_tin');
+    if (tinInput) {
+        tinInput.placeholder = 'XXX-XXX-XXX';
+        tinInput.addEventListener('input', function(e) {
+            let val = e.target.value.replace(/[^0-9]/g, '');
+            if (val.length > 9) val = val.substring(0, 9);
+            let formatted = val.substring(0, 3);
+            if (val.length > 3) formatted += '-' + val.substring(3, 6);
+            if (val.length > 6) formatted += '-' + val.substring(6, 9);
+            e.target.value = formatted;
+        });
+    }
+
+    // --- Dynamic Formset Logic ---
+    document.body.addEventListener('change', function(e) {
+        if (e.target.tagName.toLowerCase() === 'select' && e.target.name.match(/identity_type$/)) {
+                const row = e.target.closest('.id-form-row');
+                if (row) {
+                    const inputField = row.querySelector('input[name$="identity_number"]');
+                    if (inputField) {
+                        if (e.target.value === 'NIDA (National ID)') {
+                            inputField.placeholder = 'XXXXXXXX-XXXXX-XXXXX-XX';
+                        } else if (e.target.value === 'Passport (Hati ya kusafiria)') {
+                            inputField.placeholder = 'AB1234567';
+                        } else if (e.target.value === "Driver's License") {
+                            inputField.placeholder = '1234567890';
+                        } else if (e.target.value === "Voter's ID") {
+                            inputField.placeholder = 'T-XXXX-XXXX-XXX-X';
+                        } else {
+                            inputField.placeholder = 'Enter ID number';
+                        }
+                        inputField.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            }
+        });
+
+        // Format existing values on load
+        setTimeout(() => {
+            document.querySelectorAll('select[name$="identity_type"]').forEach(select => {
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            document.querySelectorAll('input[name$="identity_number"], #id_tin').forEach(input => {
+                if (input.value) {
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+        }, 100);
+
+        document.body.addEventListener('input', function(e) {
+            if (e.target.tagName.toLowerCase() === 'input' && e.target.name.match(/identity_number$/)) {
+                const row = e.target.closest('.id-form-row');
+                if (row) {
+                    const typeSelect = row.querySelector('select[name$="identity_type"]');
+                    if (typeSelect) {
+                        if (typeSelect.value === 'NIDA (National ID)') {
+                            let val = e.target.value.replace(/[^0-9]/g, '');
+                            if (val.length > 20) val = val.substring(0, 20);
+                            let formatted = val.substring(0, 8);
+                            if (val.length > 8) formatted += '-' + val.substring(8, 13);
+                            if (val.length > 13) formatted += '-' + val.substring(13, 18);
+                            if (val.length > 18) formatted += '-' + val.substring(18, 20);
+                            e.target.value = formatted;
+                        } else if (typeSelect.value === 'Passport (Hati ya kusafiria)') {
+                            let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                            if (val.length > 9) val = val.substring(0, 9);
+                            e.target.value = val;
+                        } else if (typeSelect.value === "Driver's License") {
+                            let val = e.target.value.replace(/[^0-9]/g, '');
+                            if (val.length > 10) val = val.substring(0, 10);
+                            e.target.value = val;
+                        } else if (typeSelect.value === "Voter's ID") {
+                            let val = e.target.value.replace(/[^0-9T]/gi, '').toUpperCase();
+                            if (!val.startsWith('T') && val.length > 0) {
+                                val = 'T' + val.replace(/T/g, '');
+                            }
+                            let digitsOnly = val.substring(1).replace(/[^0-9]/g, '');
+                            if (digitsOnly.length > 12) digitsOnly = digitsOnly.substring(0, 12);
+                            
+                            let formatted = val.length > 0 ? 'T' : '';
+                            if (digitsOnly.length > 0) {
+                                formatted += '-' + digitsOnly.substring(0, 4);
+                            }
+                            if (digitsOnly.length > 4) {
+                                formatted += '-' + digitsOnly.substring(4, 8);
+                            }
+                            if (digitsOnly.length > 8) {
+                                formatted += '-' + digitsOnly.substring(8, 11);
+                            }
+                            if (digitsOnly.length > 11) {
+                                formatted += '-' + digitsOnly.substring(11, 12);
+                            }
+                            e.target.value = formatted;
+                        }
+                    }
+                }
+            }
+        });
+
+    const addContactBtn = document.getElementById('add-contact-btn');
+    if (addContactBtn) {
+        addContactBtn.addEventListener('click', function() {
+            const container = document.getElementById('contact-formset-container');
+            const totalFormsInput = document.getElementById('id_contacts-TOTAL_FORMS');
+            if (!totalFormsInput) return;
+            
+            let formCount = parseInt(totalFormsInput.value);
+            const emptyFormHtml = document.getElementById('empty-contact-form').innerHTML;
+            const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formCount);
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFormHtml;
+            container.appendChild(tempDiv.firstElementChild);
+            
+            totalFormsInput.value = formCount + 1;
+        });
+
+        document.getElementById('contact-formset-container').addEventListener('click', function(e) {
+            if (e.target.closest('.remove-contact-row')) {
+                const row = e.target.closest('.contact-form-row');
+                const deleteCheck = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+                if (deleteCheck) {
+                    deleteCheck.checked = true;
+                    row.style.display = 'none';
+                } else {
+                    row.remove();
+                    const totalFormsInput = document.getElementById('id_contacts-TOTAL_FORMS');
+                    let formCount = parseInt(totalFormsInput.value);
+                    totalFormsInput.value = formCount - 1;
+                }
+            }
+        });
+    }
+
+    // Tanzania Address Dropdowns
+    window.addressInitialData = [];
+    {% for form in address_formset.forms %}
+    window.addressInitialData.push({
+        prefix: "{{ form.prefix }}",
+        region: "{{ form.region.value|default_if_none:'' }}",
+        district: "{{ form.district.value|default_if_none:'' }}",
+        ward: "{{ form.ward.value|default_if_none:'' }}"
+    });
+    {% endfor %}
+
+    const tzData = {
+      "Dar es Salaam": {
+        "Ilala": ["Kariakoo", "Upanga", "Kisutu", "Gerezani", "Mchafukoge", "Buguruni", "Ukonga", "Vingunguti"],
+        "Kinondoni": ["Oysterbay", "Msasani", "Mikocheni", "Mwenge", "Kawe", "Mbezi Beach", "Kijitonyama"],
+        "Temeke": ["Kurasini", "Chang'ombe", "Mbagala", "Tandika", "Yombo Vituka"],
+        "Ubungo": ["Mabibo", "Manzese", "Sinza", "Kimara", "Ubungo", "Makuburi"],
+        "Kigamboni": ["Kigamboni", "Vijibweni", "Tungi", "Mjimwema", "Kibada"]
+      },
+      "Arusha": {
+        "Arusha City": ["Sekei", "Kati", "Kaloleni", "Levolosi", "Sombetini", "Unga L.T.D"],
+        "Arumeru": ["Usa River", "King'ori", "Mbuguni", "Makiba"],
+        "Karatu": ["Karatu", "Mbulumbulu", "Qurus", "Endabash"],
+        "Monduli": ["Monduli Mjini", "Makuyuni", "Mto wa Mbu"]
+      },
+      "Dodoma": {
+        "Dodoma City": ["Makole", "Majengo", "Kizota", "Hazina", "Viwandani"],
+        "Bahi": ["Bahi", "Kigwe", "Lamaiti"],
+        "Chamwino": ["Chamwino", "Buigiri", "Mvumi Mission"],
+        "Kondoa": ["Kondoa Mjini", "Kolo"]
+      },
+      "Mwanza": {
+        "Nyamagana": ["Nyamagana", "Mbugani", "Pamba", "Mirongo", "Isamilo"],
+        "Ilemela": ["Ilemela", "Nyamanoro", "Kirumba", "Kitangiri"],
+        "Magu": ["Magu Mjini", "Kisesa"],
+        "Misungwi": ["Misungwi", "Usagara"]
+      },
+      "Mbeya": {
+        "Mbeya City": ["Ruanda", "Sisimba", "Iyunga", "Mbalizi Road", "Uyole"],
+        "Rungwe": ["Tukuyu", "Kiwira"],
+        "Kyela": ["Kyela Mjini", "Ipinda"]
+      }
+    };
+
+    function populateDropdown(selectElement, optionsList, selectedValue) {
+        selectElement.innerHTML = '<option value="">Select...</option>';
+        optionsList.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt;
+            option.textContent = opt;
+            if (opt === selectedValue) {
+                option.selected = true;
+            }
+            selectElement.appendChild(option);
+        });
+    }
+
+    document.body.addEventListener('change', function(e) {
+        if (e.target.tagName.toLowerCase() === 'select') {
+            const name = e.target.name;
+            if (name.match(/-region$/)) {
+                const region = e.target.value;
+                const districtSelect = document.querySelector(`select[name="${name.replace('-region', '-district')}"]`);
+                const wardSelect = document.querySelector(`select[name="${name.replace('-region', '-ward')}"]`);
+                
+                if (districtSelect) {
+                    const districts = region && tzData[region] ? Object.keys(tzData[region]) : [];
+                    populateDropdown(districtSelect, districts, '');
+                    if (wardSelect) populateDropdown(wardSelect, [], '');
+                }
+            } else if (name.match(/-district$/)) {
+                const district = e.target.value;
+                const regionSelect = document.querySelector(`select[name="${name.replace('-district', '-region')}"]`);
+                const wardSelect = document.querySelector(`select[name="${name.replace('-district', '-ward')}"]`);
+                
+                if (wardSelect && regionSelect) {
+                    const region = regionSelect.value;
+                    const wards = region && tzData[region] && tzData[region][district] ? tzData[region][district] : [];
+                    populateDropdown(wardSelect, wards, '');
+                }
+            }
+        }
+    });
+
+    // Initialize dropdowns from Django values
+    if (window.addressInitialData) {
+        window.addressInitialData.forEach(data => {
+            const regionSelect = document.querySelector(`select[name="${data.prefix}-region"]`);
+            const districtSelect = document.querySelector(`select[name="${data.prefix}-district"]`);
+            const wardSelect = document.querySelector(`select[name="${data.prefix}-ward"]`);
+            
+            if (regionSelect) {
+                populateDropdown(regionSelect, Object.keys(tzData), data.region);
+                if (districtSelect) {
+                    const districts = data.region && tzData[data.region] ? Object.keys(tzData[data.region]) : [];
+                    populateDropdown(districtSelect, districts, data.district);
+                    if (wardSelect) {
+                        const wards = data.region && tzData[data.region] && tzData[data.region][data.district] ? tzData[data.region][data.district] : [];
+                        populateDropdown(wardSelect, wards, data.ward);
+                    }
+                }
+            }
+        });
+    }
+
 });
 </script>
 {% endblock %}

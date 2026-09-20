@@ -5,7 +5,12 @@ def user_document_path(instance, filename):
     Generate file path for user profile documents.
     Format: users/user_<user_id>/<filename>
     """
-    user_id = instance.user.id if instance.user else 'unknown'
+    if hasattr(instance, 'user') and instance.user:
+        user_id = instance.user.id
+    elif hasattr(instance, 'applicant') and getattr(instance.applicant, 'user', None):
+        user_id = instance.applicant.user.id
+    else:
+        user_id = 'unknown'
     return f'users/user_{user_id}/{filename}'
 
 def medicine_document_path(instance, filename):

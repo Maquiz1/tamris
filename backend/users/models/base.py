@@ -99,17 +99,11 @@ class CustomUser(AbstractUser, TimeStampedModel):
             return 5
         
         # Step 2: Needs Details (Profile Creation)
-        if self.role.name == 'Individual Applicant':
-            if not hasattr(self, 'user_profile') or not self.user_profile.is_details_complete:
+        if self.role.name in ['Individual Applicant', 'Company Applicant']:
+            if not hasattr(self, 'applicant_profile') or not self.applicant_profile.is_details_complete:
                 return 2
             # Step 3: Needs Documents
-            if not self.user_profile.is_profile_complete:
-                return 3
-        elif self.role.name == 'Company Applicant':
-            if not hasattr(self, 'company_profile') or not self.company_profile.is_details_complete:
-                return 2
-            # Step 3: Needs Documents
-            if not self.company_profile.is_profile_complete:
+            if not self.applicant_profile.is_profile_complete:
                 return 3
         
         # Step 4: Needs Review & Submit
@@ -157,15 +151,16 @@ class CustomUser(AbstractUser, TimeStampedModel):
         # Allow access if role is assigned OR if the user completed registration
         # (has a profile) — covers new applicants pending evaluator review.
         has_role = 'Individual Applicant' in self.all_roles or 'Company Applicant' in self.all_roles
-        has_profile = hasattr(self, 'user_profile') or hasattr(self, 'company_profile')
+        has_profile = hasattr(self, 'applicant_profile')
         return has_role or has_profile or self.is_superuser or 'Admin' in self.all_roles
 
     @property
     def display_name(self):
-        if hasattr(self, 'user_profile') and self.user_profile:
-            return self.user_profile.full_name
-        elif hasattr(self, 'company_profile') and self.company_profile:
-            return self.company_profile.company_name
+        if hasattr(self, 'applicant_profile') and self.applicant_profile:
+            if self.applicant_profile.applicant_type == 'Individual' and hasattr(self.applicant_profile, 'individual'):
+                return self.applicant_profile.individual.full_name
+            elif self.applicant_profile.applicant_type == 'Organization' and hasattr(self.applicant_profile, 'organization'):
+                return self.applicant_profile.organization.organization_name
         
         full_name = self.get_full_name().strip()
         if full_name:
@@ -175,10 +170,6 @@ class CustomUser(AbstractUser, TimeStampedModel):
 
     @property
     def profile_photo_url(self):
-        if hasattr(self, 'user_profile') and self.user_profile and self.user_profile.passport_photo:
-            return self.user_profile.passport_photo.url
-        if hasattr(self, 'company_profile') and self.company_profile and self.company_profile.representative_id_image:
-            return self.company_profile.representative_id_image.url
         return None
 
     def __str__(self):

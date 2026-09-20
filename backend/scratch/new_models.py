@@ -28,26 +28,6 @@ class Applicant(TimeStampedModel):
                 return has_name and has_tin
         return False
 
-    @property
-    def is_profile_complete(self):
-        return self.documents.exists()
-
-    @property
-    def address_obj(self):
-        return self.addresses.first()
-
-    @property
-    def contact_obj(self):
-        return getattr(self, 'contact', None)
-
-    @property
-    def identity_obj(self):
-        return self.identities.first()
-        
-    @property
-    def education_obj(self):
-        return self.educations.first()
-
     def __str__(self):
         return f"{self.user.email} - {self.applicant_type}"
 
@@ -58,17 +38,6 @@ class Individual(TimeStampedModel):
     last_name = models.CharField(max_length=100, verbose_name="Last Name")
     sex = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')], blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    tin = models.CharField(
-        max_length=100, 
-        unique=True,
-        blank=True, null=True,
-        validators=[
-            RegexValidator(
-                regex=r'^[1-9]\d{2}-?\d{3}-?\d{3}$',
-                message='TIN must be exactly 9 digits and cannot start with 0.'
-            )
-        ]
-    )
 
     @property
     def full_name(self):
@@ -82,14 +51,13 @@ class Organization(TimeStampedModel):
     organization_name = models.CharField(max_length=255, unique=True)
     organization_type = models.CharField(max_length=100, blank=True, null=True)
     registration_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
-    date_registered = models.DateField(blank=True, null=True)
     tin = models.CharField(
         max_length=100, 
         unique=True,
         blank=True, null=True,
         validators=[
             RegexValidator(
-                regex=r'^[1-9]\d{2}-?\d{3}-?\d{3}$',
+                regex=r'^[1-9]\d{8}$',
                 message='TIN must be exactly 9 digits and cannot start with 0.'
             )
         ]
@@ -120,10 +88,6 @@ class ApplicantIdentity(TimeStampedModel):
             val = val.replace('-', '')
             if len(val) == 20:
                 return f"{val[:8]}-{val[8:13]}-{val[13:17]}-{val[17:]}"
-        elif self.identity_type == "Voter's ID":
-            val = val.upper().replace('-', '').replace('T', '')
-            if len(val) == 12:
-                return f"T-{val[:4]}-{val[4:8]}-{val[8:]}"
         return val
 
     def __str__(self):
@@ -137,16 +101,19 @@ class ApplicantAddress(TimeStampedModel):
     district = models.CharField(max_length=100, blank=True, null=True, verbose_name="District / Wilaya")
     ward = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ward / Kata")
     street = models.CharField(max_length=150, blank=True, null=True, verbose_name="Village/Street / Kijiji au Mtaa")
-    residency_duration = models.CharField(max_length=100, blank=True, null=True, verbose_name="Residency Duration / Muda wa Kuishi Mahali Hapo")
     physical_address = models.TextField(blank=True, null=True, verbose_name="Physical Address")
     postal_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Postal Address / Anuani ya Posta")
 
 class ApplicantContact(TimeStampedModel):
-    applicant = models.OneToOneField(Applicant, on_delete=models.CASCADE, related_name='contact')
-    mobile_phone = models.CharField(max_length=50, verbose_name="Mobile Phone")
-    landline = models.CharField(max_length=50, blank=True, null=True, verbose_name="Landline")
-    fax = models.CharField(max_length=50, blank=True, null=True, verbose_name="Fax")
-    email = models.EmailField(verbose_name="Email")
+    CONTACT_CHOICES = [
+        ('Phone', 'Phone'),
+        ('Email', 'Email'),
+        ('Fax', 'Fax'),
+    ]
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='contacts')
+    contact_type = models.CharField(max_length=50, choices=CONTACT_CHOICES, default='Phone')
+    contact_value = models.CharField(max_length=255)
+    is_primary = models.BooleanField(default=False)
 
 class Education(TimeStampedModel):
     EDUCATION_LEVEL_CHOICES = [
@@ -174,6 +141,10 @@ class OrganizationRepresentative(TimeStampedModel):
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100)
     position = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    identity_type = models.CharField(max_length=50, choices=ApplicantIdentity.ID_CHOICES, blank=True, null=True)
+    identity_number = models.CharField(max_length=100, blank=True, null=True)
     is_primary = models.BooleanField(default=False)
 
 class ApplicantDocument(TimeStampedModel):

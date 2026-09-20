@@ -43,47 +43,32 @@ class ApplicantTypeForm(forms.ModelForm):
 class IndividualForm(forms.ModelForm):
     class Meta:
         model = Individual
-        fields = ('first_name', 'middle_name', 'last_name', 'sex', 'date_of_birth', 'tin')
+        fields = ('first_name', 'middle_name', 'last_name', 'sex', 'date_of_birth')
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'middle_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'sex': forms.Select(attrs={'class': 'form-select'}),
-            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'tin': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '11'})
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
         }
-
-    def clean_tin(self):
-        tin = self.cleaned_data.get('tin')
-        if tin:
-            return tin.replace('-', '')
-        return tin
 
 class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
-        fields = ('organization_name', 'organization_type', 'registration_number', 'date_registered', 'tin', 'year_established')
+        fields = ('organization_name', 'organization_type', 'registration_number', 'tin', 'year_established')
         widgets = {
             'organization_name': forms.TextInput(attrs={'class': 'form-control'}),
             'organization_type': forms.TextInput(attrs={'class': 'form-control'}),
             'registration_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'date_registered': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'tin': forms.TextInput(attrs={'class': 'form-control'}),
             'year_established': forms.NumberInput(attrs={'class': 'form-control'})
         }
-
-    def clean_tin(self):
-        tin = self.cleaned_data.get('tin')
-        if tin:
-            return tin.replace('-', '')
-        return tin
 
 ApplicantIdentityFormSet = inlineformset_factory(
     Applicant, ApplicantIdentity,
     fields=('identity_type', 'identity_number', 'is_primary'),
     extra=1,
-    max_num=1,
-    can_delete=False,
+    can_delete=True,
     widgets={
         'identity_type': forms.Select(attrs={'class': 'form-select'}),
         'identity_number': forms.TextInput(attrs={'class': 'form-control'}),
@@ -96,31 +81,31 @@ ApplicantIdentityFormSet = inlineformset_factory(
 
 ApplicantAddressFormSet = inlineformset_factory(
     Applicant, ApplicantAddress,
-    fields=('country', 'region', 'district', 'ward', 'street', 'residency_duration', 'physical_address', 'postal_address'),
+    fields=('country', 'region', 'district', 'ward', 'street', 'physical_address', 'postal_address'),
     extra=1,
     can_delete=True,
     widgets={
-        'country': forms.Select(attrs={'class': 'form-select', 'required': 'required'}, choices=[('Tanzania', 'Tanzania')]),
-        'region': forms.Select(attrs={'class': 'form-select', 'required': 'required'}, choices=[('', 'Select Region')]),
-        'district': forms.Select(attrs={'class': 'form-select', 'required': 'required'}, choices=[('', 'Select District')]),
-        'ward': forms.Select(attrs={'class': 'form-select', 'required': 'required'}, choices=[('', 'Select Ward')]),
-        'street': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+        'country': forms.TextInput(attrs={'class': 'form-control'}),
+        'region': forms.TextInput(attrs={'class': 'form-control'}),
+        'district': forms.TextInput(attrs={'class': 'form-control'}),
+        'ward': forms.TextInput(attrs={'class': 'form-control'}),
+        'street': forms.TextInput(attrs={'class': 'form-control'}),
         'physical_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         'postal_address': forms.TextInput(attrs={'class': 'form-control'}),
-        'residency_duration': forms.TextInput(attrs={'class': 'form-control', 'required': 'required', 'placeholder': 'e.g. 5 Years'}),
     }
 )
 
-class ApplicantContactForm(forms.ModelForm):
-    class Meta:
-        model = ApplicantContact
-        fields = ('mobile_phone', 'landline', 'fax', 'email')
-        widgets = {
-            'mobile_phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'landline': forms.TextInput(attrs={'class': 'form-control'}),
-            'fax': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control bg-light', 'readonly': 'readonly'})
-        }
+ApplicantContactFormSet = inlineformset_factory(
+    Applicant, ApplicantContact,
+    fields=('contact_type', 'contact_value', 'is_primary'),
+    extra=1,
+    can_delete=True,
+    widgets={
+        'contact_type': forms.Select(attrs={'class': 'form-select'}),
+        'contact_value': forms.TextInput(attrs={'class': 'form-control'}),
+        'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    }
+)
 
 EducationFormSet = inlineformset_factory(
     Applicant, Education,
@@ -134,15 +119,18 @@ EducationFormSet = inlineformset_factory(
 
 OrganizationRepresentativeFormSet = inlineformset_factory(
     Organization, OrganizationRepresentative,
-    fields=('first_name', 'middle_name', 'last_name', 'position', 'is_primary'),
+    fields=('first_name', 'middle_name', 'last_name', 'position', 'phone', 'email', 'identity_type', 'identity_number', 'is_primary'),
     extra=1,
-    max_num=1,
-    can_delete=False,
+    can_delete=True,
     widgets={
         'first_name': forms.TextInput(attrs={'class': 'form-control'}),
         'middle_name': forms.TextInput(attrs={'class': 'form-control'}),
         'last_name': forms.TextInput(attrs={'class': 'form-control'}),
         'position': forms.TextInput(attrs={'class': 'form-control'}),
+        'phone': forms.TextInput(attrs={'class': 'form-control'}),
+        'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        'identity_type': forms.Select(attrs={'class': 'form-select'}),
+        'identity_number': forms.TextInput(attrs={'class': 'form-control'}),
         'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'})
     }
 )
@@ -153,58 +141,8 @@ class PractitionerDetailForm(forms.Form):
 class CompanyDetailForm(forms.Form):
     pass
 class PractitionerDocumentForm(forms.Form):
-    nida_copy = forms.FileField(required=True)
-    passport_photo = forms.FileField(required=False)
-    tahpc_certificate = forms.FileField(required=False)
-    tin_certificate = forms.FileField(required=False)
-    passport_document = forms.FileField(required=False)
-
-    def __init__(self, *args, **kwargs):
-        self.instance = kwargs.pop('instance', None)
-        super().__init__(*args, **kwargs)
-        if self.instance:
-            for doc in self.instance.documents.all():
-                if doc.document_type in self.fields:
-                    self.fields[doc.document_type].initial = doc.file
-
-    def save(self):
-        if not self.instance:
-            return None
-        for field_name, file in self.cleaned_data.items():
-            if file:
-                ApplicantDocument.objects.update_or_create(
-                    applicant=self.instance,
-                    document_type=field_name,
-                    defaults={'file': file}
-                )
-        return self.instance
-
+    pass
 class CompanyDocumentForm(forms.Form):
-    brela_certificate = forms.FileField(required=True)
-    tin_certificate = forms.FileField(required=True)
-    business_license = forms.FileField(required=True)
-    tahpc_certificate = forms.FileField(required=False)
-    representative_nida = forms.FileField(required=False)
-    representative_id_image = forms.FileField(required=False)
-
-    def __init__(self, *args, **kwargs):
-        self.instance = kwargs.pop('instance', None)
-        super().__init__(*args, **kwargs)
-        if self.instance:
-            for doc in self.instance.documents.all():
-                if doc.document_type in self.fields:
-                    self.fields[doc.document_type].initial = doc.file
-
-    def save(self):
-        if not self.instance:
-            return None
-        for field_name, file in self.cleaned_data.items():
-            if file:
-                ApplicantDocument.objects.update_or_create(
-                    applicant=self.instance,
-                    document_type=field_name,
-                    defaults={'file': file}
-                )
-        return self.instance
+    pass
 class UserIdentificationFormSet(forms.Form):
     pass
