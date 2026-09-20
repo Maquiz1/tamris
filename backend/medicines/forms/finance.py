@@ -11,14 +11,34 @@ class PaymentVerificationForm(forms.ModelForm):
         }
 
 class ApplicantPaymentSubmissionForm(forms.ModelForm):
+    amount_paid = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Amount Paid (Optional)'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['control_number'].required = True
+
     class Meta:
         model = Payment
-        fields = ['control_number', 'receipt_number', 'reference_number']
+        fields = ['control_number', 'amount_paid', 'receipt_number', 'reference_number']
         widgets = {
             'control_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter 12-digit Control Number'}),
             'receipt_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter 15-digit Receipt Number (Optional)'}),
             'reference_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter 16-character Reference Number (Optional)'}),
         }
+
+    def clean_amount_paid(self):
+        val = self.cleaned_data.get('amount_paid')
+        if val:
+            val = str(val).replace(',', '').replace(' ', '')
+            from decimal import Decimal
+            try:
+                return Decimal(val)
+            except Exception:
+                raise forms.ValidationError("Invalid amount.")
+        return val
 
 class FeeConfigurationForm(forms.ModelForm):
     class Meta:

@@ -31,19 +31,50 @@ class MedicineApplication(TimeStampedModel):
     applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='medicine_applications')
     application_type = models.CharField(max_length=20, choices=APPLICATION_TYPES)
     
-    # Applicant Skills (Ujuzi katika tiba asili)
+    # Applicant Skills (Ujuzi katika Tiba Asili / Miti Dawa)
     SKILL_CHOICES = [
-        ('MAFUNZO', 'Mafunzo (Training)'),
-        ('KURITHI', 'Kurithi (Inherited)'),
-        ('MENGINEYO', 'Mengineyo (Other)')
+        ('MAFUNZO', 'Mafunzo rasmi'),
+        ('KURITHI', 'Kurithi'),
+        ('MENGINEYO', 'Mengineyo')
     ]
-    traditional_medicine_skills = models.CharField(max_length=20, choices=SKILL_CHOICES, blank=True, null=True, verbose_name="Ujuzi katika tiba asili")
-    skills_acquired_details = models.TextField(blank=True, null=True, verbose_name="Ulipataje ujuzi huo (How acquired)")
+    traditional_medicine_skills = models.CharField(max_length=20, choices=SKILL_CHOICES, blank=True, null=True, verbose_name="Ulipataje ujuzi katika tiba asili?")
+    
+    DURATION_CHOICES = [
+        ('YEARS', 'Miaka (Years)'),
+        ('MONTHS', 'Miezi (Months)'),
+        ('WEEKS', 'Majuma (Weeks)'),
+        ('DAYS', 'Siku (Days)'),
+    ]
+
+    # 1.7.1 Mafunzo rasmi
+    training_institution = models.CharField(max_length=255, blank=True, null=True, verbose_name="Taja Taasisi ya Mafunzo / Mganga wa Tiba Asili")
+    training_duration = models.IntegerField(blank=True, null=True, verbose_name="Muda wa mafunzo")
+    training_duration_type = models.CharField(max_length=20, choices=DURATION_CHOICES, blank=True, null=True, verbose_name="Aina ya muda")
+    
+    # 1.7.2 Kurithi
+    inherited_from = models.CharField(max_length=255, blank=True, null=True, verbose_name="Taja jina la fundi / mtu uliyemrithi")
+    inherited_duration = models.IntegerField(blank=True, null=True, verbose_name="Muda uliojifunza")
+    inherited_duration_type = models.CharField(max_length=20, choices=DURATION_CHOICES, blank=True, null=True, verbose_name="Aina ya muda")
+    
+    # 1.7.3 Mengineyo
+    traditional_medicine_skills_other = models.TextField(blank=True, null=True, verbose_name="Mengineyo; eleza")
+
+    DOSAGE_FORM_CHOICES = [
+        ('UNGA', 'Unga'),
+        ('KIMIMINIKA', 'Kimiminika'),
+        ('KIDONGE', 'Kidonge'),
+        ('CAPSULE', 'Capsule'),
+        ('NYINGINE', 'Nyingine'),
+    ]
 
     # Basic Medicine Details
     medicine_name = models.CharField(max_length=255, verbose_name="Medicine Name (Jina la dawa)")
-    dosage_form = models.CharField(max_length=100, help_text="e.g., Liquid, Powder, Tablet, Cream")
-    net_weight_volume = models.CharField(max_length=100, blank=True, null=True, verbose_name="Kiasi (Net Weight/Net Volume)")
+    dosage_form = models.CharField(max_length=100, choices=DOSAGE_FORM_CHOICES, verbose_name="Hali ya dawa (Dosage form)")
+    dosage_form_other = models.CharField(max_length=100, blank=True, null=True, verbose_name="Taja Hali ya dawa")
+    net_weight_volume = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Kiasi (Net Weight/Net Volume)")
+    
+    UNIT_CHOICES = [('g', 'g'), ('mL', 'mL')]
+    net_weight_volume_unit = models.CharField(max_length=10, choices=UNIT_CHOICES, blank=True, null=True, verbose_name="Kipimo")
     
     # Appearance & Packaging
     medicine_color = models.CharField(max_length=100, blank=True, null=True, verbose_name="Rangi ya dawa")
@@ -62,30 +93,72 @@ class MedicineApplication(TimeStampedModel):
     ingredients = models.TextField(verbose_name="Medicine ingredients information (Taarifa za viambato vya dawa)", help_text="List of raw materials or herbs used")
     
     # Usage and Safety Details
-    route_of_administration = models.CharField(max_length=255, blank=True, null=True, verbose_name="Namna ya utoaji wa dawa (Route of administration)")
+    ROUTE_CHOICES = [
+        ('KUPAKA', 'Kupaka'),
+        ('KUNYWA', 'Kunywa'),
+        ('KUVUTA', 'Kuvuta'),
+        ('KUFUKIZA', 'Kufukiza'),
+        ('KUSUKUTUA', 'Kusukutua'),
+        ('NYINGINE', 'Njia nyingine'),
+    ]
+    route_of_administration = models.CharField(max_length=50, choices=ROUTE_CHOICES, blank=True, null=True, verbose_name="Namna ya utoaji wa dawa (Route of administration)")
+    route_of_administration_other = models.CharField(max_length=255, blank=True, null=True, verbose_name="Njia nyingine")
+    
     indications = models.TextField(help_text="What is this medicine used to treat?")
     directions_for_use = models.TextField(verbose_name="Directions for use (Namna ya matumizi)", default="")
+    
+    known_side_effects = models.BooleanField(default=False, verbose_name="Je, dawa ina madhara yanayojulikana?")
     possible_side_effects = models.TextField(verbose_name="Possible side effects (Madhara yanayoweza kutokea)", default="")
+    
     precautions = models.TextField(verbose_name="Precautions (Tahadhari)", default="")
     instructions_for_use = models.TextField(verbose_name="Instructions for use (Maelekezo ya matumizi)", default="")
-    storage_conditions = models.TextField(verbose_name="Storage conditions (Masharti ya utunzaji)", default="")
+    
+    STORAGE_CHOICES = [
+        ('JOTO_LA_KAWAIDA', 'Joto la kawaida (Room Temperature)'),
+        ('MAZINGIRA_MAALUM', 'Mazingira maalum'),
+    ]
+    storage_conditions = models.CharField(max_length=50, choices=STORAGE_CHOICES, verbose_name="Storage conditions (Masharti ya utunzaji)", default="JOTO_LA_KAWAIDA")
+    storage_conditions_other = models.TextField(blank=True, null=True, verbose_name="Iwapo mazingira maalum, elezea:")
+    
     shelf_life = models.CharField(max_length=100, blank=True, null=True, verbose_name="Muda wa matumizi wa dawa (Shelf life)")
     dosage = models.CharField(max_length=255, blank=True, null=True, verbose_name="Kipimo cha matumizi (Dosage)")
     
     # Raw Material Sources (Vyanzo vya dawa ghafi)
     CULTIVATION_CHOICES = [('INALIMWA', 'Inalimwa (Cultivated)'), ('ASILI', 'Za Asili (Wild)')]
-    local_harvest_season = models.CharField(max_length=100, blank=True, null=True, verbose_name="Msimu wa kuvuna (Local)")
-    local_harvested_part = models.CharField(max_length=100, blank=True, null=True, verbose_name="Sehemu inayovunwa (Local)")
+    SEASON_CHOICES = [
+        ('KIANGAZI', 'Kiangazi'),
+        ('MASIKA', 'Masika'),
+        ('VULI', 'Vuli'),
+        ('KIPUPWE', 'Kipupwe'),
+    ]
+    local_harvest_season = models.CharField(max_length=50, choices=SEASON_CHOICES, blank=True, null=True, verbose_name="Msimu wa kuvuna (Local)")
+    
+    PLANT_PART_CHOICES = [
+        ('MAJANI', 'Majani'),
+        ('MIZIZI', 'Mizizi'),
+        ('MAGOME', 'Magome'),
+        ('MATUNDA', 'Matunda'),
+        ('MAUA', 'Maua'),
+        ('UTOMVU', 'Utomvu'),
+        ('MENGINEYO', 'Mengineyo'),
+    ]
+    local_harvested_part = models.CharField(max_length=50, choices=PLANT_PART_CHOICES, blank=True, null=True, verbose_name="Sehemu inayovunwa (Local)")
+    local_harvested_part_other = models.CharField(max_length=100, blank=True, null=True, verbose_name="Sehemu nyingine")
+    
     local_cultivated_or_wild = models.CharField(max_length=20, choices=CULTIVATION_CHOICES, blank=True, null=True)
-    local_abundance = models.CharField(max_length=100, blank=True, null=True, verbose_name="Hali ya upatikanaji (Local)")
-    imported_countries = models.CharField(max_length=255, blank=True, null=True, verbose_name="Nchi zinakotoka (Imported)")
-    imported_plant_part = models.CharField(max_length=100, blank=True, null=True, verbose_name="Sehemu inayoingizwa (Imported)")
-    imported_raw_state = models.CharField(max_length=255, blank=True, null=True, verbose_name="Hali ya dawaghafi inayoingizwa")
-    imported_abundance = models.CharField(max_length=100, blank=True, null=True, verbose_name="Hali ya upatikanaji (Imported)")
+    
+    ABUNDANCE_CHOICES = [
+        ('KUBWA_SANA', 'Upatikanaji mkubwa sana'),
+        ('KUBWA', 'Upatikanaji mkubwa'),
+        ('KAWAIDA', 'Upatikanaji wa kawaida'),
+        ('MDOGO', 'Upatikanaji mdogo'),
+        ('MDOGO_SANA', 'Upatikanaji mdogo sana'),
+    ]
+    local_abundance = models.CharField(max_length=50, choices=ABUNDANCE_CHOICES, blank=True, null=True, verbose_name="Hali ya upatikanaji (Local)")
 
     # Manufacturing Information (Hatua ya 3)
     harvesting_method = models.TextField(verbose_name="Method of harvesting raw materials (Namna ya uvunaji wa malighafi)", blank=True, null=True)
-    drying_procedures = models.TextField(verbose_name="Drying procedures (Namna ya ukaushaji)", blank=True, null=True)
+    does_dry_raw_materials = models.BooleanField(default=False, verbose_name="Je, una kausha dawa ghafi?")
     drying_area = models.CharField(max_length=255, blank=True, null=True, verbose_name="Sehemu unayokaushia")
     drying_equipment = models.CharField(max_length=255, blank=True, null=True, verbose_name="Vifaa vya kukaushia")
     

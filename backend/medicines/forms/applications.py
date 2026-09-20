@@ -11,20 +11,22 @@ class BaseMedicineForm(forms.ModelForm):
                 allowed_sections = []
                 
             field_mapping = {
-                'medicine_name': 'BASIC_DETAILS', 'dosage_form': 'BASIC_DETAILS', 'indications': 'BASIC_DETAILS',
+                'application_type': 'BASIC_DETAILS',
+                'medicine_name': 'BASIC_DETAILS', 'dosage_form': 'BASIC_DETAILS', 'dosage_form_other': 'BASIC_DETAILS', 'indications': 'BASIC_DETAILS',
                 'directions_for_use': 'BASIC_DETAILS', 'possible_side_effects': 'BASIC_DETAILS', 'precautions': 'BASIC_DETAILS',
                 'instructions_for_use': 'BASIC_DETAILS', 'storage_conditions': 'BASIC_DETAILS', 'net_weight_volume': 'BASIC_DETAILS',
                 'medicine_color': 'BASIC_DETAILS', 'medicine_smell': 'BASIC_DETAILS', 'medicine_taste': 'BASIC_DETAILS',
                 'medicine_texture': 'BASIC_DETAILS', 'packaging_size': 'BASIC_DETAILS', 'packaging_color': 'BASIC_DETAILS',
                 'lid_color': 'BASIC_DETAILS', 'other_appearance_instructions': 'BASIC_DETAILS', 'route_of_administration': 'BASIC_DETAILS',
-                'traditional_medicine_skills': 'BASIC_DETAILS', 'skills_acquired_details': 'BASIC_DETAILS',
+                'traditional_medicine_skills': 'BASIC_DETAILS', 'traditional_medicine_skills_other': 'BASIC_DETAILS',
+                'training_institution': 'BASIC_DETAILS', 'training_duration': 'BASIC_DETAILS', 'training_duration_type': 'BASIC_DETAILS',
+                'inherited_from': 'BASIC_DETAILS', 'inherited_duration': 'BASIC_DETAILS', 'inherited_duration_type': 'BASIC_DETAILS',
                 
                 'ingredients': 'INGREDIENTS', 'ingredients_table': 'INGREDIENTS', 'active_ingredients': 'INGREDIENTS', 'excipients': 'INGREDIENTS',
-                'local_harvest_season': 'INGREDIENTS', 'local_harvested_part': 'INGREDIENTS', 'local_cultivated_or_wild': 'INGREDIENTS',
-                'local_abundance': 'INGREDIENTS', 'imported_countries': 'INGREDIENTS', 'imported_plant_part': 'INGREDIENTS',
-                'imported_raw_state': 'INGREDIENTS', 'imported_abundance': 'INGREDIENTS',
+                'local_harvest_season': 'INGREDIENTS', 'local_harvested_part': 'INGREDIENTS', 'local_harvested_part_other': 'INGREDIENTS',
+                'local_cultivated_or_wild': 'INGREDIENTS', 'local_abundance': 'INGREDIENTS',
                 
-                'drying_area': 'MANUFACTURING', 'drying_equipment': 'MANUFACTURING', 'drying_procedures': 'MANUFACTURING',
+                'does_dry_raw_materials': 'MANUFACTURING', 'drying_area': 'MANUFACTURING', 'drying_equipment': 'MANUFACTURING',
                 'manufacturing_location_type': 'MANUFACTURING', 'manufacturing_area_size': 'MANUFACTURING', 'manufacturing_area': 'MANUFACTURING',
                 'manufacturing_procedures': 'MANUFACTURING', 'harvesting_method': 'MANUFACTURING', 'equipment_used': 'MANUFACTURING',
                 'packaging_procedures': 'MANUFACTURING',
@@ -43,130 +45,65 @@ class BaseMedicineForm(forms.ModelForm):
                     # Remove the required attribute for disabled fields so the form can still submit valid data
                     field.required = False
 
-class MedicineListingForm(BaseMedicineForm):
-    class Meta:
-        model = MedicineApplication
-        fields = [
-            'medicine_name', 
-            'dosage_form', 
-            'indications', 
-            'ingredients',
-            'traditional_medicine_skills', 'skills_acquired_details',
-            'net_weight_volume', 'medicine_color', 'medicine_smell', 'medicine_taste', 'medicine_texture',
-            'packaging_size', 'packaging_color', 'lid_color', 'other_appearance_instructions',
-            'ingredients_table', 'active_ingredients', 'excipients',
-            'route_of_administration',
-            'local_harvest_season', 'local_harvested_part', 'local_cultivated_or_wild', 'local_abundance',
-            'imported_countries', 'imported_plant_part', 'imported_raw_state', 'imported_abundance',
-            'drying_area', 'drying_equipment', 'drying_procedures',
-            'manufacturing_location_type', 'manufacturing_area_size', 'manufacturing_area',
-            'manufacturing_procedures', 'harvesting_method', 'equipment_used', 'packaging_procedures',
-            
-            'directions_for_use',
-            'possible_side_effects',
-            'precautions',
-            'instructions_for_use',
-            'storage_conditions',
-            
-            # Common file fields
-            'sample_label',
-            'statement_of_efficacy',
-            'literature_review',
-            'tahpc_certificate',
-            'ingredients_info_doc',
-            'medicine_photos',
-            'instructions_doc',
+class MasterMedicineApplicationForm(BaseMedicineForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        app_type = getattr(self.instance, 'application_type', None)
+        
+        # Define fields that are exclusively for Category II
+        cat2_only_fields = [
+            'shelf_life', 'dosage', 'quality_control_procedures', 
+            'in_process_control_procedures', 'manufacturing_flow_chart',
+            'brela_registration_name', 'scientific_name_report', 
+            'heavy_metals_report', 'pesticides_report', 'toxic_chemicals_report', 
+            'conventional_drugs_report', 'foreign_matter_report', 'microbes_report', 
+            'aflatoxin_report', 'toxicity_report', 'stability_report', 
+            'moisture_analysis_report', 'ph_analysis_report', 
+            'uniformity_test_report', 'dissolution_test_report', 
+            'clinical_observation_report'
         ]
-        widgets = {
-            'medicine_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter medicine name', 'readonly': 'readonly'}),
-            'dosage_form': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Liquid, Powder, Tablet, Cream'}),
-            'indications': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What is this medicine used to treat?'}),
-            'ingredients': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'List of raw materials or herbs used'}),
-            'directions_for_use': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How should the medicine be used/applied?'}),
-            'possible_side_effects': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What are the possible side effects?'}),
-            'precautions': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Any precautions to take before/during use?'}),
-            'instructions_for_use': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Specific instructions for use'}),
-            'storage_conditions': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How should the medicine be stored? (e.g. Keep in a cool, dry place)'}),
-            
-            # Skills
-            'traditional_medicine_skills': forms.Select(attrs={'class': 'form-select'}),
-            'skills_acquired_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Provide details on how you acquired these skills'}),
-            
-            # Appearance
-            'net_weight_volume': forms.TextInput(attrs={'class': 'form-control'}),
-            'medicine_color': forms.TextInput(attrs={'class': 'form-control'}),
-            'medicine_smell': forms.TextInput(attrs={'class': 'form-control'}),
-            'medicine_taste': forms.TextInput(attrs={'class': 'form-control'}),
-            'medicine_texture': forms.TextInput(attrs={'class': 'form-control'}),
-            'packaging_size': forms.TextInput(attrs={'class': 'form-control'}),
-            'packaging_color': forms.TextInput(attrs={'class': 'form-control'}),
-            'lid_color': forms.TextInput(attrs={'class': 'form-control'}),
-            'other_appearance_instructions': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            
-            # Ingredients
-            'ingredients_table': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'List ingredients (Kiswahili/English/Latin names, source, part used)'}),
-            'active_ingredients': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'excipients': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            
-            # Route
-            'route_of_administration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Oral, External, Inhale...'}),
-            
-            # Sources
-            'local_harvest_season': forms.TextInput(attrs={'class': 'form-control'}),
-            'local_harvested_part': forms.TextInput(attrs={'class': 'form-control'}),
-            'local_cultivated_or_wild': forms.Select(attrs={'class': 'form-select'}),
-            'local_abundance': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_countries': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_plant_part': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_raw_state': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_abundance': forms.TextInput(attrs={'class': 'form-control'}),
-            
-            # Manufacturing Info
-            'harvesting_method': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe how raw materials are harvested'}),
-            'drying_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe the drying process'}),
-            'drying_area': forms.TextInput(attrs={'class': 'form-control'}),
-            'drying_equipment': forms.TextInput(attrs={'class': 'form-control'}),
-            'manufacturing_location_type': forms.Select(attrs={'class': 'form-select'}),
-            'manufacturing_area_size': forms.TextInput(attrs={'class': 'form-control'}),
-            'manufacturing_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Provide step-by-step manufacturing procedures'}),
-            'equipment_used': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'List all equipment used in production'}),
-            'manufacturing_area': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Where is the medicine manufactured?'}),
-            'packaging_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe how the final product is packaged'}),
-            
-            # Attachments
-            'sample_label': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*,.pdf'}),
-            'statement_of_efficacy': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
-            'literature_review': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
-            'tahpc_certificate': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*,.pdf'}),
-            'ingredients_info_doc': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
-            'medicine_photos': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
-            'instructions_doc': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
-        }
+        
+        # Define fields that are exclusively for Listing
+        listing_only_fields = [
+            'other_appearance_instructions'
+            # (Note: we leave medicine_color etc available for listing per user prompt)
+        ]
+        
+        if app_type == 'LISTING':
+            for f in cat2_only_fields:
+                if f in self.fields:
+                    self.fields[f].required = False
+        elif app_type == 'CATEGORY_II':
+            for f in listing_only_fields:
+                if f in self.fields:
+                    self.fields[f].required = False
+                    
 
-class MedicineCategoryIIForm(BaseMedicineForm):
     class Meta:
         model = MedicineApplication
         fields = [
             'medicine_name', 
             'dosage_form', 
+            'dosage_form_other',
             'indications', 
             'ingredients',
-            'traditional_medicine_skills', 'skills_acquired_details',
+            'traditional_medicine_skills', 'traditional_medicine_skills_other',
+            'training_institution', 'training_duration', 'training_duration_type', 'inherited_from', 'inherited_duration', 'inherited_duration_type',
             'net_weight_volume', 'medicine_color', 'medicine_smell', 'medicine_taste', 'medicine_texture',
             'packaging_size', 'packaging_color', 'lid_color', 'other_appearance_instructions',
             'ingredients_table', 'active_ingredients', 'excipients',
-            'route_of_administration',
-            'local_harvest_season', 'local_harvested_part', 'local_cultivated_or_wild', 'local_abundance',
-            'imported_countries', 'imported_plant_part', 'imported_raw_state', 'imported_abundance',
-            'drying_area', 'drying_equipment', 'drying_procedures',
+            'route_of_administration', 'route_of_administration_other',
+            'local_harvest_season', 'local_harvested_part', 'local_harvested_part_other', 'local_cultivated_or_wild', 'local_abundance',
+            'does_dry_raw_materials', 'drying_area', 'drying_equipment',
             'manufacturing_location_type', 'manufacturing_area_size', 'manufacturing_area',
             'manufacturing_procedures', 'harvesting_method', 'equipment_used', 'packaging_procedures',
             
             'directions_for_use',
+            'known_side_effects',
             'possible_side_effects',
             'precautions',
             'instructions_for_use',
-            'storage_conditions',
+            'storage_conditions', 'storage_conditions_other',
             'shelf_life',
             'dosage',
             
@@ -203,23 +140,32 @@ class MedicineCategoryIIForm(BaseMedicineForm):
         ]
         widgets = {
             'medicine_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter medicine name', 'readonly': 'readonly'}),
-            'dosage_form': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Liquid, Powder, Tablet, Cream'}),
+            'dosage_form': forms.Select(attrs={'class': 'form-select', 'onchange': 'toggleDosageFormOther()'}),
+            'dosage_form_other': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Please specify'}),
             'indications': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What is this medicine used to treat?'}),
             'ingredients': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'List of raw materials or herbs used'}),
             'directions_for_use': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How should the medicine be used/applied?'}),
+            'known_side_effects': forms.RadioSelect(choices=[(True, 'Ndiyo'), (False, 'Hapana')], attrs={'class': 'form-check-input', 'onchange': 'toggleSideEffects()'}),
             'possible_side_effects': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What are the possible side effects?'}),
             'precautions': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Any precautions to take before/during use?'}),
             'instructions_for_use': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Specific instructions for use'}),
-            'storage_conditions': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'How should the medicine be stored?'}),
+            'storage_conditions': forms.Select(attrs={'class': 'form-select', 'onchange': 'toggleStorageConditionsOther()'}),
+            'storage_conditions_other': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Elezea mazingira maalum'}),
             'shelf_life': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 12 months, 2 years'}),
             'dosage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 2 tablets twice a day, 5ml every 8 hours'}),
             
             # Skills
-            'traditional_medicine_skills': forms.Select(attrs={'class': 'form-select'}),
-            'skills_acquired_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Provide details on how you acquired these skills'}),
+            'traditional_medicine_skills': forms.RadioSelect(attrs={'class': 'form-check-input'}),
+            'traditional_medicine_skills_other': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'training_institution': forms.TextInput(attrs={'class': 'form-control'}),
+            'training_duration': forms.NumberInput(attrs={'class': 'form-control'}),
+            'training_duration_type': forms.Select(attrs={'class': 'form-select'}),
+            'inherited_from': forms.TextInput(attrs={'class': 'form-control'}),
+            'inherited_duration': forms.NumberInput(attrs={'class': 'form-control'}),
+            'inherited_duration_type': forms.Select(attrs={'class': 'form-select'}),
             
             # Appearance
-            'net_weight_volume': forms.TextInput(attrs={'class': 'form-control'}),
+            'net_weight_volume': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'medicine_color': forms.TextInput(attrs={'class': 'form-control'}),
             'medicine_smell': forms.TextInput(attrs={'class': 'form-control'}),
             'medicine_taste': forms.TextInput(attrs={'class': 'form-control'}),
@@ -235,24 +181,22 @@ class MedicineCategoryIIForm(BaseMedicineForm):
             'excipients': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             
             # Route
-            'route_of_administration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Oral, External, Inhale...'}),
+            'route_of_administration': forms.Select(attrs={'class': 'form-select', 'onchange': 'toggleRouteOther()'}),
+            'route_of_administration_other': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Please specify'}),
             
             # Sources
-            'local_harvest_season': forms.TextInput(attrs={'class': 'form-control'}),
-            'local_harvested_part': forms.TextInput(attrs={'class': 'form-control'}),
+            'local_harvest_season': forms.Select(attrs={'class': 'form-select'}),
+            'local_harvested_part': forms.Select(attrs={'class': 'form-select', 'onchange': 'toggleHarvestedPartOther()'}),
+            'local_harvested_part_other': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Please specify'}),
             'local_cultivated_or_wild': forms.Select(attrs={'class': 'form-select'}),
-            'local_abundance': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_countries': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_plant_part': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_raw_state': forms.TextInput(attrs={'class': 'form-control'}),
-            'imported_abundance': forms.TextInput(attrs={'class': 'form-control'}),
+            'local_abundance': forms.Select(attrs={'class': 'form-select'}),
             
             # Manufacturing Info
             'harvesting_method': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe how raw materials are harvested'}),
-            'drying_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe the drying process'}),
+            'does_dry_raw_materials': forms.RadioSelect(choices=[(True, 'Ndiyo'), (False, 'Hapana')], attrs={'class': 'form-check-input', 'onchange': 'toggleDryingFields()'}),
             'drying_area': forms.TextInput(attrs={'class': 'form-control'}),
             'drying_equipment': forms.TextInput(attrs={'class': 'form-control'}),
-            'manufacturing_location_type': forms.Select(attrs={'class': 'form-select'}),
+            'manufacturing_location_type': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'manufacturing_area_size': forms.TextInput(attrs={'class': 'form-control'}),
             'manufacturing_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Provide step-by-step manufacturing procedures'}),
             'equipment_used': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'List all equipment used in production'}),

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from medicines.forms import MedicineListingForm, MedicineCategoryIIForm, PreliminaryEvaluationForm, ScientificEvaluationForm, PaymentVerificationForm, ApplicantPaymentSubmissionForm, FeeConfigurationForm, InitiateApplicationForm, InspectionScheduleForm, InspectionReportForm
+from medicines.forms import MasterMedicineApplicationForm, PreliminaryEvaluationForm, ScientificEvaluationForm, PaymentVerificationForm, ApplicantPaymentSubmissionForm, FeeConfigurationForm, InitiateApplicationForm, InspectionScheduleForm, InspectionReportForm
 from django.utils import timezone
 from medicines.models import MedicineApplication, MedicineEvaluation, Payment, FeeConfiguration, InspectionSchedule, FeeInactiveError
 from django.core.paginator import Paginator
@@ -38,9 +38,23 @@ def staff_preliminary_detail_view(request, pk):
             eval_instance.evaluator = request.user
             eval_instance.save()
             if action == 'approve':
-                application.status = 'PRELIMINARY_APPROVED'
-                messages.success(request, f'Application for {application.medicine_name} passed preliminary screening.')
-                notify_applicant_application_status(application, 'TAMRIS - Preliminary Screening Passed', 'Your application has passed the preliminary screening. It is now queued for Scientific Evaluation.')
+                if application.application_type == 'CATEGORY_II':
+                    application.status = 'PENDING_INSPECTION_FEE'
+                    try:
+                        Payment.objects.create(
+                            application=application,
+                            payment_type='CAT_II_INSPECTION_FEE',
+                            amount=FeeConfiguration.get_fee('CAT_II_INSPECTION_FEE', 150000.0)
+                        )
+                        messages.success(request, f'Application for {application.medicine_name} passed preliminary screening. An Inspection Fee has been generated.')
+                        notify_applicant_application_status(application, 'TAMRIS - Preliminary Screening Passed', 'Your application has passed the preliminary screening. Please pay the Inspection Fee to schedule a site inspection.')
+                    except FeeInactiveError:
+                        messages.error(request, 'Cannot approve because the Inspection Fee is currently suspended.')
+                        return redirect('medicines:staff_preliminary_list')
+                else:
+                    application.status = 'PRELIMINARY_APPROVED'
+                    messages.success(request, f'Application for {application.medicine_name} passed preliminary screening.')
+                    notify_applicant_application_status(application, 'TAMRIS - Preliminary Screening Passed', 'Your application has passed the preliminary screening. It is now queued for Scientific Evaluation.')
             elif action == 'reject':
                 application.status = 'REJECTED'
                 application.rejection_reason = 'Failed preliminary screening.'

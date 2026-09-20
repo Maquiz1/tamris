@@ -93,21 +93,38 @@ def profile_view(request):
             phone_changed = True
             
         if 'Individual Applicant' in user.all_roles:
-            profile = getattr(user, 'user_profile', None)
-            if profile:
-                profile.full_name = request.POST.get('full_name', '').strip()
-                profile.nida_number = request.POST.get('nida_number', '').strip()
-                profile.tin = request.POST.get('tin', '').strip()
-                profile.address = request.POST.get('address', '').strip()
-                profile.save()
+            if hasattr(user, 'applicant_profile') and hasattr(user.applicant_profile, 'individual'):
+                applicant = user.applicant_profile
+                individual = applicant.individual
+                individual.first_name = request.POST.get('first_name', '').strip()
+                individual.middle_name = request.POST.get('middle_name', '').strip()
+                individual.last_name = request.POST.get('last_name', '').strip()
+                individual.tin = request.POST.get('tin', '').strip()
+                individual.save()
+                
+                identity = getattr(applicant, 'identity_obj', None)
+                if identity:
+                    identity.identity_number = request.POST.get('identity_number', '').strip()
+                    identity.save()
+                
+                address = getattr(applicant, 'address_obj', None)
+                if address:
+                    address.physical_address = request.POST.get('physical_address', '').strip()
+                    address.save()
+                    
         elif 'Company Applicant' in user.all_roles:
-            profile = getattr(user, 'company_profile', None)
-            if profile:
-                profile.company_name = request.POST.get('company_name', '').strip()
-                profile.brela_number = request.POST.get('brela_number', '').strip()
-                profile.tin = request.POST.get('tin', '').strip()
-                profile.physical_address = request.POST.get('physical_address', '').strip()
-                profile.save()
+            if hasattr(user, 'applicant_profile') and hasattr(user.applicant_profile, 'organization'):
+                applicant = user.applicant_profile
+                organization = applicant.organization
+                organization.organization_name = request.POST.get('company_name', '').strip()
+                organization.registration_number = request.POST.get('registration_number', '').strip()
+                organization.tin = request.POST.get('tin', '').strip()
+                organization.save()
+                
+                address = getattr(applicant, 'address_obj', None)
+                if address:
+                    address.physical_address = request.POST.get('physical_address', '').strip()
+                    address.save()
                 
         # Check if there are any remaining rejected documents
         has_rejected_docs = False
@@ -140,9 +157,14 @@ def profile_view(request):
             messages.error(request, 'Please correct the errors in the password change form.')
             show_password_modal = True
             
+    docs = {}
+    if hasattr(request.user, 'applicant_profile'):
+        docs = {doc.document_type: doc for doc in request.user.applicant_profile.documents.all()}
+
     return render(request, 'users/profile.html', {
         'password_form': password_form,
-        'show_password_modal': show_password_modal
+        'show_password_modal': show_password_modal,
+        'docs': docs
     })
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404

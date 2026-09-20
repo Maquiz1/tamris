@@ -280,11 +280,11 @@
                               {% endwith %}
                           {% elif med_app.status == 'DRAFT' %}
                               {% if med_app.application_type == 'LISTING' %}
-                                  <a href="{% url 'medicines:apply_listing' med_app.pk %}" class="btn btn-primary btn-sm">
+                                  <a href="{% url 'medicines:apply_master' med_app.pk %}" class="btn btn-primary btn-sm">
                                       <i class="ri-edit-line me-1"></i> Fill Form
                                   </a>
                               {% else %}
-                                  <a href="{% url 'medicines:apply_category_ii' med_app.pk %}" class="btn btn-primary btn-sm">
+                                  <a href="{% url 'medicines:apply_master' med_app.pk %}" class="btn btn-primary btn-sm">
                                       <i class="ri-edit-line me-1"></i> Fill Form
                                   </a>
                               {% endif %}

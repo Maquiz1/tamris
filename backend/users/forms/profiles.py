@@ -153,7 +153,7 @@ class PractitionerDetailForm(forms.Form):
 class CompanyDetailForm(forms.Form):
     pass
 class PractitionerDocumentForm(forms.Form):
-    nida_copy = forms.FileField(required=True)
+    nida_copy = forms.FileField(required=False)
     passport_photo = forms.FileField(required=False)
     tahpc_certificate = forms.FileField(required=False)
     tin_certificate = forms.FileField(required=False)
@@ -166,6 +166,23 @@ class PractitionerDocumentForm(forms.Form):
             for doc in self.instance.documents.all():
                 if doc.document_type in self.fields:
                     self.fields[doc.document_type].initial = doc.file
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nida = cleaned_data.get('nida_copy')
+        tin = cleaned_data.get('tin_certificate')
+        
+        # Check existing if they didn't upload a new one
+        has_existing_nida = self.instance and self.instance.documents.filter(document_type='nida_copy').exists()
+        has_existing_tin = self.instance and self.instance.documents.filter(document_type='tin_certificate').exists()
+        
+        has_nida = bool(nida) or has_existing_nida
+        has_tin = bool(tin) or has_existing_tin
+        
+        if not (has_nida or has_tin):
+            raise forms.ValidationError("You must provide either a NIDA copy or a TIN Certificate.")
+            
+        return cleaned_data
 
     def save(self):
         if not self.instance:
@@ -180,9 +197,9 @@ class PractitionerDocumentForm(forms.Form):
         return self.instance
 
 class CompanyDocumentForm(forms.Form):
-    brela_certificate = forms.FileField(required=True)
-    tin_certificate = forms.FileField(required=True)
-    business_license = forms.FileField(required=True)
+    brela_certificate = forms.FileField(required=False)
+    tin_certificate = forms.FileField(required=False)
+    business_license = forms.FileField(required=False)
     tahpc_certificate = forms.FileField(required=False)
     representative_nida = forms.FileField(required=False)
     representative_id_image = forms.FileField(required=False)
@@ -194,6 +211,25 @@ class CompanyDocumentForm(forms.Form):
             for doc in self.instance.documents.all():
                 if doc.document_type in self.fields:
                     self.fields[doc.document_type].initial = doc.file
+
+    def clean(self):
+        cleaned_data = super().clean()
+        brela = cleaned_data.get('brela_certificate')
+        tin = cleaned_data.get('tin_certificate')
+        business = cleaned_data.get('business_license')
+        
+        has_existing_brela = self.instance and self.instance.documents.filter(document_type='brela_certificate').exists()
+        has_existing_tin = self.instance and self.instance.documents.filter(document_type='tin_certificate').exists()
+        has_existing_business = self.instance and self.instance.documents.filter(document_type='business_license').exists()
+        
+        has_brela = bool(brela) or has_existing_brela
+        has_tin = bool(tin) or has_existing_tin
+        has_business = bool(business) or has_existing_business
+        
+        if not (has_brela or has_tin or has_business):
+            raise forms.ValidationError("You must provide either a BRELA Certificate, TIN Certificate, or Business License.")
+            
+        return cleaned_data
 
     def save(self):
         if not self.instance:

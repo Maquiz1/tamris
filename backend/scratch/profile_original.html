@@ -89,108 +89,108 @@
                     {% if 'Individual Applicant' in request.user.all_roles %}
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Full Name / Jina Kamili</small>
-                            <strong>{{ request.user.applicant_profile.individual.full_name }}</strong>
+                            <strong>{{ request.user.user_profile.full_name }}</strong>
                         </div>
                         <div class="col-md-3 mb-3">
                             <small class="text-muted d-block">Sex / Jinsi</small>
-                            <strong>{{ request.user.applicant_profile.individual.sex|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.sex|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-3 mb-3">
                             <small class="text-muted d-block">Age / Umri</small>
-                            <strong>{{ request.user.applicant_profile.individual.date_of_birth|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.age|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">NIDA Number</small>
-                            <strong>{{ request.user.applicant_profile.identity_obj.formatted_id_number }}</strong>
+                            <strong>{{ request.user.user_profile.formatted_nida }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">TIN Number</small>
-                            <strong>{{ request.user.applicant_profile.individual.tin }}</strong>
+                            <strong>{{ request.user.user_profile.formatted_tin }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Formal Education / Elimu (Rasmi)</small>
-                            <strong>{{ request.user.applicant_profile.education_obj.education_level|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.education_level|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Residency Duration / Muda wa Kuishi</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.residency_duration|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.residency_duration|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-4 mb-3">
                             <small class="text-muted d-block">Country / Utaifa</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.country|default:"Tanzania" }}</strong>
+                            <strong>{{ request.user.user_profile.country|default:"Tanzania" }}</strong>
                         </div>
                         <div class="col-md-4 mb-3">
                             <small class="text-muted d-block">Region / Mkoa</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.region|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.region|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-4 mb-3">
                             <small class="text-muted d-block">District / Wilaya</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.district|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.district|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Ward / Kata</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.ward|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.ward|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Village/Street / Kijiji au Mtaa</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.street|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.village_street|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Postal Address / Anuani ya Posta</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.postal_address|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.postal_address|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Landline Phone / Simu</small>
-                            <strong>{{ request.user.applicant_profile.contact_obj.landline|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.user_profile.landline_phone|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-12 mb-3">
                             <small class="text-muted d-block">Physical Address / Mahali Unapoishi</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.physical_address|default:"None" }}</strong>
+                            <strong>{{ request.user.user_profile.address|default:"None" }}</strong>
                         </div>
                     {% elif 'Company Applicant' in request.user.all_roles %}
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Company Name / Jina la Kampuni/Taasisi</small>
-                            <strong>{{ request.user.applicant_profile.organization.organization_name }}</strong>
+                            <strong>{{ request.user.company_profile.company_name }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">BRELA Number / Namba ya Usajili</small>
-                            <strong>{{ request.user.applicant_profile.organization.registration_number }}</strong>
+                            <strong>{{ request.user.company_profile.brela_number }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">TIN Number</small>
-                            <strong>{{ request.user.applicant_profile.organization.tin }}</strong>
+                            <strong>{{ request.user.company_profile.formatted_tin }}</strong>
                         </div>
                         <div class="col-md-4 mb-3">
                             <small class="text-muted d-block">Country / Utaifa</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.country|default:"Tanzania" }}</strong>
+                            <strong>{{ request.user.company_profile.country|default:"Tanzania" }}</strong>
                         </div>
                         <div class="col-md-4 mb-3">
                             <small class="text-muted d-block">Region / Mkoa</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.region|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.company_profile.region|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-4 mb-3">
                             <small class="text-muted d-block">District / Wilaya</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.district|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.company_profile.district|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Ward / Kata</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.ward|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.company_profile.ward|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Village/Street / Kijiji au Mtaa</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.street|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.company_profile.village_street|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Postal Address / Anuani ya Posta</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.postal_address|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.company_profile.postal_address|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-6 mb-3">
                             <small class="text-muted d-block">Fax / Nukushi (Faksi)</small>
-                            <strong>{{ request.user.applicant_profile.contact_obj.fax|default:"Not Provided" }}</strong>
+                            <strong>{{ request.user.company_profile.fax|default:"Not Provided" }}</strong>
                         </div>
                         <div class="col-md-12 mb-3">
                             <small class="text-muted d-block">Physical Address</small>
-                            <strong>{{ request.user.applicant_profile.address_obj.physical_address|default:"None" }}</strong>
+                            <strong>{{ request.user.company_profile.physical_address|default:"None" }}</strong>
                         </div>
                     {% else %}
                         <div class="col-12">
@@ -231,7 +231,7 @@
                                         {% elif request.user.document_statuses.nida_copy.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.nida_copy.reason }}</div>
-                                        {% elif docs.nida_copy %}
+                                        {% elif request.user.user_profile.nida_copy %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -239,18 +239,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.nida_copy %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.nida_copy.file.url }}">
+                                            {% if request.user.user_profile.nida_copy %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.nida_copy.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.nida_copy.status == 'REJECTED' or not docs.nida_copy %}
+                                            {% if request.user.document_statuses.nida_copy.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="nida_copy">
                                                     <input type="file" name="document" class="d-none" id="reupload_nida_copy" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_nida_copy" class="btn btn-sm {% if docs.nida_copy %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.nida_copy %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_nida_copy" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -265,7 +267,7 @@
                                         {% elif request.user.document_statuses.passport_photo.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.passport_photo.reason }}</div>
-                                        {% elif docs.passport_photo %}
+                                        {% elif request.user.user_profile.passport_photo %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -273,18 +275,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.passport_photo %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.passport_photo.file.url }}">
+                                            {% if request.user.user_profile.passport_photo %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.passport_photo.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.passport_photo.status == 'REJECTED' or not docs.passport_photo %}
+                                            {% if request.user.document_statuses.passport_photo.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="passport_photo">
                                                     <input type="file" name="document" class="d-none" id="reupload_passport_photo" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_passport_photo" class="btn btn-sm {% if docs.passport_photo %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.passport_photo %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_passport_photo" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -299,7 +303,7 @@
                                         {% elif request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.tahpc_certificate.reason }}</div>
-                                        {% elif docs.tahpc_certificate %}
+                                        {% elif request.user.user_profile.tahpc_certificate %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -307,18 +311,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.tahpc_certificate %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.tahpc_certificate.file.url }}">
+                                            {% if request.user.user_profile.tahpc_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.tahpc_certificate.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.tahpc_certificate.status == 'REJECTED' or not docs.tahpc_certificate %}
+                                            {% if request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="tahpc_certificate">
                                                     <input type="file" name="document" class="d-none" id="reupload_tahpc_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_tahpc_certificate" class="btn btn-sm {% if docs.tahpc_certificate %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.tahpc_certificate %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_tahpc_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -333,7 +339,7 @@
                                         {% elif request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.tin_certificate.reason }}</div>
-                                        {% elif docs.tin_certificate %}
+                                        {% elif request.user.user_profile.tin_certificate %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -341,18 +347,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.tin_certificate %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.tin_certificate.file.url }}">
+                                            {% if request.user.user_profile.tin_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.user_profile.tin_certificate.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.tin_certificate.status == 'REJECTED' or not docs.tin_certificate %}
+                                            {% if request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="tin_certificate">
                                                     <input type="file" name="document" class="d-none" id="reupload_ind_tin_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_ind_tin_certificate" class="btn btn-sm {% if docs.tin_certificate %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.tin_certificate %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_ind_tin_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -368,7 +376,7 @@
                                         {% elif request.user.document_statuses.brela_certificate.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.brela_certificate.reason }}</div>
-                                        {% elif docs.brela_certificate %}
+                                        {% elif request.user.company_profile.brela_certificate %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -376,18 +384,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.brela_certificate %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.brela_certificate.file.url }}">
+                                            {% if request.user.company_profile.brela_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.brela_certificate.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.brela_certificate.status == 'REJECTED' or not docs.brela_certificate %}
+                                            {% if request.user.document_statuses.brela_certificate.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="brela_certificate">
                                                     <input type="file" name="document" class="d-none" id="reupload_brela_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_brela_certificate" class="btn btn-sm {% if docs.brela_certificate %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.brela_certificate %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_brela_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -402,7 +412,7 @@
                                         {% elif request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.tin_certificate.reason }}</div>
-                                        {% elif docs.tin_certificate %}
+                                        {% elif request.user.company_profile.tin_certificate %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -410,18 +420,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.tin_certificate %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.tin_certificate.file.url }}">
+                                            {% if request.user.company_profile.tin_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.tin_certificate.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.tin_certificate.status == 'REJECTED' or not docs.tin_certificate %}
+                                            {% if request.user.document_statuses.tin_certificate.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="tin_certificate">
                                                     <input type="file" name="document" class="d-none" id="reupload_tin_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_tin_certificate" class="btn btn-sm {% if docs.tin_certificate %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.tin_certificate %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_tin_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -436,7 +448,7 @@
                                         {% elif request.user.document_statuses.business_license.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.business_license.reason }}</div>
-                                        {% elif docs.business_license %}
+                                        {% elif request.user.company_profile.business_license %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -444,18 +456,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.business_license %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.business_license.file.url }}">
+                                            {% if request.user.company_profile.business_license %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.business_license.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.business_license.status == 'REJECTED' or not docs.business_license %}
+                                            {% if request.user.document_statuses.business_license.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="business_license">
                                                     <input type="file" name="document" class="d-none" id="reupload_business_license" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_business_license" class="btn btn-sm {% if docs.business_license %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.business_license %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_business_license" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -470,7 +484,7 @@
                                         {% elif request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.tahpc_certificate.reason }}</div>
-                                        {% elif docs.tahpc_certificate %}
+                                        {% elif request.user.company_profile.tahpc_certificate %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -478,18 +492,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.tahpc_certificate %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.tahpc_certificate.file.url }}">
+                                            {% if request.user.company_profile.tahpc_certificate %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.tahpc_certificate.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.tahpc_certificate.status == 'REJECTED' or not docs.tahpc_certificate %}
+                                            {% if request.user.document_statuses.tahpc_certificate.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="tahpc_certificate">
                                                     <input type="file" name="document" class="d-none" id="reupload_com_tahpc_certificate" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_com_tahpc_certificate" class="btn btn-sm {% if docs.tahpc_certificate %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.tahpc_certificate %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_com_tahpc_certificate" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -504,7 +520,7 @@
                                         {% elif request.user.document_statuses.representative_nida.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.representative_nida.reason }}</div>
-                                        {% elif docs.representative_nida %}
+                                        {% elif request.user.company_profile.representative_nida %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -512,18 +528,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.representative_nida %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.representative_nida.file.url }}">
+                                            {% if request.user.company_profile.representative_nida %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.representative_nida.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.representative_nida.status == 'REJECTED' or not docs.representative_nida %}
+                                            {% if request.user.document_statuses.representative_nida.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="representative_nida">
                                                     <input type="file" name="document" class="d-none" id="reupload_representative_nida" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_representative_nida" class="btn btn-sm {% if docs.representative_nida %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.representative_nida %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_representative_nida" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -538,7 +556,7 @@
                                         {% elif request.user.document_statuses.representative_id_image.status == 'REJECTED' %}
                                             <span class="badge bg-danger">Rejected</span>
                                             <div class="small text-danger mt-1">{{ request.user.document_statuses.representative_id_image.reason }}</div>
-                                        {% elif docs.representative_id_image %}
+                                        {% elif request.user.company_profile.representative_id_image %}
                                             <span class="badge bg-warning text-dark">Pending Verification</span>
                                         {% else %}
                                             <span class="badge bg-secondary">Missing</span>
@@ -546,18 +564,20 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            {% if docs.representative_id_image %}
-                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ docs.representative_id_image.file.url }}">
+                                            {% if request.user.company_profile.representative_id_image %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-doc-btn" data-url="{{ request.user.company_profile.representative_id_image.url }}">
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
+                                            {% else %}
+                                                <span class="text-muted small"><i class="bi bi-cloud-upload me-1"></i>Not uploaded</span>
                                             {% endif %}
-                                            {% if request.user.document_statuses.representative_id_image.status == 'REJECTED' or not docs.representative_id_image %}
+                                            {% if request.user.document_statuses.representative_id_image.status == 'REJECTED' %}
                                                 <form method="post" action="{% url 'users:reupload_document' %}" enctype="multipart/form-data" class="m-0">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="doc_key" value="representative_id_image">
                                                     <input type="file" name="document" class="d-none" id="reupload_representative_id_image" onchange="this.form.submit()" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                    <label for="reupload_representative_id_image" class="btn btn-sm {% if docs.representative_id_image %}btn-danger{% else %}btn-primary{% endif %} mb-0" style="cursor: pointer;">
-                                                        <i class="bi bi-upload"></i> {% if docs.representative_id_image %}Re-upload{% else %}Upload{% endif %}
+                                                    <label for="reupload_representative_id_image" class="btn btn-sm btn-danger mb-0" style="cursor: pointer;">
+                                                        <i class="bi bi-upload"></i> Re-upload
                                                     </label>
                                                 </form>
                                             {% endif %}
@@ -669,45 +689,37 @@
           
           {% if 'Individual Applicant' in request.user.all_roles %}
             <div class="mb-3">
-              <label class="form-label fw-bold">First Name <span class="text-danger">*</span></label>
-              <input type="text" name="first_name" class="form-control" value="{{ request.user.applicant_profile.individual.first_name }}" required>
+              <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" class="form-control" value="{{ request.user.user_profile.full_name }}" required>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold">Middle Name</label>
-              <input type="text" name="middle_name" class="form-control" value="{{ request.user.applicant_profile.individual.middle_name|default:'' }}">
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Last Name <span class="text-danger">*</span></label>
-              <input type="text" name="last_name" class="form-control" value="{{ request.user.applicant_profile.individual.last_name }}" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">ID Number <span class="text-danger">*</span></label>
-              <input type="text" name="identity_number" class="form-control" value="{{ request.user.applicant_profile.identity_obj.identity_number }}" required>
+              <label class="form-label fw-bold">NIDA Number <span class="text-danger">*</span></label>
+              <input type="text" name="nida_number" class="form-control" value="{{ request.user.user_profile.nida_number }}" required>
             </div>
             <div class="mb-3">
               <label class="form-label fw-bold">TIN Number <span class="text-danger">*</span></label>
-              <input type="text" name="tin" class="form-control" value="{{ request.user.applicant_profile.individual.tin }}" required>
+              <input type="text" name="tin" class="form-control" value="{{ request.user.user_profile.tin }}" required>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold">Physical Address <span class="text-danger">*</span></label>
-              <textarea name="physical_address" class="form-control" rows="3" required>{{ request.user.applicant_profile.address_obj.physical_address }}</textarea>
+              <label class="form-label fw-bold">Address <span class="text-danger">*</span></label>
+              <textarea name="address" class="form-control" rows="3" required>{{ request.user.user_profile.address }}</textarea>
             </div>
           {% elif 'Company Applicant' in request.user.all_roles %}
             <div class="mb-3">
               <label class="form-label fw-bold">Company Name <span class="text-danger">*</span></label>
-              <input type="text" name="company_name" class="form-control" value="{{ request.user.applicant_profile.organization.organization_name }}" required>
+              <input type="text" name="company_name" class="form-control" value="{{ request.user.company_profile.company_name }}" required>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold">Registration Number <span class="text-danger">*</span></label>
-              <input type="text" name="registration_number" class="form-control" value="{{ request.user.applicant_profile.organization.registration_number }}" required>
+              <label class="form-label fw-bold">BRELA Number <span class="text-danger">*</span></label>
+              <input type="text" name="brela_number" class="form-control" value="{{ request.user.company_profile.brela_number }}" required>
             </div>
             <div class="mb-3">
               <label class="form-label fw-bold">TIN Number <span class="text-danger">*</span></label>
-              <input type="text" name="tin" class="form-control" value="{{ request.user.applicant_profile.organization.tin }}" required>
+              <input type="text" name="tin" class="form-control" value="{{ request.user.company_profile.tin }}" required>
             </div>
             <div class="mb-3">
               <label class="form-label fw-bold">Physical Address <span class="text-danger">*</span></label>
-              <textarea name="physical_address" class="form-control" rows="3" required>{{ request.user.applicant_profile.address_obj.physical_address }}</textarea>
+              <textarea name="physical_address" class="form-control" rows="3" required>{{ request.user.company_profile.physical_address }}</textarea>
             </div>
           {% endif %}
           

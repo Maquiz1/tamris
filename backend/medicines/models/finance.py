@@ -9,6 +9,7 @@ class Payment(TimeStampedModel):
     application = models.ForeignKey(MedicineApplication, on_delete=models.CASCADE, related_name='payments')
     payment_type = models.CharField(max_length=50, choices=FEE_TYPES)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="Kiasi (Amount in TZS)")
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, verbose_name="Amount Paid (TZS)")
     control_number = models.CharField(
         max_length=12,
         blank=True,

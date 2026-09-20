@@ -30,7 +30,12 @@ class Applicant(TimeStampedModel):
 
     @property
     def is_profile_complete(self):
-        return self.documents.exists()
+        doc_types = self.documents.values_list('document_type', flat=True)
+        if self.applicant_type == 'Individual':
+            return 'nida_copy' in doc_types or 'tin_certificate' in doc_types
+        elif self.applicant_type == 'Organization':
+            return 'brela_certificate' in doc_types or 'tin_certificate' in doc_types or 'business_license' in doc_types
+        return False
 
     @property
     def address_obj(self):

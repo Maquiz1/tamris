@@ -88,10 +88,10 @@
                                     <tr>
                                         <td class="px-4 py-3">
                                             <div class="fw-bold text-primary">
-                                                {% if app.role.name == 'Individual Applicant' %}
-                                                    {{ app.user_profile.full_name|default:app.email }}
+                                                {% if app.applicant_profile.applicant_type == 'Individual' %}
+                                                    {{ app.applicant_profile.individual.full_name|default:app.email }}
                                                 {% else %}
-                                                    {{ app.company_profile.company_name|default:app.email }}
+                                                    {{ app.applicant_profile.organization.organization_name|default:app.email }}
                                                 {% endif %}
                                             </div>
                                             <div class="small text-muted">{{ app.email }}</div>

@@ -5,10 +5,10 @@ app_name = 'medicines'
 
 urlpatterns = [
     path('apply/initiate/<str:app_type>/', views.initiate_application_view, name='initiate_application'),
-    path('apply/listing/<int:pk>/', views.medicine_listing_apply_view, name='apply_listing'),
-    path('apply/category-ii/<int:pk>/', views.medicine_category_ii_apply_view, name='apply_category_ii'),
+    path('apply/master/<int:pk>/', views.medicine_master_apply_view, name='apply_master'),
     path('payment/submit/<int:pk>/', views.applicant_payment_submission_view, name='submit_payment'),
     path('apply/edit/<int:pk>/', views.medicine_application_edit_view, name='edit_application'),
+    path('apply/upgrade/<int:pk>/', views.upgrade_to_registration_view, name='upgrade_to_registration'),
     path('staff/preliminary/', views.staff_preliminary_list_view, name='staff_preliminary_list'),
     path('staff/preliminary/<int:pk>/', views.staff_preliminary_detail_view, name='staff_preliminary_detail'),
     path('staff/payments/', views.staff_payment_list_view, name='staff_payment_list'),

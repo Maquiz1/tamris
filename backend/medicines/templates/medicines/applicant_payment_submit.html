@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags humanize %}
 
 {% block title %}Submit Payment - TAMRIS{% endblock %}
 
@@ -21,7 +21,7 @@
                     <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Payment Details</h6>
                     <p class="mb-1"><strong>Medicine:</strong> {{ payment.application.medicine_name }}</p>
                     <p class="mb-1"><strong>Fee Type:</strong> {{ payment.get_payment_type_display }}</p>
-                    <p class="mb-0"><strong>Amount Due:</strong> {{ payment.amount }} TZS</p>
+                    <p class="mb-0"><strong>Amount Due:</strong> {{ payment.amount|intcomma }} TZS</p>
                 </div>
                 
                 <p class="text-muted mb-4">Please deposit the amount and enter your bank receipt number or control number below. Finance will verify your payment.</p>
@@ -37,4 +37,27 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Amount Paid Formatting
+        const amountInput = document.getElementById('id_amount_paid');
+        const formatAmount = function(input) {
+            if (!input.value) return;
+            let value = input.value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            input.value = parts.join('.');
+        };
+
+        if (amountInput) {
+            amountInput.addEventListener('input', function(e) {
+                formatAmount(e.target);
+            });
+            formatAmount(amountInput); // Format on load
+        }
+    });
+</script>
 {% endblock %}

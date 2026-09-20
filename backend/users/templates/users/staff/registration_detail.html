@@ -43,39 +43,43 @@
                     <strong>{{ application.formatted_phone|default:"Not Provided" }}</strong>
                 </li>
                 
-                {% if application.role.name == 'Individual Applicant' %}
+                {% if application.applicant_profile.applicant_type == 'Individual' %}
                     <li class="list-group-item py-3">
                         <small class="text-muted d-block">Full Name</small>
-                        <strong>{{ application.user_profile.full_name }}</strong>
+                        <strong>{{ application.applicant_profile.individual.full_name }}</strong>
                     </li>
                     <li class="list-group-item py-3">
-                        <small class="text-muted d-block">NIDA Number</small>
-                        <strong>{{ application.user_profile.formatted_nida }}</strong>
+                        <small class="text-muted d-block">ID Type</small>
+                        <strong>{{ application.applicant_profile.identity_obj.identity_type }}</strong>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block">ID Number</small>
+                        <strong>{{ application.applicant_profile.identity_obj.formatted_id_number }}</strong>
                     </li>
                     <li class="list-group-item py-3">
                         <small class="text-muted d-block">TIN Number</small>
-                        <strong>{{ application.user_profile.formatted_tin }}</strong>
+                        <strong>{{ application.applicant_profile.individual.tin }}</strong>
                     </li>
                     <li class="list-group-item py-3">
                         <small class="text-muted d-block">Address</small>
-                        <strong>{{ application.user_profile.address|default:"Not Provided" }}</strong>
+                        <strong>{{ application.applicant_profile.address_obj.region|default:"Not Provided" }}, {{ application.applicant_profile.address_obj.district|default:"" }}</strong>
                     </li>
                 {% else %}
                     <li class="list-group-item py-3">
                         <small class="text-muted d-block">Company Name</small>
-                        <strong>{{ application.company_profile.company_name }}</strong>
+                        <strong>{{ application.applicant_profile.organization.organization_name }}</strong>
                     </li>
                     <li class="list-group-item py-3">
                         <small class="text-muted d-block">BRELA Registration Number</small>
-                        <strong>{{ application.company_profile.brela_number }}</strong>
+                        <strong>{{ application.applicant_profile.organization.registration_number }}</strong>
                     </li>
                     <li class="list-group-item py-3">
                         <small class="text-muted d-block">TIN Number</small>
-                        <strong>{{ application.company_profile.formatted_tin }}</strong>
+                        <strong>{{ application.applicant_profile.organization.tin }}</strong>
                     </li>
                     <li class="list-group-item py-3">
                         <small class="text-muted d-block">Physical Address</small>
-                        <strong>{{ application.company_profile.physical_address|default:"Not Provided" }}</strong>
+                        <strong>{{ application.applicant_profile.address_obj.physical_address|default:"Not Provided" }}</strong>
                     </li>
                 {% endif %}
             </ul>
@@ -87,36 +91,56 @@
             {% csrf_token %}
             
             <!-- Hidden inputs for documents -->
-            {% if application.role.name == 'Individual Applicant' %}
+            {% if application.applicant_profile.applicant_type == 'Individual' %}
+                {% if docs.nida_copy %}
                 <input type="hidden" name="doc_status_nida_copy" id="hidden_status_nida_copy" value="">
                 <input type="hidden" name="doc_reason_nida_copy" id="hidden_reason_nida_copy" value="">
+                {% endif %}
                 
+                {% if docs.passport_photo %}
                 <input type="hidden" name="doc_status_passport_photo" id="hidden_status_passport_photo" value="">
                 <input type="hidden" name="doc_reason_passport_photo" id="hidden_reason_passport_photo" value="">
+                {% endif %}
                 
+                {% if docs.tahpc_certificate %}
                 <input type="hidden" name="doc_status_tahpc_certificate" id="hidden_status_tahpc_certificate" value="">
                 <input type="hidden" name="doc_reason_tahpc_certificate" id="hidden_reason_tahpc_certificate" value="">
+                {% endif %}
                 
+                {% if docs.tin_certificate %}
                 <input type="hidden" name="doc_status_tin_certificate" id="hidden_status_tin_certificate" value="">
                 <input type="hidden" name="doc_reason_tin_certificate" id="hidden_reason_tin_certificate" value="">
+                {% endif %}
             {% else %}
+                {% if docs.brela_certificate %}
                 <input type="hidden" name="doc_status_brela_certificate" id="hidden_status_brela_certificate" value="">
                 <input type="hidden" name="doc_reason_brela_certificate" id="hidden_reason_brela_certificate" value="">
+                {% endif %}
                 
+                {% if docs.tin_certificate %}
                 <input type="hidden" name="doc_status_tin_certificate" id="hidden_status_tin_certificate" value="">
                 <input type="hidden" name="doc_reason_tin_certificate" id="hidden_reason_tin_certificate" value="">
+                {% endif %}
                 
+                {% if docs.business_license %}
                 <input type="hidden" name="doc_status_business_license" id="hidden_status_business_license" value="">
                 <input type="hidden" name="doc_reason_business_license" id="hidden_reason_business_license" value="">
+                {% endif %}
                 
+                {% if docs.tahpc_certificate %}
                 <input type="hidden" name="doc_status_tahpc_certificate" id="hidden_status_tahpc_certificate" value="">
                 <input type="hidden" name="doc_reason_tahpc_certificate" id="hidden_reason_tahpc_certificate" value="">
+                {% endif %}
                 
+                {% if docs.representative_nida %}
                 <input type="hidden" name="doc_status_representative_nida" id="hidden_status_representative_nida" value="">
                 <input type="hidden" name="doc_reason_representative_nida" id="hidden_reason_representative_nida" value="">
+                {% endif %}
                 
+                {% if docs.representative_id_image %}
                 <input type="hidden" name="doc_status_representative_id_image" id="hidden_status_representative_id_image" value="">
                 <input type="hidden" name="doc_reason_representative_id_image" id="hidden_reason_representative_id_image" value="">
+                {% endif %}
             {% endif %}
 
             <div class="card shadow-sm border-0 border-top border-primary border-4 mb-4">
@@ -172,7 +196,7 @@
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
-                    {% if application.role.name == 'Individual Applicant' %}
+                    {% if application.applicant_profile.applicant_type == 'Individual' %}
                         <!-- Practitioner Documents -->
                         
                         <!-- NIDA Card -->
@@ -185,11 +209,11 @@
                                         <span id="badge_nida_copy" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.user_profile.nida_copy %}
+                                {% if docs.nida_copy %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('nida_copy', 'NIDA Card', '{{ application.user_profile.nida_copy.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('nida_copy', 'NIDA Card', '{{ docs.nida_copy.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('NIDA Card', '{{ application.user_profile.nida_copy.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('NIDA Card', '{{ docs.nida_copy.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -207,11 +231,11 @@
                                         <span id="badge_passport_photo" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.user_profile.passport_photo %}
+                                {% if docs.passport_photo %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('passport_photo', 'Passport Photo', '{{ application.user_profile.passport_photo.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('passport_photo', 'Passport Photo', '{{ docs.passport_photo.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Passport Photo', '{{ application.user_profile.passport_photo.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Passport Photo', '{{ docs.passport_photo.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -229,11 +253,11 @@
                                         <span id="badge_tahpc_certificate" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.user_profile.tahpc_certificate %}
+                                {% if docs.tahpc_certificate %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tahpc_certificate', 'TAHPC Certificate', '{{ application.user_profile.tahpc_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tahpc_certificate', 'TAHPC Certificate', '{{ docs.tahpc_certificate.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TAHPC Certificate', '{{ application.user_profile.tahpc_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TAHPC Certificate', '{{ docs.tahpc_certificate.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -276,11 +300,11 @@
                                         <span id="badge_brela_certificate" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.company_profile.brela_certificate %}
+                                {% if docs.brela_certificate %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('brela_certificate', 'BRELA Certificate', '{{ application.company_profile.brela_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('brela_certificate', 'BRELA Certificate', '{{ docs.brela_certificate.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('BRELA Certificate', '{{ application.company_profile.brela_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('BRELA Certificate', '{{ docs.brela_certificate.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -298,11 +322,11 @@
                                         <span id="badge_tin_certificate" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.company_profile.tin_certificate %}
+                                {% if docs.tin_certificate %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tin_certificate', 'TIN Certificate', '{{ application.company_profile.tin_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tin_certificate', 'TIN Certificate', '{{ docs.tin_certificate.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TIN Certificate', '{{ application.company_profile.tin_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TIN Certificate', '{{ docs.tin_certificate.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -320,11 +344,11 @@
                                         <span id="badge_business_license" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.company_profile.business_license %}
+                                {% if docs.business_license %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('business_license', 'Business License', '{{ application.company_profile.business_license.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('business_license', 'Business License', '{{ docs.business_license.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Business License', '{{ application.company_profile.business_license.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Business License', '{{ docs.business_license.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -342,11 +366,11 @@
                                         <span id="badge_tahpc_certificate" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.company_profile.tahpc_certificate %}
+                                {% if docs.tahpc_certificate %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tahpc_certificate', 'TAHPC Certificate', '{{ application.company_profile.tahpc_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tahpc_certificate', 'TAHPC Certificate', '{{ docs.tahpc_certificate.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TAHPC Certificate', '{{ application.company_profile.tahpc_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TAHPC Certificate', '{{ docs.tahpc_certificate.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -364,11 +388,11 @@
                                         <span id="badge_representative_nida" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.company_profile.representative_nida %}
+                                {% if docs.representative_nida %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('representative_nida', 'Representative NIDA', '{{ application.company_profile.representative_nida.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('representative_nida', 'Representative NIDA', '{{ docs.representative_nida.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Representative NIDA', '{{ application.company_profile.representative_nida.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Representative NIDA', '{{ docs.representative_nida.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -386,11 +410,11 @@
                                         <span id="badge_representative_id_image" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.company_profile.representative_id_image %}
+                                {% if docs.representative_id_image %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('representative_id_image', 'Representative ID/Passport', '{{ application.company_profile.representative_id_image.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('representative_id_image', 'Representative ID/Passport', '{{ docs.representative_id_image.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Representative ID/Passport', '{{ application.company_profile.representative_id_image.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('Representative ID/Passport', '{{ docs.representative_id_image.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>
@@ -624,8 +648,8 @@
         const isReject = document.getElementById('decision_reject').checked;
         
         if (isApprove && hasRejectedDoc) {
-            alert("You cannot approve the registration if any individual document is marked as Rejected. Please set all documents to Verified or select Reject / Query as your overall decision.");
-            return false;
+            // The backend handles whether a rejected document allows approval (e.g. alternative document was verified).
+            // We just let the backend handle the final status logic.
         }
         
         if (isReject) {

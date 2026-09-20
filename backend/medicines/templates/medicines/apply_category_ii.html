@@ -125,16 +125,95 @@
                             <h4 class="fw-bold text-primary mb-4">Step 1: Applicant Skills & Basic Medicine Info</h4>
                             
                             <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-4">1.7 Ujuzi katika tiba asili/ miti dawa</h5>
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">{{ form.traditional_medicine_skills.label }} <span class="text-danger">*</span></label>
-                                    {{ form.traditional_medicine_skills }}
+                                                                            <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Ujuzi katika Tiba Asili / Miti Dawa</label><br>
+                                <label class="form-label mb-2">{{ form.traditional_medicine_skills.label }} <span class="text-danger">*</span></label>
+                                <div>
+                                    {% for radio in form.traditional_medicine_skills %}
+                                    <div class="form-check form-check-inline">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                    {% endfor %}
                                 </div>
-                                <div class="col-md-12">
-                                    <label class="form-label fw-bold">{{ form.skills_acquired_details.label }} <span class="text-danger">*</span></label>
-                                    {{ form.skills_acquired_details }}
-                                    <div class="form-text mt-1">e.g., Duration of training, institution, or who you inherited from.</div>
+                            </div>
+                            
+                            <div class="col-md-12 mt-3" id="skills_mafunzo_container" style="display: none;">
+                                <h6 class="fw-bold text-muted">Iwapo umepata mafunzo rasmi:</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ form.training_institution.label }}</label>
+                                        {{ form.training_institution }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">{{ form.training_duration.label }}</label>
+                                        {{ form.training_duration }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">{{ form.training_duration_type.label }}</label>
+                                        {{ form.training_duration_type }}
+                                    </div>
                                 </div>
+                            </div>
+                            
+                            <div class="col-md-12 mt-3" id="skills_kurithi_container" style="display: none;">
+                                <h6 class="fw-bold text-muted">Iwapo umerithi ujuzi huo:</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ form.inherited_from.label }}</label>
+                                        {{ form.inherited_from }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">{{ form.inherited_duration.label }}</label>
+                                        {{ form.inherited_duration }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">{{ form.inherited_duration_type.label }}</label>
+                                        {{ form.inherited_duration_type }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-3" id="traditional_medicine_skills_other_container" style="display: none;">
+                                <h6 class="fw-bold text-muted">{{ form.traditional_medicine_skills_other.label }}:</h6>
+                                {{ form.traditional_medicine_skills_other }}
+                            </div>
+                        </div>
+                            
+                            <div class="col-md-12 mt-3" id="skills_mafunzo_container" style="display: none;">
+                                <h6 class="fw-bold text-muted">1.7.1. Iwapo umepata mafunzo rasmi:</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ form.training_institution.label }}</label>
+                                        {{ form.training_institution }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ form.training_duration.label }}</label>
+                                        {{ form.training_duration }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-12 mt-3" id="skills_kurithi_container" style="display: none;">
+                                <h6 class="fw-bold text-muted">1.7.2. Iwapo umerithi ujuzi huo:</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ form.inherited_from.label }}</label>
+                                        {{ form.inherited_from }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ form.inherited_duration.label }}</label>
+                                        {{ form.inherited_duration }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-3" id="traditional_medicine_skills_other_container" style="display: none;">
+                                <h6 class="fw-bold text-muted">1.7.3. {{ form.traditional_medicine_skills_other.label }}:</h6>
+                                {{ form.traditional_medicine_skills_other }}
+                            </div>
+                        </div>
                             </div>
 
                             <h5 class="fw-bold border-bottom pb-2 mb-4 text-secondary mt-5">2. Maelezo ya dawa inayoombewa usajili</h5>
@@ -166,7 +245,8 @@
                             </div>
                             
                             <h6 class="fw-bold text-muted mt-3">Sifa za muonekano wa dawa:</h6>
-                            <div class="row g-3 mb-4 border p-3 bg-light rounded">
+                            <div class="mb-4 border p-3 bg-light rounded">
+                                <div class="row g-3">
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">{{ form.medicine_color.label }}</label>
                                     {{ form.medicine_color }}
@@ -197,6 +277,7 @@
                                     <label class="form-label fw-bold">{{ form.other_appearance_instructions.label }}</label>
                                     {{ form.other_appearance_instructions }}
                                 </div>
+                            </div>
                             </div>
                         </div>
 
@@ -475,51 +556,48 @@
     </div>
 </div>
 
+
 <script>
-    let currentStep = 1;
-    const totalSteps = 5;
-
-    function showStep(n) {
-        document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
-        document.getElementById(`step-${n}`).classList.add('active');
-
-        // Update indicators
-        for (let i = 1; i <= totalSteps; i++) {
-            const indicator = document.getElementById(`indicator-${i}`);
-            indicator.classList.remove('active', 'completed');
-            if (i < n) {
-                indicator.classList.add('completed');
-            } else if (i === n) {
-                indicator.classList.add('active');
-            }
-        }
-
-        // Update buttons
-        document.getElementById('prevBtn').style.display = (n === 1) ? 'none' : 'inline-block';
-        if (n === totalSteps) {
-            document.getElementById('nextBtn').style.display = 'none';
-            document.getElementById('submitBtn').style.display = 'inline-block';
-        } else {
-            document.getElementById('nextBtn').style.display = 'inline-block';
-            document.getElementById('submitBtn').style.display = 'none';
+    document.addEventListener("DOMContentLoaded", function() {
+        const radios = document.querySelectorAll('input[name="traditional_medicine_skills"]');
+        
+        const containers = {
+            'MAFUNZO': document.getElementById('skills_mafunzo_container'),
+            'KURITHI': document.getElementById('skills_kurithi_container'),
+            'MENGINEYO': document.getElementById('traditional_medicine_skills_other_container')
+        };
+        
+        const inputs = {
+            'MAFUNZO': [document.getElementById('id_training_institution'), document.getElementById('id_training_duration'), document.getElementById('id_training_duration_type')],
+            'KURITHI': [document.getElementById('id_inherited_from'), document.getElementById('id_inherited_duration'), document.getElementById('id_inherited_duration_type')],
+            'MENGINEYO': [document.getElementById('id_traditional_medicine_skills_other')]
+        };
+        
+        function toggleSkills() {
+            let selectedValue = null;
+            radios.forEach(r => { if (r.checked) selectedValue = r.value; });
+            
+            Object.keys(containers).forEach(key => {
+                if (containers[key]) {
+                    if (key === selectedValue) {
+                        containers[key].style.display = 'block';
+                        inputs[key].forEach(i => { if (i) i.required = true; });
+                    } else {
+                        containers[key].style.display = 'none';
+                        inputs[key].forEach(i => {
+                            if (i) {
+                                i.required = false;
+                                i.value = '';
+                            }
+                        });
+                    }
+                }
+            });
         }
         
-        window.scrollTo(0, 0);
-    }
-
-    function nextPrev(n) {
-        currentStep += n;
-        if (currentStep < 1) currentStep = 1;
-        if (currentStep > totalSteps) currentStep = totalSteps;
-        showStep(currentStep);
-    }
-
-    function goToStep(n) {
-        currentStep = n;
-        showStep(currentStep);
-    }
-
-    // Initialize
-    showStep(currentStep);
+        radios.forEach(r => r.addEventListener('change', toggleSkills));
+        toggleSkills();
+    });
 </script>
+
 {% endblock %}

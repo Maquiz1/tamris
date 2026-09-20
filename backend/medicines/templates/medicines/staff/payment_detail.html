@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %}Application Details - TAMRIS{% endblock %}
 
@@ -66,11 +67,12 @@
                         </div>
                         <div class="col-md-6">
                             <p class="text-muted small mb-1 text-uppercase fw-bold">Amount Due</p>
-                            <p class="mb-0 fs-5">{{ payment.amount }} TZS</p>
+                            <p class="mb-0 fs-5">{{ payment.amount|intcomma }} TZS</p>
                         </div>
                         <div class="col-12 mt-3 pt-3 border-top">
                             <p class="text-muted small mb-1 text-uppercase fw-bold">Applicant Submitted Control Number</p>
                             <p class="mb-0 fs-4">
+                                {% if payment.control_number %}
                                     <span class="fw-bold text-primary">{{ payment.control_number }}</span>
                                 {% else %}
                                     <span class="text-muted fst-italic fs-6">Not yet submitted by applicant</span>
@@ -83,6 +85,10 @@
                             {% if payment.reference_number %}
                             <p class="text-muted small mb-1 mt-3 text-uppercase fw-bold">Reference Number</p>
                             <p class="mb-0 fs-5"><span class="fw-bold text-secondary">{{ payment.reference_number }}</span></p>
+                            {% endif %}
+                            {% if payment.amount_paid %}
+                            <p class="text-muted small mb-1 mt-3 text-uppercase fw-bold">Amount Paid by Applicant</p>
+                            <p class="mb-0 fs-5"><span class="fw-bold text-success">{{ payment.amount_paid|intcomma }} TZS</span></p>
                             {% endif %}
                         </div>
                     </div>

@@ -91,6 +91,14 @@
                                                     <i class="ri-file-text-line me-1"></i> Provisional Letter
                                                 </a>
                                             {% endif %}
+                                            {% if application.application_type == 'LISTING' %}
+                                                <form action="{% url 'medicines:upgrade_to_registration' application.pk %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to upgrade this medicine to Category II Registration? You will be asked to pay the application fee.');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3 shadow-sm fw-bold">
+                                                        <i class="ri-arrow-up-circle-line me-1"></i> Upgrade to Registration
+                                                    </button>
+                                                </form>
+                                            {% endif %}
                                             <a href="{% url 'medicines:applicant_application_detail' application.pk %}" class="btn btn-light btn-sm rounded-pill px-3 text-secondary border fw-bold">
                                                 Details
                                             </a>

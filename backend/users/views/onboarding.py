@@ -234,34 +234,45 @@ def reupload_document_view(request):
         if not doc_key or not uploaded_file:
             messages.error(request, 'Invalid request. Please select a file.')
             return redirect('users:dashboard')
+            
         user = request.user
-        if user.role.name == 'Individual Applicant':
-            profile = user.user_profile
-        else:
-            profile = user.company_profile
-        if hasattr(profile, doc_key):
-            doc_status = user.document_statuses.get(doc_key, {}).get('status') if user.document_statuses else None
-            if doc_status != 'REJECTED':
-                messages.error(request, 'You can only re-upload documents that have been rejected.')
-                return redirect('users:dashboard')
-            setattr(profile, doc_key, uploaded_file)
-            profile.save()
-            # Update document_statuses dictionary copy to make sure Django detects JSONField change
-            statuses = dict(user.document_statuses or {})
-            statuses[doc_key] = {'status': 'PENDING', 'reason': ''}
-            user.document_statuses = statuses
-            has_other_rejections = False
-            if user.document_statuses:
-                for (key, data) in user.document_statuses.items():
-                    if data.get('status') == 'REJECTED':
-                        has_other_rejections = True
-                        break
-            if not has_other_rejections:
-                user.registration_status = 'PENDING'
-                user.rejection_reason = None
-                user.review_remarks = None
-            user.save()
-            messages.success(request, f'Document successfully re-uploaded. Your application is now pending review.')
-        else:
-            messages.error(request, 'Invalid document type.')
+        if not hasattr(user, 'applicant_profile'):
+            messages.error(request, 'Applicant profile not found.')
+            return redirect('users:dashboard')
+            
+        applicant = user.applicant_profile
+        doc_status = user.document_statuses.get(doc_key, {}).get('status') if user.document_statuses else None
+        doc_exists = applicant.documents.filter(document_type=doc_key).exists()
+        
+        # Allow upload if document was rejected OR if it's completely missing
+        if doc_status != 'REJECTED' and doc_exists:
+            messages.error(request, 'You can only re-upload documents that have been rejected.')
+            return redirect('users:dashboard')
+            
+        from users.models.profiles import ApplicantDocument
+        ApplicantDocument.objects.update_or_create(
+            applicant=applicant,
+            document_type=doc_key,
+            defaults={'file': uploaded_file}
+        )
+        
+        statuses = dict(user.document_statuses or {})
+        statuses[doc_key] = {'status': 'PENDING', 'reason': ''}
+        user.document_statuses = statuses
+        
+        has_other_rejections = False
+        if user.document_statuses:
+            for (key, data) in user.document_statuses.items():
+                if data.get('status') == 'REJECTED':
+                    has_other_rejections = True
+                    break
+                    
+        if not has_other_rejections:
+            user.registration_status = 'PENDING'
+            user.rejection_reason = None
+            user.review_remarks = None
+            
+        user.save()
+        messages.success(request, f'Document successfully uploaded. Your application is now pending review.')
+        
     return redirect('users:dashboard')

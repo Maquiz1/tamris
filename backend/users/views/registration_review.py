@@ -36,7 +36,14 @@ def staff_registration_list_view(request):
     if list_filter == 'pending':
         applications_list = applications_list.filter(registration_status='PENDING')
     if query:
-        applications_list = applications_list.filter(Q(email__icontains=query) | Q(user_profile__first_name__icontains=query) | Q(user_profile__last_name__icontains=query) | Q(company_profile__company_name__icontains=query) | Q(nida_number__icontains=query) | Q(brela_number__icontains=query)).distinct()
+        applications_list = applications_list.filter(
+            Q(email__icontains=query) | 
+            Q(applicant_profile__individual__first_name__icontains=query) | 
+            Q(applicant_profile__individual__last_name__icontains=query) | 
+            Q(applicant_profile__organization__organization_name__icontains=query) | 
+            Q(applicant_profile__identities__identity_number__icontains=query) | 
+            Q(applicant_profile__organization__registration_number__icontains=query)
+        ).distinct()
     if status_filter:
         applications_list = applications_list.filter(registration_status=status_filter)
     if start_date:
@@ -53,7 +60,12 @@ def staff_registration_detail_view(request, pk):
     if not (request.user.is_evaluator or request.user.is_admin):
         return redirect('users:dashboard')
     application = get_object_or_404(CustomUser, pk=pk, is_onboarding_complete=True)
-    return render(request, 'users/staff/registration_detail.html', {'application': application})
+    
+    docs = {}
+    if hasattr(application, 'applicant_profile'):
+        docs = {doc.document_type: doc for doc in application.applicant_profile.documents.all()}
+        
+    return render(request, 'users/staff/registration_detail.html', {'application': application, 'docs': docs})
 
 @login_required
 def staff_registration_action_view(request, pk):
@@ -62,17 +74,33 @@ def staff_registration_action_view(request, pk):
     application = get_object_or_404(CustomUser, pk=pk, is_onboarding_complete=True)
     if request.method == 'POST':
         doc_keys = [key.replace('doc_status_', '') for key in request.POST.keys() if key.startswith('doc_status_')]
-        has_rejection = False
-        rejection_messages = []
         document_statuses = application.document_statuses or {}
+        
         for key in doc_keys:
             status = request.POST.get(f'doc_status_{key}')
             reason = request.POST.get(f'doc_reason_{key}', '').strip()
             document_statuses[key] = {'status': status, 'reason': reason}
-            if status == 'REJECTED':
-                has_rejection = True
-                human_readable_name = key.replace('_', ' ').title()
-                rejection_messages.append(f'{human_readable_name}: {reason}')
+            
+        applicant_type = application.applicant_profile.applicant_type if hasattr(application, 'applicant_profile') else 'Individual'
+        
+        has_rejection = False
+        rejection_messages = []
+        
+        for key, info in document_statuses.items():
+            if info.get('status') == 'REJECTED':
+                can_ignore_rejection = False
+                if applicant_type == 'Individual' and key in ['nida_copy', 'tin_certificate']:
+                    if document_statuses.get('nida_copy', {}).get('status') == 'VERIFIED' or document_statuses.get('tin_certificate', {}).get('status') == 'VERIFIED':
+                        can_ignore_rejection = True
+                elif applicant_type == 'Organization' and key in ['brela_certificate', 'tin_certificate', 'business_license']:
+                    if document_statuses.get('brela_certificate', {}).get('status') == 'VERIFIED' or document_statuses.get('tin_certificate', {}).get('status') == 'VERIFIED' or document_statuses.get('business_license', {}).get('status') == 'VERIFIED':
+                        can_ignore_rejection = True
+                        
+                if not can_ignore_rejection:
+                    has_rejection = True
+                    human_readable_name = key.replace('_', ' ').title()
+                    rejection_messages.append(f'{human_readable_name}: {info.get("reason")}')
+                    
         application.document_statuses = document_statuses
         overall_remarks = request.POST.get('overall_remarks', '').strip()
         application.review_remarks = overall_remarks
