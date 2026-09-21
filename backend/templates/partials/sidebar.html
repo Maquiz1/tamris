@@ -243,6 +243,15 @@
       </li>
       {% endif %}
 
+      {% if user.is_superuser %}
+      <li>
+        <a href="{% url 'admin:index' %}" target="_blank">
+          <i class="ri-shield-user-line"></i>
+          <span class="menu-text">Django Admin</span>
+        </a>
+      </li>
+      {% endif %}
+
       {% endif %}
 
       <!-- Applicant Navigation -->
