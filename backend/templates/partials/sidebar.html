@@ -61,8 +61,7 @@
       </li>
 
       <!-- Staff / Admin Navigation -->
-      {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in
-      user.all_roles or 'Accountant' in user.all_roles %}
+      {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Accountant' in user.all_roles %}
 
       <li class="menu-header text-uppercase fs-7 fw-bold text-muted px-3 mt-3 mb-1">Staff Operations</li>
 
@@ -126,8 +125,7 @@
       </li>
       {% endif %}
 
-      {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Admin' in
-      user.all_roles %}
+      {% if user.is_superuser or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Admin' in user.all_roles %}
       <li class="treeview">
         <a href="#!">
           <i class="ri-calendar-event-line"></i>
@@ -203,8 +201,7 @@
           </li>
           {% endif %}
 
-          {% if user.is_superuser or 'Admin' in user.all_roles or 'Inspector' in user.all_roles or 'Evaluator' in
-          user.all_roles %}
+          {% if user.is_superuser or 'Admin' in user.all_roles or 'Inspector' in user.all_roles or 'Evaluator' in user.all_roles %}
           <li>
             <a href="{% url 'reports:inspections' %}">All Inspections</a>
           </li>
@@ -249,8 +246,7 @@
       {% endif %}
 
       <!-- Applicant Navigation -->
-      {% if 'Individual Applicant' in user.all_roles or 'Company Applicant' in user.all_roles or 'Applicant' in
-      user.all_roles or user.is_superuser or 'Admin' in user.all_roles %}
+      {% if 'Individual Applicant' in user.all_roles or 'Company Applicant' in user.all_roles or 'Applicant' in user.all_roles or user.is_superuser or 'Admin' in user.all_roles %}
 
       <li class="menu-header text-uppercase fs-7 fw-bold text-muted px-3 mt-3 mb-1">Applicant Actions</li>
 
