@@ -27,7 +27,7 @@ sitemaps = {
 }
 
 urlpatterns = [
-    path('google6cdde7307643194d.html', TemplateView.as_view(template_name="google6cdde7307643194d.html")),
+    path('googlece0b479e8c4e58bd.html', TemplateView.as_view(template_name="googlece0b479e8c4e58bd.html")),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     path('admin/', admin.site.urls),
