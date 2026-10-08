@@ -70,6 +70,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.postgres',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
 
     # Third-party apps
     'rest_framework',
@@ -245,3 +248,7 @@ SITE_URL = env('SITE_URL', default='http://localhost:8000')
 
 # Trust X-Forwarded-Proto header from Nginx reverse proxy
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# django.contrib.sites configuration
+SITE_ID = 1
+

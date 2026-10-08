@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /users/
+Disallow: /medicines/
+Disallow: /reports/
+Allow: /
+
+Sitemap: https://live.tamris.org/sitemap.xml
