@@ -1,79 +1,83 @@
-from reports.views.utils import is_staff_check, export_csv
-import csv
+from django.db.models import Count, Q
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.utils import timezone
-from django.db import models
-from medicines.models import MedicineApplication, Payment, MedicineEvaluation, InspectionSchedule
-from users.models import CustomUser
 
-@login_required
-@user_passes_test(is_staff_check)
+from medicines.models import InspectionSchedule
+from reports.views.utils import report_access, date_range, filter_dates, paginate, as_json, export_csv
+
+
+def inspector_names(inspection):
+    return ', '.join(i.display_name for i in inspection.assigned_inspectors.all())
+
+
+@report_access('inspections')
 def inspections_report_view(request):
-    qs = InspectionSchedule.objects.all().select_related('application').order_by('-start_date_time')
-    
-    status_filter = request.GET.get('status')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    
+    qs = InspectionSchedule.objects.select_related('application', 'application__applicant').prefetch_related('assigned_inspectors').order_by('-start_date_time')
+    status_filter = request.GET.get('status', '')
+    result_filter = request.GET.get('result', '')
+    start_date, end_date, start_dt, end_dt = date_range(request)
     if status_filter:
         qs = qs.filter(status=status_filter)
-    if start_date:
-        qs = qs.filter(start_date_time__gte=start_date)
-    if end_date:
-        qs = qs.filter(start_date_time__lte=f"{end_date} 23:59:59")
-        
+    if result_filter == 'compliant':
+        qs = qs.filter(status='COMPLETED', gmp_compliant=True)
+    elif result_filter == 'not_compliant':
+        qs = qs.filter(status='COMPLETED', gmp_compliant=False)
+    qs = filter_dates(qs, 'start_date_time', start_dt, end_dt)
+
     if request.GET.get('export') == 'csv':
-        fields = [{'name': 'id', 'label': 'Inspection ID'}, {'name': lambda i: i.application.medicine_name, 'label': 'Medicine Name'}, {'name': 'start_date_time', 'label': 'Start Time'}, {'name': 'end_date_time', 'label': 'End Time'}, {'name': 'get_status_display', 'label': 'Status'}]
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'''attachment; filename="inspections_report_{timezone.now().strftime('%Y%m%d')}.csv"'''
-        writer = csv.writer(response)
-        writer.writerow([field['label'] for field in fields])
-        for obj in qs:
-            row = []
-            for field in fields:
-                if callable(field['name']):
-                    row.append(field['name'](obj))
-                else:
-                    val = getattr(obj, field['name'], '')
-                    if callable(val):
-                        val = val()
-                    row.append(val)
-            writer.writerow(row)
-        return response
-        
-    # Group by status
-    status_summary = qs.values('status').annotate(count=models.Count('id'))
-    status_dict = dict(InspectionSchedule.STATUS_CHOICES)
-    status_labels = [status_dict.get(item['status'], item['status']) for item in status_summary]
-    status_data = [item['count'] for item in status_summary]
-    
-    # Checklist stats
-    from django.db.models import Q
-    checklist_stats = InspectionSchedule.objects.aggregate(
-        manufacturing_area=models.Count('id', filter=Q(check_manufacturing_area=True)),
-        machines=models.Count('id', filter=Q(check_machines=True)),
-        cleanliness=models.Count('id', filter=Q(check_cleanliness=True)),
-        medicine_storage=models.Count('id', filter=Q(check_medicine_storage=True)),
-        quality_control=models.Count('id', filter=Q(check_quality_control=True))
+        return export_csv(qs, 'inspections_report', [
+            ('Inspection ID', 'id'),
+            ('Application Reference', lambda i: i.application.reference_number),
+            ('Medicine Name', lambda i: i.application.medicine_name),
+            ('Applicant', lambda i: i.application.holder_name),
+            ('Region', lambda i: i.application.applicant.applicant_region),
+            ('Inspectors', inspector_names),
+            ('Start', 'start_date_time'),
+            ('End', 'end_date_time'),
+            ('Status', 'get_status_display'),
+            ('GMP Compliant', lambda i: (('Yes' if i.gmp_compliant else 'No') if i.status == 'COMPLETED' else '')),
+            ('Manufacturing Area', 'manufacturing_area_remarks'),
+            ('Machines', 'machines_remarks'),
+            ('Cleanliness', 'cleanliness_remarks'),
+            ('Medicine Storage', 'medicine_storage_remarks'),
+            ('Quality Control', 'quality_control_remarks'),
+            ('Inspector Remarks', 'remarks'),
+        ])
+
+    status_names = dict(InspectionSchedule.STATUS_CHOICES)
+    status_summary = qs.values('status').annotate(count=Count('id'))
+    completed = qs.filter(status='COMPLETED')
+    outcome = completed.aggregate(
+        compliant=Count('id', filter=Q(gmp_compliant=True)),
+        not_compliant=Count('id', filter=Q(gmp_compliant=False)),
     )
-    checklist_labels = ['Mfg Area Passes', 'Machine Passes', 'Cleanliness Passes', 'Storage Passes', 'QC System Passes']
-    checklist_data = [
-        checklist_stats['manufacturing_area'],
-        checklist_stats['machines'],
-        checklist_stats['cleanliness'],
-        checklist_stats['medicine_storage'],
-        checklist_stats['quality_control']
-    ]
-    
+    # Applications inspected more than once are re-inspections
+    reinspections = (
+        completed.values('application').annotate(n=Count('id')).filter(n__gt=1).count()
+    )
+    # Items the evaluator asked inspectors to look at (not results)
+    checklist = qs.aggregate(
+        manufacturing_area=Count('id', filter=Q(check_manufacturing_area=True)),
+        machines=Count('id', filter=Q(check_machines=True)),
+        cleanliness=Count('id', filter=Q(check_cleanliness=True)),
+        medicine_storage=Count('id', filter=Q(check_medicine_storage=True)),
+        quality_control=Count('id', filter=Q(check_quality_control=True)),
+    )
+
+    page, query_string = paginate(request, qs)
     context = {
-        'inspections': qs,
-        'status_labels': status_labels,
-        'status_data': status_data,
-        'checklist_labels': checklist_labels,
-        'checklist_data': checklist_data,
+        'inspections': page,
+        'query_string': query_string,
+        'status_labels': as_json([status_names.get(i['status'], i['status']) for i in status_summary]),
+        'status_data': as_json([i['count'] for i in status_summary]),
+        'outcome_labels': as_json(['GMP compliant', 'Not compliant']),
+        'outcome_data': as_json([outcome['compliant'], outcome['not_compliant']]),
+        'compliant_count': outcome['compliant'],
+        'not_compliant_count': outcome['not_compliant'],
+        'reinspection_count': reinspections,
+        'checklist_labels': as_json(['Manufacturing area', 'Machines', 'Cleanliness', 'Medicine storage', 'Quality control']),
+        'checklist_data': as_json([checklist['manufacturing_area'], checklist['machines'], checklist['cleanliness'], checklist['medicine_storage'], checklist['quality_control']]),
         'status_filter': status_filter,
+        'result_filter': result_filter,
         'start_date': start_date,
         'end_date': end_date,
         'STATUS_CHOICES': InspectionSchedule.STATUS_CHOICES,

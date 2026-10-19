@@ -19,7 +19,7 @@
                         </h3>
                     </div>
                     <div>
-                        <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}export=csv" class="btn btn-danger fw-bold shadow-sm d-inline-flex align-items-center">
+                        <a href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv" class="btn btn-danger fw-bold shadow-sm d-inline-flex align-items-center">
                             <i class="ri-download-line me-2"></i> Export to CSV
                         </a>
                     </div>
@@ -34,7 +34,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-3">
                     <form method="get" class="row g-2 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <label class="form-label fw-semibold small text-muted mb-1">Status</label>
                             <select name="status" class="form-select form-select-sm">
                                 <option value="">All Statuses</option>
@@ -43,13 +43,21 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold small text-muted mb-1">Result</label>
+                            <select name="result" class="form-select form-select-sm">
+                                <option value="">All results</option>
+                                <option value="compliant" {% if result_filter == 'compliant' %}selected{% endif %}>GMP compliant</option>
+                                <option value="not_compliant" {% if result_filter == 'not_compliant' %}selected{% endif %}>Not compliant</option>
+                            </select>
+                        </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold small text-muted mb-1">From Date</label>
-                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date|default:'' }}">
+                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date|date:'Y-m-d' }}">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold small text-muted mb-1">To Date</label>
-                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date|default:'' }}">
+                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date|date:'Y-m-d' }}">
                         </div>
                         <div class="col-md-2 d-flex gap-2">
                             <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold">
@@ -63,6 +71,25 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Outcomes -->
+    <div class="row gx-3 mb-3">
+        <div class="col-md-4 mb-2"><div class="card shadow-sm border-0 h-100"><div class="card-body">
+            <div class="small text-muted text-uppercase fw-bold">GMP compliant</div>
+            <div class="fs-3 fw-bold text-success">{{ compliant_count }}</div>
+            <div class="small text-muted">Completed inspections that passed</div>
+        </div></div></div>
+        <div class="col-md-4 mb-2"><div class="card shadow-sm border-0 h-100"><div class="card-body">
+            <div class="small text-muted text-uppercase fw-bold">Not compliant</div>
+            <div class="fs-3 fw-bold text-danger">{{ not_compliant_count }}</div>
+            <div class="small text-muted">Rejected with recommendations, or sent for re-inspection</div>
+        </div></div></div>
+        <div class="col-md-4 mb-2"><div class="card shadow-sm border-0 h-100"><div class="card-body">
+            <div class="small text-muted text-uppercase fw-bold">Re-inspected sites</div>
+            <div class="fs-3 fw-bold text-warning">{{ reinspection_count }}</div>
+            <div class="small text-muted">Applications inspected more than once</div>
+        </div></div></div>
     </div>
 
     <!-- Graphs Row -->
@@ -82,7 +109,8 @@
         <div class="col-xl-6 col-lg-12">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-transparent border-0 pt-3">
-                    <h5 class="card-title fw-bold mb-0">Checklist compliance performance</h5>
+                    <h5 class="card-title fw-bold mb-0">Items inspectors were asked to check</h5>
+                    <p class="small text-muted mb-0">How often each item was on the inspection checklist (not a pass rate).</p>
                 </div>
                 <div class="card-body">
                     <div id="checklistChart" style="min-height: 250px;"></div>
@@ -102,19 +130,20 @@
                                 <tr>
                                     <th class="px-4 py-3">Inspection ID</th>
                                     <th class="py-3">Medicine Name</th>
-                                    <th class="py-3">Start Time</th>
-                                    <th class="py-3">End Time</th>
-                                    <th class="px-4 py-3">Status</th>
+                                    <th class="py-3">Inspectors</th>
+                                    <th class="py-3">Dates</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="px-4 py-3">GMP Result</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for i in inspections %}
                                 <tr>
                                     <td class="px-4 py-3 text-muted">#{{ i.id }}</td>
-                                    <td class="py-3 fw-bold text-dark">{{ i.application.medicine_name }}</td>
-                                    <td class="py-3 text-muted">{{ i.start_date_time|date:"M d, Y H:i"|default:"-" }}</td>
-                                    <td class="py-3 text-muted">{{ i.end_date_time|date:"M d, Y H:i"|default:"-" }}</td>
-                                    <td class="px-4 py-3">
+                                    <td class="py-3 fw-bold text-dark">{{ i.application.medicine_name }}<div class="small text-muted fw-normal">{{ i.application.holder_name }}</div></td>
+                                    <td class="py-3 text-muted small">{% for p in i.assigned_inspectors.all %}{{ p.display_name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+                                    <td class="py-3 text-muted small">{{ i.start_date_time|date:"M d, Y H:i"|default:"-" }}<br>{{ i.end_date_time|date:"M d, Y H:i"|default:"" }}</td>
+                                    <td class="py-3">
                                         {% if i.status == 'COMPLETED' %}
                                             <span class="badge bg-success-lighten text-success">{{ i.get_status_display }}</span>
                                         {% elif i.status == 'CANCELLED' %}
@@ -123,10 +152,15 @@
                                             <span class="badge bg-warning-lighten text-warning">{{ i.get_status_display }}</span>
                                         {% endif %}
                                     </td>
+                                    <td class="px-4 py-3">
+                                        {% if i.status == 'COMPLETED' %}
+                                            {% if i.gmp_compliant %}<span class="badge bg-success">Compliant</span>{% else %}<span class="badge bg-danger">Not compliant</span>{% endif %}
+                                        {% else %}<span class="text-muted small">-</span>{% endif %}
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="ri-calendar-event-line fs-2 mb-2 d-block opacity-50"></i>
                                         No inspections found.
                                     </td>
@@ -135,6 +169,7 @@
                             </tbody>
                         </table>
                     </div>
+                    {% include 'reports/_pager.html' with page=inspections %}
                 </div>
             </div>
         </div>
@@ -169,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Checklist Compliance Bar Chart
     const checklistOptions = {
         series: [{
-            name: 'Passes',
+            name: 'Inspections',
             data: {{ checklist_data|safe }}
         }],
         chart: {

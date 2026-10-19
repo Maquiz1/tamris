@@ -1,18 +1,25 @@
-from reports.views.utils import is_staff_check, export_csv
-import csv
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.utils import timezone
-from django.db import models
-from medicines.models import MedicineApplication, Payment, MedicineEvaluation, InspectionSchedule
-from users.models import CustomUser
 
-@login_required
-@user_passes_test(is_staff_check)
+from users.models import CustomUser
+from reports.views.utils import report_access, paginate, export_csv
+
+
+@report_access('users')
 def users_report_view(request):
-    qs = CustomUser.objects.exclude(is_superuser=True).order_by('-date_joined')  # superusers: Django admin only
+    # Superusers are managed in Django admin only
+    qs = CustomUser.objects.exclude(is_superuser=True).select_related('role').prefetch_related('additional_roles').order_by('-date_joined')
     if request.GET.get('export') == 'csv':
-        fields = [{'name': 'id', 'label': 'ID'}, {'name': 'email', 'label': 'Email'}, {'name': 'phone_number', 'label': 'Phone'}, {'name': 'is_staff', 'label': 'Is Staff'}, {'name': 'date_joined', 'label': 'Date Joined'}]
-        return export_csv(qs, 'users_report', fields)
-    return render(request, 'reports/users.html', {'users': qs})
+        return export_csv(qs, 'users_report', [
+            ('ID', 'id'),
+            ('Name', 'display_name'),
+            ('Email', 'email'),
+            ('Phone', 'contact_phone'),
+            ('Roles', lambda u: ', '.join(u.all_roles)),
+            ('Region', 'applicant_region'),
+            ('Registration Status', 'registration_status'),
+            ('Active', 'is_active'),
+            ('Legacy Entry', 'is_legacy'),
+            ('Date Joined', 'date_joined'),
+        ])
+    page, query_string = paginate(request, qs)
+    return render(request, 'reports/users.html', {'users': page, 'query_string': query_string})

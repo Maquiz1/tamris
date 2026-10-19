@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Revenue by Month - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'reports:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small"><i class="ri-arrow-left-line me-1"></i> Back to Reports</a>
+                        <h3 class="fw-bold mb-0 mt-1 text-success d-inline-flex align-items-center"><i class="ri-line-chart-line me-2"></i> Revenue by Month</h3>
+                        <p class="text-muted small mb-0 mt-1">Money received through TAMRIS, by the date Finance verified it. Paper-era payments are shown separately.</p>
+                    </div>
+                    <a href="?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&export=csv" class="btn btn-success fw-bold shadow-sm d-inline-flex align-items-center"><i class="ri-download-2-line me-2"></i> Export CSV</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small text-muted mb-1">From</label>
+                    <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small text-muted mb-1">To</label>
+                    <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-success btn-sm w-100 fw-bold"><i class="ri-filter-3-line me-1"></i> Show</button>
+                    <a href="{% url 'reports:revenue' %}" class="btn btn-outline-secondary btn-sm fw-bold">Last 12 months</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row gx-3 mb-3">
+        <div class="col-md-3 col-6 mb-2"><div class="card shadow-sm border-0 h-100"><div class="card-body">
+            <div class="small text-muted text-uppercase fw-bold">Received in period</div>
+            <div class="fs-4 fw-bold text-success">{{ grand_total|floatformat:"0g" }} <span class="fs-6">TZS</span></div>
+            <div class="small text-muted">{{ payment_count }} payment{{ payment_count|pluralize }}</div>
+        </div></div></div>
+        <div class="col-md-3 col-6 mb-2"><div class="card shadow-sm border-0 h-100"><div class="card-body">
+            <div class="small text-muted text-uppercase fw-bold">Listing</div>
+            <div class="fs-4 fw-bold text-primary">{{ listing_total|floatformat:"0g" }} <span class="fs-6">TZS</span></div>
+        </div></div></div>
+        <div class="col-md-3 col-6 mb-2"><div class="card shadow-sm border-0 h-100"><div class="card-body">
+            <div class="small text-muted text-uppercase fw-bold">Category II</div>
+            <div class="fs-4 fw-bold text-info">{{ category_ii_total|floatformat:"0g" }} <span class="fs-6">TZS</span></div>
+        </div></div></div>
+        <div class="col-md-3 col-6 mb-2"><div class="card shadow-sm border-0 h-100"><div class="card-body">
+            <div class="small text-muted text-uppercase fw-bold">Paid before the system</div>
+            <div class="fs-4 fw-bold text-secondary">{{ legacy_total|floatformat:"0g" }} <span class="fs-6">TZS</span></div>
+            <div class="small text-muted">All time, verified amounts only</div>
+        </div></div></div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-transparent border-0 pt-3"><h5 class="card-title fw-bold mb-0">Received per month</h5></div>
+        <div class="card-body"><div id="revenueMonthChart" style="min-height: 300px;"></div></div>
+    </div>
+
+    <div class="card shadow-sm border-0 border-top border-success border-4">
+        <div class="card-header bg-transparent border-0 pt-3 pb-0"><h5 class="card-title text-success fw-bold mb-0">By fee and month (TZS)</h5></div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-3 py-3">Fee</th>
+                            {% for label in month_labels %}<th class="py-3 text-end text-nowrap">{{ label }}</th>{% endfor %}
+                            <th class="px-3 py-3 text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in table %}
+                        <tr>
+                            <td class="px-3 py-2 fw-semibold text-nowrap">{{ row.label }}<div class="text-muted fw-normal">{{ row.service }}</div></td>
+                            {% for v in row.values %}<td class="py-2 text-end">{% if v %}{{ v|floatformat:"0g" }}{% else %}<span class="text-muted">-</span>{% endif %}</td>{% endfor %}
+                            <td class="px-3 py-2 text-end fw-bold">{{ row.total|floatformat:"0g" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="{{ month_labels|length|add:2 }}" class="text-center py-5 text-muted">No verified payments in this period.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if table %}
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td class="px-3 py-3">Total</td>
+                            {% for v in month_totals %}<td class="py-3 text-end">{{ v|floatformat:"0g" }}</td>{% endfor %}
+                            <td class="px-3 py-3 text-end text-success">{{ grand_total|floatformat:"0g" }}</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var el = document.querySelector('#revenueMonthChart');
+    if (!el || typeof ApexCharts === 'undefined') return;
+    new ApexCharts(el, {
+        chart: { type: 'bar', height: 300, stacked: true, toolbar: { show: false } },
+        series: [
+            { name: 'Listing', data: {{ chart_listing|safe }} },
+            { name: 'Category II', data: {{ chart_category_ii|safe }} }
+        ],
+        xaxis: { categories: {{ chart_labels|safe }} },
+        yaxis: { labels: { formatter: function (v) { return Math.round(v).toLocaleString(); } } },
+        tooltip: { y: { formatter: function (v) { return Math.round(v).toLocaleString() + ' TZS'; } } },
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
+        dataLabels: { enabled: false },
+        colors: ['#0f766e', '#0ea5e9'],
+        legend: { position: 'top' }
+    }).render();
+});
+</script>
+{% endblock %}

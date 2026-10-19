@@ -255,9 +255,11 @@
           <li>
             <a href="{% url 'reports:applications' %}">All Applications</a>
           </li>
+          {% if user.is_admin or user.is_evaluator or user.is_registrar or user.is_committee %}
           <li>
             <a href="{% url 'reports:evaluations' %}">All Evaluations</a>
           </li>
+          {% endif %}
           {% endif %}
 
           {% if user.is_admin or user.is_inspector or user.is_evaluator or user.is_registrar or user.is_committee %}
@@ -269,6 +271,14 @@
           {% if user.is_admin or user.is_finance or user.is_registrar or user.is_committee %}
           <li>
             <a href="{% url 'reports:payments' %}">All Payments</a>
+          </li>
+          <li>
+            <a href="{% url 'reports:revenue' %}">Revenue by Month</a>
+          </li>
+          {% endif %}
+          {% if user.is_admin or user.is_evaluator or user.is_registrar or user.is_committee or user.is_finance %}
+          <li>
+            <a href="{% url 'reports:renewals' %}">Renewals Due</a>
           </li>
           {% endif %}
         </ul>

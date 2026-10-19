@@ -19,7 +19,7 @@
                         </h3>
                     </div>
                     <div>
-                        <a href="?{% if docs_filter %}docs_complete={{ docs_filter }}&{% endif %}{% if quality_filter %}quality_check={{ quality_filter }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}export=csv" class="btn btn-primary fw-bold shadow-sm d-inline-flex align-items-center">
+                        <a href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv" class="btn btn-primary fw-bold shadow-sm d-inline-flex align-items-center">
                             <i class="ri-download-line me-2"></i> Export to CSV
                         </a>
                     </div>
@@ -52,11 +52,11 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label fw-semibold small text-muted mb-1">From Date</label>
-                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date|default:'' }}">
+                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date|date:'Y-m-d' }}">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label fw-semibold small text-muted mb-1">To Date</label>
-                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date|default:'' }}">
+                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date|date:'Y-m-d' }}">
                         </div>
                         <div class="col-md-2 d-flex gap-2">
                             <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">
@@ -119,7 +119,7 @@
                                 <tr>
                                     <td class="px-4 py-3 text-muted">#{{ e.id }}</td>
                                     <td class="py-3 fw-bold text-dark">{{ e.application.medicine_name }}</td>
-                                    <td class="py-3 text-muted">{{ e.evaluator.email|default:"Not Assigned" }}</td>
+                                    <td class="py-3 text-muted">{{ e.evaluator.display_name|default:"Not Assigned" }}</td>
                                     <td class="py-3">
                                         {% if e.documents_complete %}
                                             <span class="badge bg-success-lighten text-success">Yes</span>
@@ -146,6 +146,7 @@
                             </tbody>
                         </table>
                     </div>
+                    {% include 'reports/_pager.html' with page=evaluations %}
                 </div>
             </div>
         </div>

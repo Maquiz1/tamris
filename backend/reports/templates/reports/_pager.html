@@ -1,0 +1,18 @@
+{% if page.has_other_pages %}
+<div class="d-flex justify-content-between align-items-center px-4 py-3 border-top flex-wrap gap-2">
+    <span class="small text-muted">Showing {{ page.start_index }}–{{ page.end_index }} of {{ page.paginator.count }}</span>
+    <ul class="pagination pagination-sm mb-0">
+        {% if page.has_previous %}
+            <li class="page-item"><a class="page-link" href="?{% if query_string %}{{ query_string }}&{% endif %}page=1">First</a></li>
+            <li class="page-item"><a class="page-link" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page.number }} of {{ page.paginator.num_pages }}</span></li>
+        {% if page.has_next %}
+            <li class="page-item"><a class="page-link" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page.next_page_number }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page.paginator.num_pages }}">Last</a></li>
+        {% endif %}
+    </ul>
+</div>
+{% elif page.paginator.count %}
+<div class="px-4 py-3 border-top small text-muted">{{ page.paginator.count }} record{{ page.paginator.count|pluralize }}</div>
+{% endif %}

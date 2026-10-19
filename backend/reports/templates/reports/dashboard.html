@@ -35,7 +35,7 @@
                         </div>
                         <div class="d-flex flex-column">
                             <h1 class="lh-1 mb-1">{{ total_applications }}</h1>
-                            <p class="m-0 text-muted small">Total Applications</p>
+                            <p class="m-0 text-muted small">Applications in TAMRIS</p>
                         </div>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                         </div>
                         <div class="d-flex flex-column">
                             <h1 class="lh-1 mb-1">{{ total_registered }}</h1>
-                            <p class="m-0 text-muted small">Registered Medicines</p>
+                            <p class="m-0 text-muted small">Valid Certificates</p>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="d-flex flex-column">
                             <h1 class="lh-1 mb-1">{{ total_payments_verified }}</h1>
-                            <p class="m-0 text-muted small">Verified Payments</p>
+                            <p class="m-0 text-muted small">Payments Verified in TAMRIS</p>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@
                         </div>
                         <div class="d-flex flex-column">
                             <h1 class="lh-1 mb-1">{{ total_users }}</h1>
-                            <p class="m-0 text-muted small">Total Users</p>
+                            <p class="m-0 text-muted small">Users</p>
                         </div>
                     </div>
                 </div>
@@ -131,13 +131,90 @@
         </div>
     </div>
 
+    <!-- Renewals at a glance -->
+    {% if can.renewals %}
+    <div class="row gx-3 mb-3">
+        <div class="col-md-6 mb-3">
+            <a href="{% url 'reports:renewals' %}?window=90" class="card shadow-sm border-0 text-decoration-none h-100 border-start border-warning border-4">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                    <div><div class="small text-muted text-uppercase fw-bold">Expiring within 90 days</div><div class="fs-2 fw-bold text-warning">{{ expiring_soon }}</div></div>
+                    <i class="ri-timer-line fs-1 text-warning opacity-50"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 mb-3">
+            <a href="{% url 'reports:renewals' %}?window=expired" class="card shadow-sm border-0 text-decoration-none h-100 border-start border-danger border-4">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                    <div><div class="small text-muted text-uppercase fw-bold">Expired, not renewed</div><div class="fs-2 fw-bold text-danger">{{ expired }}</div></div>
+                    <i class="ri-alarm-warning-line fs-1 text-danger opacity-50"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Available Reports Section -->
     <div class="row gx-3">
         <div class="col-12 mb-3">
             <h4 class="fw-bold text-secondary">Available Reports</h4>
         </div>
 
+        <!-- Renewals Due -->
+{% if can.renewals %}
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 border-start border-warning border-4">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-warning-lighten rounded-circle me-3">
+                            <i class="ri-refresh-line text-warning fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Renewals Due</h5>
+                            <p class="text-muted small mb-0">Certificates expiring soon or expired, with contacts.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:renewals' %}" class="btn btn-outline-warning btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:renewals' %}?export=csv" class="btn btn-warning btn-sm flex-fill fw-bold">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Revenue by Month -->
+{% if can.revenue %}
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 border-start border-success border-4">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box lg bg-success-lighten rounded-circle me-3">
+                            <i class="ri-line-chart-line text-success fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Revenue by Month</h5>
+                            <p class="text-muted small mb-0">Money received per month and per fee.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{% url 'reports:revenue' %}" class="btn btn-outline-success btn-sm flex-fill fw-bold">
+                            <i class="ri-eye-line me-1"></i> View
+                        </a>
+                        <a href="{% url 'reports:revenue' %}?export=csv" class="btn btn-success btn-sm flex-fill fw-bold">
+                            <i class="ri-download-line me-1"></i> CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Applications Report -->
+{% if can.applications %}
         <div class="col-md-6 col-xl-4 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -161,8 +238,10 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Payments Report -->
+{% if can.payments %}
         <div class="col-md-6 col-xl-4 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -186,8 +265,10 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Registered Medicines Report -->
+{% if can.medicines %}
         <div class="col-md-6 col-xl-4 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -211,8 +292,10 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Users Report -->
+{% if can.users %}
         <div class="col-md-6 col-xl-4 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -236,8 +319,10 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Evaluations Report -->
+{% if can.evaluations %}
         <div class="col-md-6 col-xl-4 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -261,8 +346,10 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Inspections Report -->
+{% if can.inspections %}
         <div class="col-md-6 col-xl-4 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -286,6 +373,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

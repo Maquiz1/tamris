@@ -6,3 +6,4 @@ from .users import *
 from .evaluations import *
 from .inspections import *
 from .utils import *
+from .renewals import *

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Renewals Due - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    <div class="row gx-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <a href="{% url 'reports:dashboard' %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small"><i class="ri-arrow-left-line me-1"></i> Back to Reports</a>
+                        <h3 class="fw-bold mb-0 mt-1 text-warning d-inline-flex align-items-center"><i class="ri-refresh-line me-2"></i> Renewals Due</h3>
+                        <p class="text-muted small mb-0 mt-1">Certificates are valid 12 months. Holders are reminded by email 90, 30 and 7 days before expiry.</p>
+                    </div>
+                    <a href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv" class="btn btn-warning fw-bold shadow-sm d-inline-flex align-items-center text-dark"><i class="ri-download-2-line me-2"></i> Export CSV</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row gx-3 mb-3">
+        {% for key, label in windows %}
+        <div class="col-md-3 col-6 mb-2">
+            <a href="?window={{ key }}{% if type_filter %}&type={{ type_filter }}{% endif %}" class="card shadow-sm border-0 text-decoration-none h-100 {% if window == key %}border border-2 {% if key == 'expired' %}border-danger{% else %}border-warning{% endif %}{% endif %}">
+                <div class="card-body">
+                    <div class="small text-muted text-uppercase fw-bold">{{ label }}</div>
+                    <div class="fs-3 fw-bold {% if key == 'expired' %}text-danger{% else %}text-warning{% endif %}">{% if key == 'expired' %}{{ counts.expired }}{% elif key == '7' %}{{ counts.7 }}{% elif key == '30' %}{{ counts.30 }}{% else %}{{ counts.90 }}{% endif %}</div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body py-3">
+            <form method="get" class="d-flex gap-2 flex-wrap align-items-end">
+                <input type="hidden" name="window" value="{{ window }}">
+                <div>
+                    <label class="form-label fw-semibold small text-muted mb-1">Service</label>
+                    <select name="type" class="form-select form-select-sm">
+                        <option value="">Both services</option>
+                        <option value="LISTING" {% if type_filter == 'LISTING' %}selected{% endif %}>Listing</option>
+                        <option value="CATEGORY_II" {% if type_filter == 'CATEGORY_II' %}selected{% endif %}>Category II</option>
+                    </select>
+                </div>
+                <button class="btn btn-warning btn-sm fw-bold text-dark px-4">Show</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 border-top border-warning border-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 py-3">Certificate</th>
+                            <th class="py-3">Holder and contact</th>
+                            <th class="py-3">Expires</th>
+                            <th class="py-3">Renewal</th>
+                            <th class="px-4 py-3">Reminders sent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in certificates %}
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="fw-bold text-dark">{{ app.medicine_name }}{% if app.is_legacy %} <span class="badge bg-secondary">Legacy</span>{% endif %}</div>
+                                <div class="small text-muted font-monospace">{{ app.certificate_number }} &middot; {{ app.get_application_type_display }}</div>
+                            </td>
+                            <td class="py-3 small">
+                                <div class="fw-semibold">{{ app.holder_name }}</div>
+                                <div class="text-muted">{{ app.applicant.contact_phone|default:"-" }} &middot; {{ app.applicant.email }}</div>
+                                {% if app.applicant.applicant_region %}<div class="text-muted">{{ app.applicant.applicant_region }}</div>{% endif %}
+                            </td>
+                            <td class="py-3 small">
+                                {{ app.certificate_expires_on|date:"M d, Y" }}
+                                {% if app.days_to_expiry < 0 %}<div class="text-danger fw-bold">{{ app.days_to_expiry|stringformat:"d"|slice:"1:" }} days ago</div>
+                                {% else %}<div class="{% if app.days_to_expiry <= 7 %}text-danger{% else %}text-warning{% endif %} fw-bold">in {{ app.days_to_expiry }} day{{ app.days_to_expiry|pluralize }}</div>{% endif %}
+                            </td>
+                            <td class="py-3">
+                                {% if app.renewal_state == 'Not started' %}<span class="badge bg-secondary-lighten text-secondary">Not started</span>
+                                {% elif app.renewal_state == 'Started, not paid' %}<span class="badge bg-warning-lighten text-warning">Started, not paid</span>
+                                {% else %}<span class="badge bg-success-lighten text-success">{{ app.renewal_state }}</span>{% endif %}
+                            </td>
+                            <td class="px-4 py-3 small text-muted">{% for r in app.renewal_reminders_sent %}{% if r == 'expired' %}expiry notice{% else %}{{ r }} days{% endif %}{% if not forloop.last %}, {% endif %}{% empty %}None yet{% endfor %}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center py-5 text-muted"><i class="ri-checkbox-circle-line fs-2 d-block mb-2 opacity-50"></i>Nothing in this window.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'reports/_pager.html' with page=certificates %}
+        </div>
+    </div>
+</div>
+{% endblock %}
