@@ -1,0 +1,127 @@
+/* ─── TAMRIS motion and polish ──────────────────────────────────────────────
+ * Small, quick animations on top of the Apollo theme. Everything here is
+ * decoration: pages look and work the same if this file is missing, and all
+ * movement is switched off for users who ask their device for reduced motion.
+ */
+
+:root {
+    --tamris-accent: #0f766e;
+    --tamris-accent-soft: rgba(15, 118, 110, 0.12);
+    --tamris-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Top progress bar while the next page loads */
+#tamris-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    z-index: 100000;
+    background: linear-gradient(90deg, #14b8a6, #0f766e 60%, #f59e0b);
+    box-shadow: 0 0 10px rgba(20, 184, 166, 0.6);
+    opacity: 0;
+    transition: width 0.4s var(--tamris-ease), opacity 0.3s ease;
+    pointer-events: none;
+}
+#tamris-progress.is-active { opacity: 1; }
+
+/* Loader: quicker, softer exit */
+#loading-wrapper { transition: opacity 0.45s ease; }
+#loading-wrapper.tamris-hide { opacity: 0; pointer-events: none; }
+
+/* Page entrance: cards rise in one after another (classes added by tamris-motion.js) */
+.tamris-reveal {
+    opacity: 0;
+    transform: translateY(14px);
+}
+.tamris-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.55s var(--tamris-ease), transform 0.55s var(--tamris-ease);
+    transition-delay: var(--tamris-delay, 0s);
+}
+
+/* Cards: gentle lift on hover */
+.app-body .card {
+    transition: transform 0.25s var(--tamris-ease), box-shadow 0.25s var(--tamris-ease);
+}
+.app-body a.card:hover,
+.app-body .card.shadow-sm:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10) !important;
+}
+.app-body .card .table .card:hover { transform: none; }
+
+/* Buttons: tiny lift and smooth colour change */
+.app-body .btn {
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.app-body .btn:not(:disabled):hover { transform: translateY(-1px); }
+.app-body .btn:not(:disabled):active { transform: translateY(0); }
+.app-body .btn-primary:not(:disabled):hover,
+.app-body .btn-success:not(:disabled):hover {
+    box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+}
+
+/* Tables: smooth row highlight with an accent edge */
+.table-hover > tbody > tr { transition: background-color 0.2s ease, box-shadow 0.2s ease; }
+.table-hover > tbody > tr:hover { box-shadow: inset 3px 0 0 var(--tamris-accent); }
+
+/* Welcome card: slow moving gradient */
+.bg-3 {
+    background: linear-gradient(120deg, #e0f4f3, #b2e0dc, #d7f0ec, #c3e8e4) !important;
+    background-size: 300% 300% !important;
+    animation: tamris-gradient 14s ease infinite;
+}
+@keyframes tamris-gradient {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Icon boxes on dashboard cards pop slightly on hover */
+.app-body .card:hover .icon-box { transform: scale(1.06) rotate(-3deg); }
+.app-body .icon-box { transition: transform 0.3s var(--tamris-ease); }
+
+/* Sidebar: badges with pending work breathe softly */
+.sidebar-wrapper .badge {
+    animation: tamris-breathe 2.6s ease-in-out infinite;
+}
+@keyframes tamris-breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(15, 118, 110, 0); }
+    50%      { box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.18); }
+}
+.sidebar-wrapper .sidebar-menu > li > a { transition: background-color 0.2s ease, padding-left 0.2s ease; }
+.sidebar-wrapper .sidebar-menu > li > a:hover { padding-left: 1.4rem; }
+
+/* Alerts and toasts slide in */
+.app-body .alert { animation: tamris-slide-in 0.45s var(--tamris-ease) both; }
+@keyframes tamris-slide-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* Form fields: clear focus glow */
+.app-body .form-control:focus,
+.app-body .form-select:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 0.2rem rgba(20, 184, 166, 0.18);
+}
+
+/* Respect "reduce motion" */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+    .tamris-reveal { opacity: 1; transform: none; }
+    #tamris-progress { display: none; }
+}
+
+/* Never animate on paper */
+@media print {
+    #tamris-progress, #loading-wrapper { display: none !important; }
+    .tamris-reveal { opacity: 1 !important; transform: none !important; }
+}
