@@ -75,9 +75,9 @@
                                             </td>
                                             <td class="py-3 text-secondary">
                                                 {% if 'Company Applicant' in app.applicant.all_roles %}
-                                                    {{ app.applicant.company_profile.company_name }}
+                                                    {{ app.applicant.display_name }}
                                                 {% else %}
-                                                    {{ app.applicant.user_profile.full_name }}
+                                                    {{ app.applicant.display_name }}
                                                 {% endif %}
                                             </td>
                                             <td class="py-3">
@@ -133,9 +133,9 @@
                                             </td>
                                             <td class="py-3 text-secondary">
                                                 {% if 'Company Applicant' in schedule.application.applicant.all_roles %}
-                                                    {{ schedule.application.applicant.company_profile.company_name }}
+                                                    {{ schedule.application.applicant.display_name }}
                                                 {% else %}
-                                                    {{ schedule.application.applicant.user_profile.full_name }}
+                                                    {{ schedule.application.applicant.display_name }}
                                                 {% endif %}
                                             </td>
                                             <td class="py-3">
@@ -315,13 +315,13 @@
                                             </td>
                                             <td class="py-3 text-secondary">
                                                 {% if 'Company Applicant' in inspection.application.applicant.all_roles %}
-                                                    {{ inspection.application.applicant.company_profile.company_name }}
+                                                    {{ inspection.application.applicant.display_name }}
                                                 {% else %}
-                                                    {{ inspection.application.applicant.user_profile.full_name }}
+                                                    {{ inspection.application.applicant.display_name }}
                                                 {% endif %}
                                             </td>
                                             <td class="py-3 text-secondary">
-                                                {{ inspection.inspector.user_profile.full_name }}
+                                                {% for i in inspection.assigned_inspectors.all %}{{ i.display_name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
                                             </td>
                                             <td class="py-3 text-muted">
                                                 {{ inspection.start_date_time|date:"d M Y, H:i" }}

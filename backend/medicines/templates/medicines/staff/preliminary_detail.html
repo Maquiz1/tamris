@@ -512,9 +512,9 @@
                     <div>
                         <h6 class="fw-bold mb-0">
                             {% if 'Company Applicant' in application.applicant.all_roles %}
-                                {{ application.applicant.company_profile.company_name }}
+                                {{ application.applicant.display_name }}
                             {% else %}
-                                {{ application.applicant.user_profile.full_name }}
+                                {{ application.applicant.display_name }}
                             {% endif %}
                         </h6>
                         <span class="badge bg-secondary rounded-pill mt-1">{{ application.applicant.all_roles|join:", " }}</span>
@@ -530,9 +530,9 @@
                         <span class="text-muted small"><i class="bi bi-telephone me-2"></i>Phone</span>
                         <span class="fw-medium">
                             {% if 'Company Applicant' in application.applicant.all_roles %}
-                                {{ application.applicant.company_profile.phone_number }}
+                                {{ application.applicant.contact_phone|default:"-" }}
                             {% else %}
-                                {{ application.applicant.user_profile.phone_number }}
+                                {{ application.applicant.contact_phone|default:"-" }}
                             {% endif %}
                         </span>
                     </li>
@@ -540,9 +540,9 @@
                         <span class="text-muted small"><i class="bi bi-geo-alt me-2"></i>Region</span>
                         <span class="fw-medium">
                             {% if 'Company Applicant' in application.applicant.all_roles %}
-                                {{ application.applicant.company_profile.region }}
+                                {{ application.applicant.applicant_region|default:"-" }}
                             {% else %}
-                                {{ application.applicant.user_profile.region }}
+                                {{ application.applicant.applicant_region|default:"-" }}
                             {% endif %}
                         </span>
                     </li>

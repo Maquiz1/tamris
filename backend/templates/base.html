@@ -130,7 +130,7 @@
                       Finance Dashboard
                     {% elif 'Individual Applicant' in user.all_roles or 'Company Applicant' in user.all_roles %}
                       Applicant Dashboard
-                    {% elif user.user_profile or user.company_profile %}
+                    {% elif user.applicant_profile %}
                       Applicant Dashboard
                     {% else %}
                       TAMRIS Dashboard

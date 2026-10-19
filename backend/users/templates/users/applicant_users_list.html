@@ -64,17 +64,16 @@
                                 {% for applicant in applicants %}
                                 <tr>
                                     <td class="px-4 py-3 fw-bold text-dark">
-                                        {% if applicant.role.name == 'Individual Applicant' %}
-                                            {{ applicant.user_profile.full_name|default:"-" }}
-                                        {% else %}
-                                            {{ applicant.company_profile.company_name|default:"-" }}
-                                        {% endif %}
+                                        {% if applicant.display_name != applicant.email %}{{ applicant.display_name }}{% else %}<span class="text-muted fw-normal">Profile not filled</span>{% endif %}
                                     </td>
                                     <td class="px-4 py-3 text-muted">{{ applicant.email }}</td>
                                     <td class="px-4 py-3">
-                                        <span class="badge bg-secondary-lighten text-secondary">
-                                            {{ applicant.role.name }}
-                                        </span>
+                                        {% if applicant.role.name == 'Company Applicant' %}
+                                            <span class="badge rounded-pill border border-info text-info bg-white"><i class="ri-building-line me-1"></i>Company</span>
+                                        {% else %}
+                                            <span class="badge rounded-pill border border-primary text-primary bg-white"><i class="ri-user-line me-1"></i>Individual</span>
+                                        {% endif %}
+                                        {% if applicant.is_legacy %}<span class="badge rounded-pill bg-secondary ms-1">Legacy</span>{% endif %}
                                     </td>
                                     <td class="px-4 py-3 text-muted">{{ applicant.date_joined|date:"M d, Y" }}</td>
                                     <td class="px-4 py-3">

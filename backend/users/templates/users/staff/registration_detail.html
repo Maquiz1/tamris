@@ -275,11 +275,11 @@
                                         <span id="badge_tin_certificate" class="badge bg-secondary">Pending Evaluation</span>
                                     </div>
                                 </div>
-                                {% if application.user_profile.tin_certificate %}
+                                {% if docs.tin_certificate %}
                                     {% if application.registration_status == 'PENDING' %}
-                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tin_certificate', 'TIN Certificate', '{{ application.user_profile.tin_certificate.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
+                                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="viewAndEvaluate('tin_certificate', 'TIN Certificate', '{{ docs.tin_certificate.file.url }}')"><i class="bi bi-box-arrow-up-right me-1"></i> Open & Evaluate</button>
                                     {% else %}
-                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TIN Certificate', '{{ application.user_profile.tin_certificate.url }}')"><i class="bi bi-eye"></i> View</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="viewOnly('TIN Certificate', '{{ docs.tin_certificate.file.url }}')"><i class="bi bi-eye"></i> View</button>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Missing</span>

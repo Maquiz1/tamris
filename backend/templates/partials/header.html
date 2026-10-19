@@ -357,12 +357,8 @@
                     <h6 class="m-0">
                       {% if user.is_superuser %}
                         Superuser
-                      {% elif user.user_profile %}
-                        {{ user.user_profile.full_name }}
-                      {% elif user.company_profile %}
-                        {{ user.company_profile.company_name }}
                       {% else %}
-                        {{ user.email }}
+                        {{ user.display_name }}
                       {% endif %}
                     </h6>
                   </div>

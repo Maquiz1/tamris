@@ -191,6 +191,20 @@ class CustomUser(AbstractUser, TimeStampedModel):
         return self.email
 
     @property
+    def contact_phone(self):
+        profile = getattr(self, 'applicant_profile', None)
+        contact = getattr(profile, 'contact', None) if profile else None
+        return (contact.mobile_phone if contact and contact.mobile_phone else None) or self.phone_number
+
+    @property
+    def applicant_region(self):
+        profile = getattr(self, 'applicant_profile', None)
+        address = profile.address_obj if profile else None
+        if not address:
+            return None
+        return ", ".join(part for part in [address.district, address.region] if part) or None
+
+    @property
     def profile_photo_url(self):
         return None
 

@@ -485,11 +485,11 @@
                                                 <div class="d-flex align-items-center">
                                                     <i class="bi bi-shield-check fs-3 text-success me-3"></i>
                                                     <div>
-                                                        <h6 class="mb-1">Inspection by {{ inspection.inspector.user_profile.full_name }}</h6>
+                                                        <h6 class="mb-1">Inspection by {% for i in inspection.assigned_inspectors.all %}{{ i.display_name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</h6>
                                                         <p class="small text-muted mb-0">Completed on: {{ inspection.updated_at|date:"M d, Y" }}</p>
                                                     </div>
                                                 </div>
-                                                <button type="button" class="btn btn-sm btn-outline-success doc-view-btn" data-file-url="{{ inspection.report_file.url }}" data-file-name="Inspection Report - {{ inspection.inspector.user_profile.full_name }}" data-bs-toggle="modal" data-bs-target="#fileViewerModal">
+                                                <button type="button" class="btn btn-sm btn-outline-success doc-view-btn" data-file-url="{{ inspection.report_file.url }}" data-file-name="Inspection Report - {% for i in inspection.assigned_inspectors.all %}{{ i.display_name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}" data-bs-toggle="modal" data-bs-target="#fileViewerModal">
                                                     <i class="bi bi-eye me-1"></i> View Report
                                                 </button>
                                             </div>
@@ -590,9 +590,9 @@
                     <div>
                         <h6 class="fw-bold mb-0">
                             {% if 'Company Applicant' in application.applicant.all_roles %}
-                                {{ application.applicant.company_profile.company_name }}
+                                {{ application.applicant.display_name }}
                             {% else %}
-                                {{ application.applicant.user_profile.full_name }}
+                                {{ application.applicant.display_name }}
                             {% endif %}
                         </h6>
                         <span class="badge bg-secondary rounded-pill mt-1">{{ application.applicant.all_roles|join:", " }}</span>
@@ -608,9 +608,9 @@
                         <span class="text-muted small"><i class="bi bi-telephone me-2"></i>Phone</span>
                         <span class="fw-medium">
                             {% if 'Company Applicant' in application.applicant.all_roles %}
-                                {{ application.applicant.company_profile.phone_number }}
+                                {{ application.applicant.contact_phone|default:"-" }}
                             {% else %}
-                                {{ application.applicant.user_profile.phone_number }}
+                                {{ application.applicant.contact_phone|default:"-" }}
                             {% endif %}
                         </span>
                     </li>
@@ -618,9 +618,9 @@
                         <span class="text-muted small"><i class="bi bi-geo-alt me-2"></i>Region</span>
                         <span class="fw-medium">
                             {% if 'Company Applicant' in application.applicant.all_roles %}
-                                {{ application.applicant.company_profile.region }}
+                                {{ application.applicant.applicant_region|default:"-" }}
                             {% else %}
-                                {{ application.applicant.user_profile.region }}
+                                {{ application.applicant.applicant_region|default:"-" }}
                             {% endif %}
                         </span>
                     </li>

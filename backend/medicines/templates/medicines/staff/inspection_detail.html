@@ -37,9 +37,9 @@
           <p class="mb-2"><strong>Type:</strong><br>{{ application.get_application_type_display }}</p>
           <p class="mb-2"><strong>Applicant:</strong><br>
             {% if 'Company Applicant' in application.applicant.all_roles %}
-              {{ application.applicant.company_profile.company_name }}
+              {{ application.applicant.display_name }}
             {% else %}
-              {{ application.applicant.user_profile.full_name }}
+              {{ application.applicant.display_name }}
             {% endif %}
           </p>
           <p class="mb-0"><strong>Status:</strong><br>

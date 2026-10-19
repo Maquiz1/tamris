@@ -37,3 +37,35 @@ class SuperuserHiddenTests(TestCase):
     def test_superuser_also_does_not_see_superusers_in_lists(self):
         self.client.force_login(self.root)
         self.assertNotContains(self.client.get(reverse('users:system_users_list')), 'root2@example.com')
+
+
+class ApplicantNameDisplayTests(TestCase):
+    """Applicant names, phone and region show on staff screens (they read the current profile models)."""
+
+    def test_names_show_in_applicants_list_and_payment_page(self):
+        from users.models import Applicant, Individual, Organization, ApplicantContact, ApplicantAddress
+        from medicines.models import MedicineApplication, Payment
+        admin = CustomUser.objects.create_user(email='a@example.com', password='x', role=Role.objects.create(name='Admin'), is_email_verified=True)
+        finance = CustomUser.objects.create_user(email='f@example.com', password='x', role=Role.objects.create(name='Accountant'), is_email_verified=True)
+        person = CustomUser.objects.create_user(email='p@example.com', password='x', role=Role.objects.create(name='Individual Applicant'), phone_number='0712345678')
+        company = CustomUser.objects.create_user(email='c@example.com', password='x', role=Role.objects.create(name='Company Applicant'))
+        p = Applicant.objects.create(user=person, applicant_type='Individual')
+        Individual.objects.create(applicant=p, first_name='Asha', last_name='Juma')
+        ApplicantAddress.objects.create(applicant=p, region='Tabora', district='Urambo')
+        c = Applicant.objects.create(user=company, applicant_type='Organization')
+        Organization.objects.create(applicant=c, organization_name='Wabeloya Natural Therapies')
+        ApplicantContact.objects.create(applicant=c, mobile_phone='0755000111', email='c@example.com')
+
+        self.client.force_login(admin)
+        page = self.client.get(reverse('users:applicant_users_list'))
+        self.assertContains(page, 'Asha Juma')
+        self.assertContains(page, 'Wabeloya Natural Therapies')
+        self.assertContains(self.client.get(reverse('users:applicant_users_list'), {'q': 'Wabeloya'}), 'c@example.com')
+
+        app = MedicineApplication.objects.create(applicant=person, application_type='LISTING', medicine_name='Jocha', indications='x', dosage_form='UNGA', status='PENDING_APPLICATION_FEE')
+        payment = Payment.objects.create(application=app, payment_type='LISTING_APP_FEE', amount=1000)
+        self.client.force_login(finance)
+        page = self.client.get(reverse('medicines:staff_payment_detail', args=[payment.pk]))
+        self.assertContains(page, 'Asha Juma')
+        self.assertContains(page, '0712345678')
+        self.assertContains(page, 'Urambo, Tabora')
