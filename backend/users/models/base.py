@@ -67,6 +67,10 @@ class CustomUser(AbstractUser, TimeStampedModel):
     review_remarks = models.TextField(blank=True, null=True, help_text="Overall remarks from the evaluator")
     document_statuses = models.JSONField(blank=True, null=True, default=dict, help_text="Stores status per document: {'nida_copy': {'status': 'VERIFIED', 'reason': ''}}")
 
+    # Applicants entered from paper records by a Data Clerk
+    is_legacy = models.BooleanField(default=False)
+    legacy_invited_at = models.DateTimeField(blank=True, null=True)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -87,17 +91,23 @@ class CustomUser(AbstractUser, TimeStampedModel):
             return f"{val[:4]}-{val[4:7]}-{val[7:]}"
         return self.phone_number
 
+    STAFF_ROLES = ['Admin', 'Evaluator', 'Inspector', 'Accountant', 'Registrar', 'Committee', 'Data Clerk']
+
     @property
     def onboarding_step(self):
         if self.is_superuser or self.is_staff:
             return 5
         if not self.role:
             return 1
-            
+
         # Staff bypasses onboarding completely
-        if self.role.name in ['Evaluator', 'Inspector', 'Accountant', 'Admin']:
+        if self.role.name in self.STAFF_ROLES:
             return 5
-        
+
+        # A submitted profile never sends the user back into the wizard
+        if self.is_onboarding_complete:
+            return 5
+
         # Step 2: Needs Details (Profile Creation)
         if self.role.name in ['Individual Applicant', 'Company Applicant']:
             if not hasattr(self, 'applicant_profile') or not self.applicant_profile.is_details_complete:
@@ -140,11 +150,23 @@ class CustomUser(AbstractUser, TimeStampedModel):
     @property
     def is_finance(self):
         return self.is_accountant
-        
+
+    @property
+    def is_registrar(self):
+        return 'Registrar' in self.all_roles
+
+    @property
+    def is_committee(self):
+        return 'Committee' in self.all_roles
+
+    @property
+    def is_data_clerk(self):
+        return 'Data Clerk' in self.all_roles
+
     @property
     def is_staff_member(self):
         """Check if user has any staff role."""
-        return self.is_staff or self.is_admin or self.is_evaluator or self.is_inspector or self.is_finance or self.is_superuser
+        return self.is_staff or self.is_superuser or any(r in self.STAFF_ROLES for r in self.all_roles)
 
     @property
     def is_applicant(self):

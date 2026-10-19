@@ -1,0 +1,14 @@
+<table class="fields">
+    <tr><td class="label">{{ number_label }}:</td><td class="value">{{ application.certificate_number }}</td></tr>
+    <tr><td class="label">Trade name of the medicine:</td><td class="value">{{ application.medicine_name }}</td></tr>
+    <tr><td class="label">Name of the active ingredient(s) and strength:</td><td class="value"><em>{{ application.active_ingredients|default:application.ingredients|default:"" }}</em></td></tr>
+    <tr><td class="label">The form in which the medicine is presented and the colour thereof:</td><td class="value">{{ application.form_and_colour }}</td></tr>
+    <tr><td class="label">Shelf life of medicine in months:</td><td class="value">{{ application.shelf_life_display }}</td></tr>
+    <tr><td class="label">Container-closure system(s) and pack size(s):</td><td class="value">{{ application.pack_description }}</td></tr>
+    <tr><td class="label">Storage statement:</td><td class="value">{{ application.storage_statement }}</td></tr>
+    <tr><td class="label">Name of market authorization holder:</td><td class="value">{{ application.holder_name }}</td></tr>
+    <tr><td class="label">Name and address of manufacturer:</td><td class="value">{{ application.manufacturer_name|default:application.holder_name }}{% if application.manufacturer_address %}<br>{{ application.manufacturer_address|linebreaksbr }}{% elif application.holder_address %}<br>{{ application.holder_address }}{% endif %}</td></tr>
+    <tr><td class="label">Responsible Person:</td><td class="value">{{ application.responsible_person }}</td></tr>
+    <tr><td class="label">Issued on:</td><td class="value">{{ application.certificate_issued_on|date:"jS F Y" }}</td></tr>
+    <tr><td class="label">Expires on:</td><td class="value">{{ application.certificate_expires_on|date:"jS F Y" }}</td></tr>
+</table>

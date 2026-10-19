@@ -1,6 +1,16 @@
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Q
 from .models import CustomUser
+
+
+def staff_emails(roles):
+    """Emails of active users holding any of the roles, as main or additional role."""
+    users = CustomUser.objects.filter(
+        Q(role__name__in=roles) | Q(additional_roles__name__in=roles),
+        is_active=True,
+    ).distinct()
+    return list(users.values_list('email', flat=True))
 
 def send_tamris_email(subject, message, recipient_list):
     """
@@ -9,8 +19,6 @@ def send_tamris_email(subject, message, recipient_list):
     if not recipient_list:
         return
         
-    print(f"DEBUG EMAIL - Subject: {subject} | To: {recipient_list}")
-    
     send_mail(
         subject=subject,
         message=message,
@@ -23,13 +31,9 @@ def notify_staff_new_registration(applicant):
     """
     Notify Admins and Evaluators that a new applicant has submitted their profile for review.
     """
-    staff_users = CustomUser.objects.filter(
-        role__name__in=['Admin', 'Evaluator'],
-        is_active=True
-    )
-    staff_emails = list(staff_users.values_list('email', flat=True))
+    recipients = staff_emails(['Admin', 'Evaluator'])
     
-    if not staff_emails:
+    if not recipients:
         return
         
     subject = "TAMRIS - New Applicant Registration Pending Review"
@@ -40,7 +44,7 @@ def notify_staff_new_registration(applicant):
         f"Thank you,\nTAMRIS System"
     )
     
-    send_tamris_email(subject, message, staff_emails)
+    send_tamris_email(subject, message, recipients)
 
 def notify_applicant_registration_status(applicant, status, reason=None):
     """
@@ -70,11 +74,7 @@ def notify_finance_pending_payment(payment, applicant):
     """
     Notify Accountants/Admins that a new payment receipt has been submitted.
     """
-    finance_users = CustomUser.objects.filter(
-        role__name__in=['Admin', 'Accountant'],
-        is_active=True
-    )
-    finance_emails = list(finance_users.values_list('email', flat=True))
+    finance_emails = staff_emails(['Admin', 'Accountant'])
     
     if not finance_emails:
         return
@@ -82,8 +82,10 @@ def notify_finance_pending_payment(payment, applicant):
     subject = f"TAMRIS - New Payment Receipt Submitted ({payment.get_payment_type_display()})"
     message = (
         f"Hello,\n\n"
-        f"Applicant {applicant.email} has submitted a receipt number for {payment.get_payment_type_display()}.\n"
-        f"Receipt Number: {payment.receipt_number}\n"
+        f"Applicant {applicant.email} has submitted payment details for {payment.get_payment_type_display()}.\n"
+        f"Application: {payment.application.reference_number or payment.application.medicine_name}\n"
+        f"Control Number: {payment.control_number}\n"
+        f"Receipt Number: {payment.receipt_number or '-'}\n"
         f"Amount Due: {payment.amount} TZS\n\n"
         f"Please log in to the TAMRIS portal to verify this payment.\n\n"
         f"Thank you,\nTAMRIS System"
@@ -95,27 +97,25 @@ def notify_evaluator_payment_verified(application, payment_type):
     """
     Notify Evaluators that a payment has been verified and the application is ready for the next step.
     """
-    evaluators = CustomUser.objects.filter(
-        role__name__in=['Admin', 'Evaluator'],
-        is_active=True
-    )
-    evaluator_emails = list(evaluators.values_list('email', flat=True))
+    evaluator_emails = staff_emails(['Admin', 'Evaluator'])
     
     if not evaluator_emails:
         return
         
     subject = f"TAMRIS - Payment Verified for {application.medicine_name}"
     
-    if payment_type == 'EVALUATION_FEE':
+    from medicines.models import Payment
+    fee_name = dict(Payment._meta.get_field('payment_type').choices).get(payment_type, payment_type)
+    if payment_type in ('LISTING_EVAL_FEE', 'CAT_II_EVAL_FEE'):
         next_step = "Preliminary Screening"
-    elif payment_type == 'LISTING_FEE':
-        next_step = "Granting Full Registration"
+    elif payment_type == 'CAT_II_INSPECTION_FEE':
+        next_step = "Inspection Scheduling"
     else:
-        next_step = "Evaluation"
+        next_step = "the next evaluation step"
         
     message = (
         f"Hello,\n\n"
-        f"The {payment_type.replace('_', ' ').title()} for the application '{application.medicine_name}' has been verified by Finance.\n"
+        f"The {fee_name} for the application '{application.medicine_name}' ({application.reference_number or '-'}) has been verified by Finance.\n"
         f"The application is now ready for {next_step}.\n\n"
         f"Please log in to the TAMRIS portal to proceed.\n\n"
         f"Thank you,\nTAMRIS System"
@@ -225,3 +225,142 @@ def notify_ready_for_inspection(application):
     
     if all_emails:
         send_tamris_email(subject, message, list(all_emails))
+
+
+def notify_registrars_ready_for_approval(application):
+    recipients = staff_emails(['Registrar'])
+    if not recipients:
+        return
+    send_tamris_email(
+        f"TAMRIS - Ready for Final Approval: {application.medicine_name}",
+        f"Hello,\n\nThe final fee for '{application.medicine_name}' ({application.reference_number or '-'}) has been verified.\n"
+        f"The application is waiting for your approval on behalf of the Committee.\n\nThank you,\nTAMRIS System",
+        recipients,
+    )
+
+
+def notify_registrars_number_clash(number, existing_application):
+    recipients = staff_emails(['Registrar'])
+    if not recipients:
+        return
+    send_tamris_email(
+        f"TAMRIS - Certificate Number Clash: {number}",
+        f"Hello,\n\nA Data Clerk tried to enter a paper certificate numbered {number}, but the system has already issued that "
+        f"number to '{existing_application.medicine_name}' ({existing_application.reference_number or '-'}).\n"
+        f"Please check the paper register and decide which record keeps the number.\n\nThank you,\nTAMRIS System",
+        recipients,
+    )
+
+
+def notify_evaluators_resubmitted(application):
+    recipients = staff_emails(['Admin', 'Evaluator'])
+    if not recipients:
+        return
+    send_tamris_email(
+        f"TAMRIS - Conditions Answered: {application.medicine_name}",
+        f"Hello,\n\nThe applicant has corrected and resubmitted '{application.medicine_name}' ({application.reference_number or '-'}).\n"
+        f"It is now at: {application.get_status_display()}.\n\nThank you,\nTAMRIS System",
+        recipients,
+    )
+
+
+def notify_evaluators_inspection_report(schedule):
+    recipients = staff_emails(['Admin', 'Evaluator'])
+    if not recipients:
+        return
+    app = schedule.application
+    result = 'GMP compliant' if schedule.gmp_compliant else 'NOT GMP compliant'
+    send_tamris_email(
+        f"TAMRIS - Inspection Report Submitted: {app.medicine_name}",
+        f"Hello,\n\nThe inspection report for '{app.medicine_name}' ({app.reference_number or '-'}) has been submitted: {result}.\n"
+        f"The application is ready for scientific evaluation.\n\nThank you,\nTAMRIS System",
+        recipients,
+    )
+
+
+def notify_renewal_reminder(application, days_left):
+    send_tamris_email(
+        f"TAMRIS - Certificate {application.certificate_number} expires in {days_left} days",
+        f"Hello,\n\nYour certificate {application.certificate_number} for '{application.medicine_name}' expires on "
+        f"{application.certificate_expires_on:%d %B %Y}.\nPlease log in to TAMRIS and renew it by paying the renewal fee.\n\n"
+        f"Thank you,\nTAMRIS System",
+        [application.applicant.email],
+    )
+
+
+def notify_certificate_expired(application):
+    send_tamris_email(
+        f"TAMRIS - Certificate {application.certificate_number} has expired",
+        f"Hello,\n\nYour certificate {application.certificate_number} for '{application.medicine_name}' expired on "
+        f"{application.certificate_expires_on:%d %B %Y}.\nYou can still renew it in TAMRIS by paying the renewal fee.\n\n"
+        f"Thank you,\nTAMRIS System",
+        [application.applicant.email],
+    )
+    recipients = staff_emails(['Evaluator'])
+    if recipients:
+        send_tamris_email(
+            f"TAMRIS - Certificate expired: {application.certificate_number}",
+            f"The certificate {application.certificate_number} for '{application.medicine_name}' expired on "
+            f"{application.certificate_expires_on:%d %B %Y} and has not been renewed.",
+            recipients,
+        )
+
+
+def send_legacy_invitation(user):
+    """Invite an applicant entered from paper records to set a password."""
+    from django.contrib.auth.tokens import default_token_generator
+    from django.urls import reverse
+    from django.utils.encoding import force_bytes
+    from django.utils.http import urlsafe_base64_encode
+    from django.utils import timezone
+
+    site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000').rstrip('/')
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    link = site_url + reverse('users:password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+    send_tamris_email(
+        "TAMRIS - Your medicines are now in the TAMRIS portal",
+        f"Hello,\n\nThe Traditional and Alternative Health Practice Council has moved your records into the TAMRIS online portal.\n"
+        f"Set your password with this link to see your medicines and certificates, renew them and make new applications:\n{link}\n\n"
+        f"Your login email is {user.email}.\n\nThank you,\nTAMRIS System",
+        [user.email],
+    )
+    user.legacy_invited_at = timezone.now()
+    user.save(update_fields=['legacy_invited_at'])
+
+
+def notify_registrars_legacy_entered(application, is_new):
+    recipients = [e for e in staff_emails(['Registrar']) if not application.legacy_entered_by or e != application.legacy_entered_by.email]
+    if not recipients:
+        return
+    action = 'entered' if is_new else 'corrected'
+    send_tamris_email(
+        f"TAMRIS - Legacy certificate to verify: {application.certificate_number}",
+        f"Hello,\n\nA Data Clerk has {action} the paper certificate {application.certificate_number} for '{application.medicine_name}'.\n"
+        f"Please compare it with the scan and verify it, or return it for correction.\n\nThank you,\nTAMRIS System",
+        recipients,
+    )
+
+
+def notify_clerk_legacy_returned(application):
+    clerk = application.legacy_entered_by
+    if not clerk or not clerk.email:
+        return
+    send_tamris_email(
+        f"TAMRIS - Legacy record returned: {application.medicine_name}",
+        f"Hello,\n\nThe Registrar returned the legacy record '{application.medicine_name}' ({application.certificate_number or '-'}) for correction.\n"
+        f"Reason: {application.legacy_return_reason}\n\nThank you,\nTAMRIS System",
+        [clerk.email],
+    )
+
+
+def notify_staff_claim_requested(claim):
+    recipients = staff_emails(['Registrar', 'Admin'])
+    if not recipients:
+        return
+    send_tamris_email(
+        "TAMRIS - Request to link earlier records",
+        f"Hello,\n\n{claim.new_user.email} has asked to link the records entered from paper for {claim.legacy_user.display_name}.\n"
+        f"Matched on: {claim.matched_on}.\nPlease confirm or reject the request in TAMRIS.\n\nThank you,\nTAMRIS System",
+        recipients,
+    )

@@ -154,15 +154,31 @@
                         </div>
                     </div>
                     
-                    {% if application.status == 'FULL_REGISTRATION' or application.status == 'PROVISIONAL_REGISTRATION' %}
                     <hr>
                     <div class="mb-2">
-                        <span class="text-muted small">Registration Number:</span>
-                        <strong class="d-block text-dark font-monospace">{{ application.registration_number|default:"Pending" }}</strong>
+                        <span class="text-muted small">Application Reference:</span>
+                        <strong class="d-block text-dark font-monospace">{{ application.reference_number|default:"-" }}</strong>
                     </div>
-                    <div class="d-grid mt-3">
+                    {% if application.has_active_certificate %}
+                    <div class="mb-2">
+                        <span class="text-muted small">{% if application.is_listing %}Listing{% else %}Registration{% endif %} Number:</span>
+                        <strong class="d-block text-dark font-monospace">{{ application.certificate_number }}</strong>
+                        <span class="small {% if application.is_expired %}text-danger{% else %}text-muted{% endif %}">{% if application.is_expired %}Expired on{% else %}Valid until{% endif %} {{ application.certificate_expires_on|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="d-grid mt-3 gap-2">
                         <a href="{% url 'medicines:download_certificate' application.pk %}" class="btn btn-success fw-bold text-dark" target="_blank">
                             <i class="ri-download-line me-2"></i> Download Certificate
+                        </a>
+                        {% if application.can_renew %}
+                        <form method="post" action="{% url 'medicines:start_renewal' application.pk %}" class="d-grid">{% csrf_token %}
+                            <button class="btn btn-outline-warning fw-bold text-dark"><i class="ri-refresh-line me-2"></i> Renew Certificate</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% elif application.provisional_letter_open_to_applicant %}
+                    <div class="d-grid mt-3">
+                        <a href="{% url 'medicines:provisional_letter' application.pk %}" class="btn btn-primary fw-bold" target="_blank">
+                            <i class="ri-file-text-line me-2"></i> Download Provisional Letter
                         </a>
                     </div>
                     {% endif %}

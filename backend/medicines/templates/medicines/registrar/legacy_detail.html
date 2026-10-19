@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Legacy Record - {{ application.medicine_name }} - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    {% if user.is_registrar %}{% url 'medicines:legacy_verification_list' as back %}{% else %}{% url 'medicines:legacy_dashboard' as back %}{% endif %}
+    {% include 'medicines/registrar/_page_header.html' with icon="ri-archive-drawer-line" heading=application.medicine_name subheading="Legacy record entered from paper" back_url=back %}
+    {% if application.is_void %}
+        <div class="alert alert-secondary">This record is void. Reason: {{ application.void_reason }}</div>
+    {% elif application.legacy_verification_status == 'RETURNED' %}
+        <div class="alert alert-warning">Returned for correction: {{ application.legacy_return_reason }}</div>
+    {% endif %}
+    <div class="row gx-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">As entered</h5>
+                    <table class="table table-sm small mb-0">
+                        <tr><th class="w-50 text-muted fw-normal">Outcome on paper</th><td>{% if application.status == 'REJECTED' %}Rejected{% else %}{{ application.get_application_type_display }} certificate{% endif %}</td></tr>
+                        <tr><th class="text-muted fw-normal">Certificate number</th><td class="fw-bold font-monospace">{{ application.certificate_number|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Issued on / Expires on</th><td>{{ application.certificate_issued_on|date:"d M Y"|default:"-" }} / {{ application.certificate_expires_on|date:"d M Y"|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Holder</th><td>{{ application.holder_name }} &lt;{{ application.applicant.email }}&gt;</td></tr>
+                        <tr><th class="text-muted fw-normal">Responsible person</th><td>{{ application.responsible_person|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Active ingredients</th><td>{{ application.active_ingredients|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Form and colour</th><td>{{ application.form_and_colour|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Shelf life (months)</th><td>{{ application.shelf_life_display|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Pack</th><td>{{ application.pack_description|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Storage</th><td>{{ application.storage_statement }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Manufacturer</th><td>{{ application.manufacturer_name|default:"-" }} {{ application.manufacturer_address|default:"" }}</td></tr>
+                        {% if application.rejection_reason %}<tr><th class="text-muted fw-normal">Rejection reason</th><td>{{ application.rejection_reason }}</td></tr>{% endif %}
+                        <tr><th class="text-muted fw-normal">Entered by</th><td>{{ application.legacy_entered_by.display_name|default:"-" }} on {{ application.created_at|date:"d M Y" }}</td></tr>
+                        {% if application.legacy_verified_by %}<tr><th class="text-muted fw-normal">Verified by</th><td>{{ application.legacy_verified_by.display_name }} on {{ application.legacy_verified_at|date:"d M Y" }}</td></tr>{% endif %}
+                    </table>
+                    {% if payments %}
+                    <h6 class="fw-bold mt-4">Payments before the system</h6>
+                    <table class="table table-sm small mb-0">
+                        {% for p in payments %}<tr><td>{{ p.get_payment_type_display }}</td><td>{% if p.amount_paid is not None %}{{ p.amount_paid }} TZS{% else %}Paid (amount not verified){% endif %}</td><td class="text-muted">{{ p.remarks }}</td></tr>{% endfor %}
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Scans</h5>
+                    {% if application.legacy_certificate_scan %}<a href="{{ application.legacy_certificate_scan.url }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 mb-2 d-block">Open certificate scan</a>{% endif %}
+                    {% if application.legacy_application_scan %}<a href="{{ application.legacy_application_scan.url }}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3 d-block">Open application scan</a>{% endif %}
+                    {% if not application.legacy_certificate_scan and not application.legacy_application_scan %}<p class="small text-muted mb-0">No scans attached.</p>{% endif %}
+                </div>
+            </div>
+            {% if not application.is_void %}
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Decision</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if application.legacy_verification_status == 'PENDING' and user.is_registrar %}
+                            {% if application.legacy_entered_by_id == user.id %}
+                                <div class="alert alert-info small">You entered this record, so another Registrar has to verify it.</div>
+                            {% else %}
+                                <button name="action" value="verify" class="btn btn-success w-100 fw-bold mb-3" onclick="return confirm('The details match the scan?');"><i class="ri-check-line me-1"></i> Matches the scan: verify</button>
+                            {% endif %}
+                        {% endif %}
+                        <label class="form-label small fw-bold">Reason (needed to return or void)</label>
+                        <textarea name="reason" class="form-control mb-2" rows="3"></textarea>
+                        {% if application.legacy_verification_status == 'PENDING' and user.is_registrar %}
+                            <button name="action" value="return" class="btn btn-outline-warning w-100 mb-2">Return to Data Clerk for correction</button>
+                        {% endif %}
+                        {% if user.is_registrar or user.is_admin %}
+                            <button name="action" value="void" class="btn btn-outline-danger w-100" onclick="return confirm('Void this record? It cannot be deleted, but it will no longer count.');">Void record</button>
+                        {% endif %}
+                    </form>
+                    {% if user.is_data_clerk and application.legacy_verification_status != 'VERIFIED' %}
+                        <a href="{% url 'medicines:legacy_medicine_edit' application.pk %}" class="btn btn-primary w-100 mt-3">Correct this record</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

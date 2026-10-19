@@ -86,14 +86,23 @@
     </td>
     <td class="text-end px-4 py-3">
         <div class="d-flex justify-content-end gap-2 flex-wrap">
-            {% if med_app.status == 'FULL_REGISTRATION' %}
+            {% if med_app.has_active_certificate %}
                 <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm fw-bold text-dark" target="_blank">
                     <i class="ri-article-line me-1"></i> Certificate
                 </a>
+                {% with renewal=med_app.pending_renewal_payment %}
+                {% if renewal and not renewal.control_number %}
+                    <a href="{% url 'medicines:submit_payment' renewal.pk %}" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm fw-bold"><i class="ri-money-dollar-circle-line me-1"></i> Pay Renewal Fee</a>
+                {% elif med_app.can_renew %}
+                    <form method="post" action="{% url 'medicines:start_renewal' med_app.pk %}" class="d-inline">{% csrf_token %}
+                        <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-sm fw-bold text-dark"><i class="ri-refresh-line me-1"></i> Renew</button>
+                    </form>
+                {% endif %}
+                {% endwith %}
             {% endif %}
             
-            {% if med_app.status in 'PROVISIONAL_REGISTRATION,PENDING_FINAL_APPROVAL,PENDING_LISTING_FEE,PENDING_REGISTRATION_FEE' %}
-                <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
+            {% if med_app.provisional_letter_open_to_applicant %}
+                <a href="{% url 'medicines:provisional_letter' med_app.pk %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
                     <i class="ri-file-text-line me-1"></i> Provisional Letter
                 </a>
             {% endif %}

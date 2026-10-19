@@ -1,0 +1,34 @@
+<div class="page">
+    <div class="frame letter">
+        {% include 'medicines/documents/_header.html' %}
+        <div class="meta">
+            <div>
+                <strong>Ref No:</strong> {{ application.reference_number }}{% if application.former_reference %}<br><small>Earlier ref: {{ application.former_reference }}</small>{% endif %}
+            </div>
+            <div><strong>Date:</strong> {{ application.provisional_issued_on|date:"jS F Y" }}</div>
+        </div>
+        <div>
+            <strong>To:</strong><br>
+            {{ application.holder_name }}<br>
+            {% if application.holder_address %}{{ application.holder_address }}<br>{% endif %}
+            {% if application.applicant_profile.applicant_type == 'Organization' %}Attn: {{ application.responsible_person|default:"Director / Authorized Representative" }}{% endif %}
+        </div>
+        <h3>RE: {{ letter_title }}</h3>
+        <p>Please refer to the subject matter above.</p>
+        <p>The Traditional and Alternative Health Practice Council (TAHPC) has evaluated your application and granted <strong>provisional approval</strong> for the {{ service_name }} of the traditional medicine named:</p>
+        <div class="medicine">&ldquo;{{ application.medicine_name }}&rdquo;</div>
+        <table>
+            <tr><td>Application reference:</td><td><strong>{{ application.reference_number }}</strong></td></tr>
+            <tr><td>Applicant:</td><td><strong>{{ application.holder_name }}</strong></td></tr>
+            <tr><td>Form:</td><td>{{ application.form_and_colour }}</td></tr>
+        </table>
+        <p>To receive the {{ certificate_name }}, please pay the {{ fee_name }} and submit the control number in the TAMRIS portal. After Finance verifies the payment, the Registrar will approve the certificate on behalf of the Committee.</p>
+        <p>This letter is valid only until the certificate is issued. It does not authorise sale of the medicine as a {{ status_word }} medicine.</p>
+        <div class="sign">
+            {% if settings_obj.registrar_signature %}<img src="{{ settings_obj.registrar_signature.url }}" alt="Registrar signature">{% else %}<br><br>{% endif %}
+            ......................................<br>
+            <strong>REGISTRAR</strong><br>
+            Traditional and Alternative Health Practice Council
+        </div>
+    </div>
+</div>

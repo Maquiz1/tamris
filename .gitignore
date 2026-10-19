@@ -78,3 +78,6 @@ yarn-error.log*
 *.bak
 *.tmp
 *.orig
+
+# Business documents and real certificate scans: keep out of the public repository
+documentations/

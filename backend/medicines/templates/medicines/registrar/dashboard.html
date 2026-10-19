@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Registrar - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    {% include 'medicines/registrar/_page_header.html' with icon="ri-quill-pen-line" heading="Registrar" subheading="Approve certificates on behalf of the Committee, verify legacy certificates, and confirm link requests." %}
+    <div class="row gx-3">
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'medicines:final_approval_list' %}" class="card shadow-sm border-0 text-decoration-none h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted small text-uppercase fw-bold">Final approvals</div>
+                    <div class="display-6 fw-bold text-success">{{ final_count }}</div>
+                    <div class="small text-muted">Final fee verified, waiting for your approval</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'medicines:legacy_verification_list' %}" class="card shadow-sm border-0 text-decoration-none h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted small text-uppercase fw-bold">Legacy certificates</div>
+                    <div class="display-6 fw-bold text-warning">{{ legacy_count }}</div>
+                    <div class="small text-muted">Entered from paper, waiting to be checked against the scan</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'medicines:claim_list' %}" class="card shadow-sm border-0 text-decoration-none h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted small text-uppercase fw-bold">Link requests</div>
+                    <div class="display-6 fw-bold text-info">{{ claim_count }}</div>
+                    <div class="small text-muted">Applicants asking to take over paper records</div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div><strong>{{ issued_this_year }}</strong> certificates issued through TAMRIS this year.</div>
+            <a href="{% url 'reports:medicines' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Open the register</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

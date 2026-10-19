@@ -33,9 +33,19 @@ def dashboard_view(request):
         
     from medicines.models import MedicineApplication, Payment, InspectionSchedule
     from users.models import CustomUser
+
+    # Roles without a dashboard of their own go to their main work page
+    if not (is_superuser or role_name in ('Admin', 'Evaluator', 'Inspector', 'Accountant')):
+        if request.user.is_registrar:
+            return redirect('medicines:registrar_dashboard')
+        if request.user.is_data_clerk:
+            return redirect('medicines:legacy_dashboard')
+        if request.user.is_committee:
+            return redirect('reports:dashboard')
+
     if is_superuser or role_name == 'Admin':
         context['admin_pending_users'] = CustomUser.objects.filter(is_onboarding_complete=True, registration_status='PENDING', role__name__in=['Individual Applicant', 'Company Applicant']).count()
-        context['admin_pending_evaluations'] = MedicineApplication.objects.filter(status__in=['UNDER_REVIEW', 'PRELIMINARY_APPROVED', 'INSPECTION_COMPLETED']).count()
+        context['admin_pending_evaluations'] = MedicineApplication.objects.filter(status__in=['UNDER_REVIEW', 'PRELIMINARY_APPROVED', 'INSPECTION_COMPLETED'], is_legacy=False).count()
         context['admin_pending_inspections'] = InspectionSchedule.objects.filter(status='SCHEDULED').count()
         context['finance_pending_payments'] = Payment.objects.filter(is_verified=False).count()
         return render(request, 'users/dashboards/admin.html', context)
@@ -46,12 +56,13 @@ def dashboard_view(request):
         # Inspections with assigned inspectors
         context['eval_pending_inspections'] = InspectionSchedule.objects.filter(status='SCHEDULED', assigned_inspectors__isnull=False).distinct().count()
         
-        context['eval_pending_sci'] = MedicineApplication.objects.filter(status='PRELIMINARY_APPROVED').count()
+        context['eval_pending_sci'] = MedicineApplication.objects.filter(status__in=['PRELIMINARY_APPROVED', 'INSPECTION_COMPLETED'], is_legacy=False).exclude(application_type='CATEGORY_II', status='PRELIMINARY_APPROVED').count()
         context['eval_pending_final'] = MedicineApplication.objects.filter(status='PENDING_FINAL_APPROVAL').count()
         context['eval_total_listings'] = MedicineApplication.objects.exclude(status='DRAFT').filter(application_type='LISTING').count()
         context['eval_total_cat_ii'] = MedicineApplication.objects.exclude(status='DRAFT').filter(application_type='CATEGORY_II').count()
         context['eval_pending_users'] = CustomUser.objects.filter(is_onboarding_complete=True, registration_status='PENDING', role__name__in=['Individual Applicant', 'Company Applicant']).count()
-        context['inspector_pending_assignments'] = MedicineApplication.objects.filter(application_type='CATEGORY_II', inspections__isnull=True, status='PRELIMINARY_APPROVED').distinct().count()
+        from medicines.views.inspections import awaiting_scheduling
+        context['inspector_pending_assignments'] = awaiting_scheduling().count()
         context['inspector_active_schedules'] = InspectionSchedule.objects.filter(status='SCHEDULED').count()
         context['inspector_completed_reports'] = InspectionSchedule.objects.filter(status='COMPLETED').count()
         return render(request, 'users/dashboards/evaluator.html', context)
@@ -60,9 +71,13 @@ def dashboard_view(request):
         context['finance_verified_payments'] = Payment.objects.filter(is_verified=True).count()
         return render(request, 'users/dashboards/finance.html', context)
     else:
+        from medicines.legacy import find_legacy_matches
         context['applicant_inspection_count'] = InspectionSchedule.objects.filter(
             application__applicant=request.user
         ).count()
+        context['legacy_matches'] = find_legacy_matches(request.user)
+        from medicines.views.applicant import visible_applications
+        context['my_applications'] = visible_applications(request.user).prefetch_related('payments').order_by('-created_at')
         return render(request, 'users/dashboards/applicant.html', context)
 
 @login_required

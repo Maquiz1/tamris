@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Legacy Records - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    {% include 'medicines/registrar/_page_header.html' with icon="ri-archive-drawer-line" heading="Legacy Records" subheading="Completed records from before TAMRIS: listed, registered, expired and rejected medicines. Certificates are checked by a Registrar before they become active." %}
+    <div class="row gx-3 mb-3">
+        <div class="col-6 col-md mb-2"><a href="?show=all" class="card shadow-sm border-0 text-decoration-none {% if show == 'all' %}border border-primary{% endif %}"><div class="card-body py-3"><div class="small text-muted">All</div><div class="fs-4 fw-bold">{{ counts.total }}</div></div></a></div>
+        <div class="col-6 col-md mb-2"><a href="?show=pending" class="card shadow-sm border-0 text-decoration-none"><div class="card-body py-3"><div class="small text-muted">Waiting for Registrar</div><div class="fs-4 fw-bold text-warning">{{ counts.pending }}</div></div></a></div>
+        <div class="col-6 col-md mb-2"><a href="?show=returned" class="card shadow-sm border-0 text-decoration-none"><div class="card-body py-3"><div class="small text-muted">Returned to you</div><div class="fs-4 fw-bold text-danger">{{ counts.returned }}</div></div></a></div>
+        <div class="col-6 col-md mb-2"><a href="?show=verified" class="card shadow-sm border-0 text-decoration-none"><div class="card-body py-3"><div class="small text-muted">Verified</div><div class="fs-4 fw-bold text-success">{{ counts.verified }}</div></div></a></div>
+        <div class="col-6 col-md mb-2"><a href="?show=rejected" class="card shadow-sm border-0 text-decoration-none"><div class="card-body py-3"><div class="small text-muted">Rejected (history)</div><div class="fs-4 fw-bold text-secondary">{{ counts.rejected }}</div></div></a></div>
+    </div>
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body py-3 d-flex flex-wrap gap-2 justify-content-between">
+            <form method="get" class="d-flex gap-2 flex-grow-1" style="max-width:520px">
+                <input type="hidden" name="show" value="{{ show }}">
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search medicine, certificate number or email">
+                <button class="btn btn-primary px-4">Search</button>
+            </form>
+            {% if user.is_data_clerk or user.is_admin %}
+            <div class="d-flex gap-2">
+                <a href="{% url 'medicines:legacy_applicant_create' %}" class="btn btn-outline-primary"><i class="ri-user-add-line me-1"></i> New applicant</a>
+                <a href="{% url 'medicines:legacy_medicine_create' %}" class="btn btn-primary"><i class="ri-add-line me-1"></i> New medicine record</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr><th class="px-4 py-3">Medicine</th><th class="py-3">Certificate No.</th><th class="py-3">Holder</th><th class="py-3">State</th><th class="px-4 py-3 text-end">Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for app in records %}
+                        <tr>
+                            <td class="px-4 py-3 fw-bold">{{ app.medicine_name }}<div class="small text-muted fw-normal">{{ app.get_application_type_display }} &middot; {{ app.reference_number }}</div></td>
+                            <td class="font-monospace">{{ app.certificate_number|default:"-" }}</td>
+                            <td>{{ app.holder_name }}<div class="small text-muted">{{ app.applicant.email }}</div></td>
+                            <td class="small">
+                                {% if app.is_void %}<span class="badge bg-secondary">Void</span>
+                                {% elif app.status == 'REJECTED' %}<span class="badge bg-secondary-lighten text-secondary">Rejected</span>
+                                {% elif app.legacy_verification_status == 'PENDING' %}<span class="badge bg-warning-lighten text-warning">Waiting for Registrar</span>
+                                {% elif app.legacy_verification_status == 'RETURNED' %}<span class="badge bg-danger-lighten text-danger">Returned</span><div class="text-muted">{{ app.legacy_return_reason|truncatechars:60 }}</div>
+                                {% else %}<span class="badge bg-success-lighten text-success">{{ app.display_status }}</span>{% endif %}
+                            </td>
+                            <td class="px-4 text-end">
+                                <a href="{% url 'medicines:legacy_verification_detail' app.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Open</a>
+                                {% if user.is_data_clerk and not app.is_void and app.legacy_verification_status != 'VERIFIED' %}
+                                <a href="{% url 'medicines:legacy_medicine_edit' app.pk %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Correct</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center py-5 text-muted"><i class="ri-archive-line fs-2 d-block mb-2 opacity-50"></i>No legacy records here yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% include 'medicines/registrar/_pager.html' with page=records %}
+</div>
+{% endblock %}

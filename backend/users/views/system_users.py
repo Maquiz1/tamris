@@ -62,7 +62,8 @@ def system_user_create_view(request):
             user.registration_status = 'PENDING'
             user.save()
             otp_code = pyotp.TOTP(user.otp_secret).now()
-            print(f'DEBUG: Generated OTP for staff user {user.email} is {otp_code}')
+            if settings.DEBUG:  # never write one-time codes to production logs
+                print(f'DEBUG: Generated OTP for staff user {user.email} is {otp_code}')
             notify_staff_account_created(user, temp_password, otp_code)
             messages.success(request, f'Successfully created staff user: {user.email}. An email with their temporary password and verification code has been sent.')
             return redirect('users:system_users_list')

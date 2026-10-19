@@ -9,7 +9,8 @@ from .profiles import (
     Education,
     OrganizationRepresentative,
     ApplicantDocument,
-    StaffProfile
+    StaffProfile,
+    LegacyClaim,
 )
 
 __all__ = [
@@ -17,5 +18,5 @@ __all__ = [
     'Applicant', 'Individual', 'Organization',
     'ApplicantIdentity', 'ApplicantAddress', 'ApplicantContact',
     'Education', 'OrganizationRepresentative', 'ApplicantDocument',
-    'StaffProfile'
+    'StaffProfile', 'LegacyClaim'
 ]

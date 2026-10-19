@@ -11,7 +11,16 @@ from users.models import CustomUser
 @login_required
 @user_passes_test(is_staff_check)
 def medicines_report_view(request):
-    qs = MedicineApplication.objects.filter(status__in=['FULL_REGISTRATION', 'PROVISIONAL_REGISTRATION']).order_by('-updated_at')
+    qs = (
+        MedicineApplication.objects.filter(status__in=['FULL_REGISTRATION', 'PROVISIONAL_REGISTRATION'], is_void=False)
+        .exclude(is_legacy=True, legacy_verification_status__in=['PENDING', 'RETURNED'])
+        .order_by('-updated_at')
+    )
+    source = request.GET.get('source')
+    if source == 'legacy':
+        qs = qs.filter(is_legacy=True)
+    elif source == 'system':
+        qs = qs.filter(is_legacy=False)
     
     app_type = request.GET.get('type')
     status_filter = request.GET.get('status')
@@ -28,7 +37,7 @@ def medicines_report_view(request):
         qs = qs.filter(updated_at__lte=f"{end_date} 23:59:59")
         
     if request.GET.get('export') == 'csv':
-        fields = [{'name': 'registration_number', 'label': 'Registration Number'}, {'name': 'medicine_name', 'label': 'Medicine Name'}, {'name': 'get_application_type_display', 'label': 'Type'}, {'name': 'get_status_display', 'label': 'Registration Level'}, {'name': 'updated_at', 'label': 'Approval Date'}]
+        fields = [{'name': 'certificate_number', 'label': 'Certificate Number'}, {'name': 'medicine_name', 'label': 'Medicine Name'}, {'name': 'get_application_type_display', 'label': 'Type'}, {'name': 'display_status', 'label': 'Status'}, {'name': 'holder_name', 'label': 'Holder'}, {'name': 'certificate_issued_on', 'label': 'Issued On'}, {'name': 'certificate_expires_on', 'label': 'Expires On'}, {'name': 'is_legacy', 'label': 'Legacy Entry'}]
         return export_csv(qs, 'medicines_report', fields)
         
     full_count = qs.filter(status='FULL_REGISTRATION').count()
@@ -41,5 +50,6 @@ def medicines_report_view(request):
         'status_filter': status_filter,
         'start_date': start_date,
         'end_date': end_date,
+        'source': source,
     }
     return render(request, 'reports/medicines.html', context)

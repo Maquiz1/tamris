@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Link Requests - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    {% url 'medicines:registrar_dashboard' as back %}
+    {% include 'medicines/registrar/_page_header.html' with icon="ri-links-line" heading="Link Requests" subheading="Applicants who registered on their own and asked to take over records entered from paper." back_url=back %}
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr><th class="px-4 py-3">New account</th><th class="py-3">Paper records of</th><th class="py-3">Matched on</th><th class="py-3">Status</th><th class="px-4 py-3 text-end">Decision</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for claim in claims %}
+                        <tr>
+                            <td class="px-4">{{ claim.new_user.display_name }}<div class="small text-muted">{{ claim.new_user.email }}</div></td>
+                            <td>{{ claim.legacy_user.display_name }}<div class="small text-muted">{{ claim.legacy_user.email }} &middot; {{ claim.legacy_user.medicine_applications.count }} record(s)</div></td>
+                            <td class="small">{{ claim.matched_on }}</td>
+                            <td class="small">{{ claim.get_status_display }}{% if claim.decided_by %}<div class="text-muted">{{ claim.decided_by.display_name }}, {{ claim.decided_at|date:"M d, Y" }}</div>{% endif %}</td>
+                            <td class="px-4 text-end" style="min-width:280px">
+                                {% if claim.status == 'PENDING' %}
+                                <form method="post" class="d-flex gap-2 justify-content-end flex-wrap">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="claim_id" value="{{ claim.pk }}">
+                                    <input type="text" name="note" class="form-control form-control-sm" placeholder="Note (needed to reject)">
+                                    <button name="action" value="confirm" class="btn btn-success btn-sm">Confirm</button>
+                                    <button name="action" value="reject" class="btn btn-outline-danger btn-sm">Reject</button>
+                                </form>
+                                {% else %}<span class="small text-muted">{{ claim.decision_note|default:"" }}</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center py-5 text-muted">No link requests.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

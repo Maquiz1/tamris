@@ -10,6 +10,9 @@ class Command(BaseCommand):
         'Evaluator',
         'Inspector',
         'Accountant',
+        'Registrar',
+        'Committee',
+        'Data Clerk',
 
         # ── Applicant Roles ────────────────────────────────────────
         'Individual Applicant',

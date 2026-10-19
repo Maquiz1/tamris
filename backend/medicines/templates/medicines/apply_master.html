@@ -493,7 +493,19 @@
                                     <label class="form-label fw-bold">Maelezo kamili na ya kina ya taratibu za utengenezaji wa bidhaa kuanzia dawaghafi hadi bidhaa ya mwisho, ikijumuisha taratibu zote za udhibiti wa ubora zinazofanyika katika kila hatua ya uzalishaji pamoja na vifaa, mitambo na maeneo yanayotumika katika kila hatua ya mchakato wa utengenezaji <span class="text-danger">*</span></label>
                                     {{ form.manufacturing_procedures }}
                                 </div>
-                                
+
+                                <div class="col-md-6 mt-3">
+                                    <label class="form-label fw-bold">{{ form.manufacturer_name.label }}</label>
+                                    {{ form.manufacturer_name }}
+                                    <div class="form-text">Printed on the certificate. Leave empty if you manufacture the medicine yourself.</div>
+                                    {% for error in form.manufacturer_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <label class="form-label fw-bold">{{ form.manufacturer_address.label }}</label>
+                                    {{ form.manufacturer_address }}
+                                    {% for error in form.manufacturer_address.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+
                                 <!-- These fields remain for scientific clarity -->
                                 <div class="col-md-6 mt-3">
                                     <label class="form-label fw-bold">Taratibu za udhibiti wa ubora (Quality control procedures) <span class="text-danger">*</span></label>

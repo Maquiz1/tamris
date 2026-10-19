@@ -94,7 +94,15 @@
                     </div>
                 </div>
 
-                {% if payment.control_number %}
+                {% if payment.is_verified %}
+                <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
+                    <i class="bi bi-patch-check-fill fs-4 me-3"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">{% if payment.paid_before_system %}Paid before the system{% else %}Verified{% endif %}</h6>
+                        <span class="small">{% if payment.verified_by %}By {{ payment.verified_by.display_name }} on {{ payment.verified_at|date:"M d, Y H:i" }}. {% endif %}A verified payment cannot be reversed.</span>
+                    </div>
+                </div>
+                {% elif payment.control_number %}
                 <form method="post" action="{% url 'medicines:staff_payment_detail' payment.pk %}">
                     {% csrf_token %}
                     
@@ -117,7 +125,7 @@
                         </button>
                         
                         <button type="button" id="showRejectBtn" class="btn btn-warning text-dark fw-bold py-2 w-100" onclick="showRejectRemarks()">
-                            <i class="bi bi-x-circle-fill me-1"></i> Reject/Mark as Unpaid
+                            <i class="bi bi-x-circle-fill me-1"></i> Not Received: Ask Applicant to Resubmit
                         </button>
                         
                         <button type="submit" name="action" value="mark_unpaid" id="confirmRejectBtn" class="btn btn-danger fw-bold py-2 w-100" style="display: none;">
@@ -126,11 +134,12 @@
                     </div>
                 </form>
                 {% else %}
+                {% if payment.remarks %}<div class="alert alert-light small border">Last note to the applicant: {{ payment.remarks }}</div>{% endif %}
                 <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
                     <i class="bi bi-hourglass-split fs-4 me-3"></i>
                     <div>
                         <h6 class="fw-bold mb-1">Awaiting Applicant</h6>
-                        <span class="small">The applicant has not submitted their receipt number yet. You cannot verify this payment until they do.</span>
+                        <span class="small">The applicant has not submitted the control number yet. You cannot verify this payment until they do.</span>
                     </div>
                 </div>
                 {% endif %}

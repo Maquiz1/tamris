@@ -1,0 +1,18 @@
+<div class="row gx-3 mb-3">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <a href="{% if back_url %}{{ back_url }}{% else %}{% url 'users:dashboard' %}{% endif %}" class="text-decoration-none text-muted mb-1 d-inline-flex align-items-center small">
+                        <i class="ri-arrow-left-line me-1"></i> Back
+                    </a>
+                    <h3 class="fw-bold mb-0 mt-1 text-primary d-inline-flex align-items-center">
+                        <i class="{{ icon }} me-2"></i> {{ heading }}
+                    </h3>
+                    {% if subheading %}<p class="text-muted small mb-0 mt-1">{{ subheading }}</p>{% endif %}
+                </div>
+                {% if badge %}<span class="badge bg-primary-lighten text-primary px-3 py-2 fw-bold">{{ badge }}</span>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>

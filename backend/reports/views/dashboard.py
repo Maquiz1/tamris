@@ -27,5 +27,5 @@ def reports_dashboard_view(request):
         if entry['month']:
             trend_labels.append(entry['month'].strftime('%b %Y'))
             trend_data.append(entry['count'])
-    context = {'total_applications': MedicineApplication.objects.count(), 'total_registered': MedicineApplication.objects.filter(status='FULL_REGISTRATION').count(), 'total_users': CustomUser.objects.count(), 'total_payments_verified': Payment.objects.filter(is_verified=True).count(), 'status_labels': status_labels, 'status_data': status_data, 'trend_labels': trend_labels, 'trend_data': trend_data}
+    context = {'total_applications': MedicineApplication.objects.count(), 'total_registered': MedicineApplication.objects.filter(status='FULL_REGISTRATION', is_void=False).exclude(is_legacy=True, legacy_verification_status__in=['PENDING', 'RETURNED']).count(), 'total_users': CustomUser.objects.count(), 'total_payments_verified': Payment.objects.filter(is_verified=True).count(), 'status_labels': status_labels, 'status_data': status_data, 'trend_labels': trend_labels, 'trend_data': trend_data}
     return render(request, 'reports/dashboard.html', context)

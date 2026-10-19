@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}My Certificates - TAMRIS{% endblock %}
+{% block title %}My Letters & Certificates - TAMRIS{% endblock %}
 
 {% block content %}
 <div class="row mt-4">
     <div class="col-12 d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
-        <h3 class="fw-bold text-dark mb-0"><i class="bi bi-person-vcard me-2 text-primary"></i>My Certificates</h3>
+        <h3 class="fw-bold text-dark mb-0"><i class="bi bi-person-vcard me-2 text-primary"></i>My Letters &amp; Certificates</h3>
     </div>
 </div>
 
@@ -13,18 +13,18 @@
     <div class="col-12">
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white pt-3 pb-0 border-0">
-                <h5 class="mb-0 fw-bold">Certificates & Approvals</h5>
-                <p class="text-muted small mt-1">A comprehensive list of all your approved medicines and provisional registrations.</p>
+                <h5 class="mb-0 fw-bold">Provisional letters and certificates</h5>
+                <p class="text-muted small mt-1">A provisional letter is available until its certificate is issued. Certificates are valid for 12 months and can be renewed from 90 days before they expire.</p>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="px-4 py-3">Medicine Name</th>
-                                <th class="py-3">Application Type</th>
-                                <th class="py-3 text-center">Date Approved</th>
-                                <th class="py-3 text-center">Status</th>
+                                <th class="px-4 py-3">Medicine</th>
+                                <th class="py-3">Document</th>
+                                <th class="py-3">Number</th>
+                                <th class="py-3">Validity</th>
                                 <th class="text-end px-4 py-3">Action</th>
                             </tr>
                         </thead>
@@ -33,41 +33,61 @@
                             <tr>
                                 <td class="px-4 py-3 fw-bold text-dark">
                                     {{ app.medicine_name }}
+                                    <div class="small text-muted fw-normal">{{ app.reference_number }}</div>
                                 </td>
                                 <td>
-                                    {{ app.get_application_type_display }}
-                                </td>
-                                <td class="text-center text-muted small">
-                                    {% if app.evaluation %}
-                                        {{ app.evaluation.created_at|date:"M d, Y" }}
+                                    {% if app.has_active_certificate %}
+                                        {% if app.is_listing %}Listing Certificate{% else %}Category II Registration Certificate{% endif %}
                                     {% else %}
-                                        -
+                                        {% if app.is_listing %}Listing Provisional Letter{% else %}Registration Provisional Letter{% endif %}
                                     {% endif %}
                                 </td>
-                                <td class="text-center">
-                                    {% if app.status == 'FULL_REGISTRATION' %}
-                                        <span class="badge bg-success px-2 py-1"><i class="bi bi-patch-check-fill me-1"></i> Full Registration</span>
-                                    {% elif app.status == 'PROVISIONAL_REGISTRATION' %}
-                                        <span class="badge bg-primary px-2 py-1"><i class="bi bi-clock-history me-1"></i> Provisional Registration</span>
+                                <td class="font-monospace small">
+                                    {% if app.has_active_certificate %}{{ app.certificate_number }}{% else %}{{ app.reference_number }}{% endif %}
+                                </td>
+                                <td class="small">
+                                    {% if app.has_active_certificate %}
+                                        {% if app.is_expired %}
+                                            <span class="badge bg-danger">Expired {{ app.certificate_expires_on|date:"M d, Y" }}</span>
+                                        {% elif app.days_to_expiry <= 90 %}
+                                            <span class="badge bg-warning text-dark">Expires {{ app.certificate_expires_on|date:"M d, Y" }}</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Valid until {{ app.certificate_expires_on|date:"M d, Y" }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">Until the certificate is issued ({{ app.get_status_display }})</span>
                                     {% endif %}
                                 </td>
                                 <td class="text-end px-4 py-3">
-                                    {% if app.status == 'FULL_REGISTRATION' %}
+                                    <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                    {% if app.has_active_certificate %}
                                         <a href="{% url 'medicines:download_certificate' app.pk %}" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm" target="_blank">
-                                            <i class="bi bi-download me-1"></i> Download Certificate
+                                            <i class="bi bi-download me-1"></i> Certificate
                                         </a>
-                                    {% elif app.status == 'PROVISIONAL_REGISTRATION' %}
-                                        <a href="{% url 'medicines:download_certificate' app.pk %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" target="_blank">
-                                            <i class="bi bi-download me-1"></i> Download Letter
+                                        {% with renewal=app.pending_renewal_payment %}
+                                        {% if renewal and not renewal.control_number %}
+                                            <a href="{% url 'medicines:submit_payment' renewal.pk %}" class="btn btn-danger btn-sm rounded-pill px-3">Pay Renewal Fee</a>
+                                        {% elif renewal %}
+                                            <span class="badge bg-secondary align-self-center">Renewal payment being verified</span>
+                                        {% elif app.can_renew %}
+                                            <form method="post" action="{% url 'medicines:start_renewal' app.pk %}">{% csrf_token %}
+                                                <button class="btn btn-outline-warning btn-sm rounded-pill px-3 text-dark">Renew</button>
+                                            </form>
+                                        {% endif %}
+                                        {% endwith %}
+                                    {% elif app.provisional_letter_open_to_applicant %}
+                                        <a href="{% url 'medicines:provisional_letter' app.pk %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" target="_blank">
+                                            <i class="bi bi-download me-1"></i> Provisional Letter
                                         </a>
                                     {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
                                 <td colspan="5" class="text-center py-5 text-muted">
                                     <i class="bi bi-award fs-1 d-block mb-3 opacity-50"></i>
-                                    You have no approved certificates yet. Once your applications are approved, they will appear here.
+                                    You have no letters or certificates yet. They appear here once your applications reach provisional approval.
                                 </td>
                             </tr>
                             {% endfor %}

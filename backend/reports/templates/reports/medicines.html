@@ -128,28 +128,32 @@
                                     <th class="px-4 py-3">Registration No.</th>
                                     <th class="py-3">Medicine Name</th>
                                     <th class="py-3">Type</th>
-                                    <th class="py-3">Registration Level</th>
-                                    <th class="px-4 py-3">Approval Date</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="py-3">Issued</th>
+                                    <th class="px-4 py-3">Expires</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for med in medicines %}
                                 <tr>
                                     <td class="px-4 py-3 font-monospace text-muted">{{ med.registration_number }}</td>
-                                    <td class="py-3 fw-bold text-dark">{{ med.medicine_name }}</td>
+                                    <td class="py-3 fw-bold text-dark">{{ med.medicine_name }}{% if med.is_legacy %} <span class="badge bg-secondary-lighten text-secondary">Legacy entry</span>{% endif %}<div class="small text-muted fw-normal">{{ med.holder_name }}</div></td>
                                     <td class="py-3">{{ med.get_application_type_display }}</td>
                                     <td class="py-3">
-                                        {% if med.status == 'FULL_REGISTRATION' %}
-                                            <span class="badge bg-success-lighten text-success">Full</span>
+                                        {% if med.status == 'FULL_REGISTRATION' and med.is_expired %}
+                                            <span class="badge bg-danger-lighten text-danger">Expired</span>
+                                        {% elif med.status == 'FULL_REGISTRATION' %}
+                                            <span class="badge bg-success-lighten text-success">{{ med.display_status }}</span>
                                         {% else %}
                                             <span class="badge bg-primary-lighten text-primary">Provisional</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-4 py-3 text-muted">{{ med.updated_at|date:"M d, Y" }}</td>
+                                    <td class="py-3 text-muted">{{ med.certificate_issued_on|date:"M d, Y"|default:"-" }}</td>
+                                    <td class="px-4 py-3 text-muted">{{ med.certificate_expires_on|date:"M d, Y"|default:"-" }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="ri-medicine-bottle-line fs-2 mb-2 d-block opacity-50"></i>
                                         No registered medicines found.
                                     </td>

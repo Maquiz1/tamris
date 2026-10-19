@@ -322,17 +322,17 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            {% if application.sample_label %}
+                            {% for label in application.label_attachments.all %}
                             <div class="col-md-6">
                                 <div class="border rounded p-3 d-flex align-items-center bg-light">
                                     <i class="bi bi-file-earmark-image fs-3 text-primary me-3"></i>
                                     <div>
-                                        <h6 class="mb-1">Sample Label</h6>
-                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ application.sample_label.url }}" data-file-name="Sample Label" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
+                                        <h6 class="mb-1">Sample Label {{ forloop.counter }}</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-primary doc-view-btn" data-file-url="{{ label.file.url }}" data-file-name="Sample Label {{ forloop.counter }}" data-bs-toggle="modal" data-bs-target="#fileViewerModal">View File</button>
                                     </div>
                                 </div>
                             </div>
-                            {% endif %}
+                            {% endfor %}
                             
                             {% if application.statement_of_efficacy %}
                             <div class="col-md-6">
@@ -552,7 +552,7 @@
                                 {% endfor %}
                             {% endif %}
                             
-                            {% if not application.sample_label and not application.statement_of_efficacy and not application.literature_review and not application.tahpc_certificate and not application.ingredients_info_doc and not application.medicine_photos and not application.instructions_doc and not application.scientific_name_report %}
+                            {% if not application.label_attachments.exists and not application.statement_of_efficacy and not application.literature_review and not application.tahpc_certificate and not application.ingredients_info_doc and not application.medicine_photos and not application.instructions_doc and not application.scientific_name_report %}
                             <div class="col-12 text-center text-muted py-4">
                                 <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
                                 No attachments were uploaded with this application.
@@ -716,29 +716,34 @@
                         <div class="form-text text-danger">Must be filled out if applying Conditions for Improvement or Rejecting.</div>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        {% if application.status == 'PENDING_FINAL_APPROVAL' %}
-                            <div class="alert alert-success d-flex align-items-center mb-3">
-                                <i class="bi bi-check-circle-fill me-3 fs-4"></i>
-                                <div>
-                                    <h6 class="fw-bold mb-0">Listing Fee Verified</h6>
-                                    <span class="small">The applicant has paid the listing fee. You may now issue the Full Registration certificate.</span>
-                                </div>
-                            </div>
-                            <button type="submit" name="action" value="full" class="btn btn-success fw-bold py-3">
-                                <i class="bi bi-patch-check-fill me-2 fs-5"></i> Grant Full Registration Certificate
-                            </button>
-                        {% else %}
-                            <div class="d-flex gap-2 mb-2">
-                                <button type="submit" name="action" value="provisional" class="btn btn-primary fw-bold py-2 w-50">
-                                    <i class="bi bi-clock-history me-1"></i> Give Provisional & Request Listing Fee
-                                </button>
-                                <button type="submit" name="action" value="reject" class="btn btn-danger fw-bold py-2 w-50">
-                                    <i class="bi bi-x-circle-fill me-1"></i> Reject
-                                </button>
-                            </div>
-                        {% endif %}
+                    {% if can_act %}
+                    {% if application.application_type == 'CATEGORY_II' %}
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="requires_reinspection" value="1" id="requires_reinspection">
+                        <label class="form-check-label small" for="requires_reinspection">With conditions: an inspector must re-inspect the site after the corrections (no new inspection fee).</label>
                     </div>
+                    {% endif %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" name="action" value="provisional" class="btn btn-primary fw-bold py-2">
+                            <i class="bi bi-clock-history me-1"></i> Give Provisional &amp; Request {% if application.application_type == 'CATEGORY_II' %}Registration{% else %}Listing{% endif %} Fee
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="action" value="conditions" class="btn btn-warning text-dark fw-bold py-2 w-50">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Apply Conditions
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger fw-bold py-2 w-50">
+                                <i class="bi bi-x-circle-fill me-1"></i> Reject with Recommendations
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-secondary small mb-0">
+                        This application is at <strong>{{ application.get_status_display }}</strong>.
+                        {% if application.status == 'PENDING_FINAL_APPROVAL' %}The final fee is verified; the Registrar approves the certificate.
+                        {% elif application.application_type == 'CATEGORY_II' and application.status != 'INSPECTION_COMPLETED' %}Scientific evaluation of a Category II medicine opens after the inspection report.
+                        {% else %}No scientific evaluation decision is open now.{% endif %}
+                    </div>
+                    {% endif %}
                 </form>
             </div>
         </div>

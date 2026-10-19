@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from .models import CustomUser, Role, Applicant, Individual, Organization
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -68,7 +69,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
                 Organization.objects.create(applicant=applicant, **organization_data)
 
         # In a real app, you would trigger an email/SMS sending the OTP here
-        print(f"DEBUG: Generated OTP for user {user.email} is {pyotp.TOTP(user.otp_secret).now()}")
+        if settings.DEBUG:  # never write one-time codes to production logs
+            print(f"DEBUG: Generated OTP for user {user.email} is {pyotp.TOTP(user.otp_secret).now()}")
         
         return user
 

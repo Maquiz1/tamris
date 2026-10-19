@@ -1,0 +1,34 @@
+{% extends 'medicines/documents/base_document.html' %}
+{% block page_title %}Registration Certificate {{ application.certificate_number }}{% endblock %}
+{% block document %}
+<div class="page">
+    <div class="frame">
+        {% if application.is_expired %}<div class="watermark"><span>EXPIRED</span></div>{% endif %}
+        {% include 'medicines/documents/_header.html' %}
+        <div class="title">REGISTRATION OF CATEGORY II TRADITIONAL MEDICINES</div>
+        <div class="title" style="font-size:16px;margin-top:0">Certificate of Traditional Medicine &ndash; Materia Medica Category II Registration</div>
+        <div class="basis">(Made under Section 55(2) (iii) of Traditional Medicine and Alternative Health Practice Act No. 23 of 2002).</div>
+        <div class="statement">This is to certify that the medicine described below has been registered in Tanzania.</div>
+        {% with number_label="Registration number of medicine" %}{% include 'medicines/documents/_certificate_fields.html' %}{% endwith %}
+        {% include 'medicines/documents/_signatures.html' %}
+        <div class="note">The certificate must be returned to Council if cancelled, invalidated, or if registration of the medicine is withdrawn or when requested to do so by the Registrar.</div>
+        <div class="note left" style="margin-top:22px">Note: The efficacy liability is not on the TAHPC</div>
+    </div>
+</div>
+<div class="page page-break">
+    <div class="frame conditions">
+        <h2>CONDITIONS OF REGISTRATION</h2>
+        <ol>
+            <li>The medicine shall comply with all relevant provisions of the Traditional and Alternative Medicine Council, Cap 244 and regulations made there under at all times.</li>
+            <li>The marketing authorization holder shall ensure that the medicines comply with specifications approved by the Council at all times.</li>
+            <li>The marketing authorization holder shall ensure that the medicines comply with Tanzanian labeling requirements at all times.</li>
+            <li>The marketing authorization holder shall ensure that the manufacturing facilities where a registered medicine is produced comply at all times with minimum Tanzanian Good Manufacturing Practices requirements.</li>
+            <li>The marketing authorization holder, Manufacturer and supplier shall ensure that medicines within their control are stored and transported in accordance with the instructions and information provided in this certificate.</li>
+            <li>The marketing authorization holder shall ensure that application for renewal of registration is made 90 days before expiry of registration.</li>
+            <li>The registration of the medicines shall continue to be valid provided that annual retention fee is paid annually before 31st of January each year.</li>
+            <li>The Council reserves the right to withdrawal this certificate when condition 1 to 7 are contravened and when the risks of the medicine outweighs the benefits or it is in public interest to do so.</li>
+            <li>The marketing authorization holder is duty bound to conduct periodic post-marketing surveillance and safety studies of registered medicines and report the outcome of such studies to the Council.</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

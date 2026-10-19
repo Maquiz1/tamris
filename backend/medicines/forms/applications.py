@@ -40,12 +40,22 @@ class BaseMedicineForm(forms.ModelForm):
             }
             
             for field_name, field in self.fields.items():
-                section = field_mapping.get(field_name)
+                section = field_mapping.get(field_name) or self._default_section(field_name, field)
                 if section not in allowed_sections:
                     field.disabled = True
                     field.widget.attrs['readonly'] = True
                     # Remove the required attribute for disabled fields so the form can still submit valid data
                     field.required = False
+
+    @staticmethod
+    def _default_section(field_name, field):
+        """Fields added after the section map was written: uploads are documents, the rest by name."""
+        if isinstance(field, forms.FileField):
+            return 'DOCUMENTS'
+        if field_name.startswith(('manufactur', 'quality_control', 'in_process', 'storage_environment')):
+            return 'MANUFACTURING'
+        return 'BASIC_DETAILS'
+
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -101,7 +111,25 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             for f in listing_only_fields:
                 if f in self.fields:
                     self.fields[f].required = False
-                    
+
+        # Mandatory attachments are set by the administrator (System Settings)
+        from medicines.models import SystemSettings
+        settings_obj = SystemSettings.load()
+        mandatory = settings_obj.mandatory_listing_documents if app_type == 'LISTING' else settings_obj.mandatory_category_ii_documents
+        self.mandatory_documents = [f for f in (mandatory or []) if f in self.fields and not self.fields[f].disabled]
+        for f in self.mandatory_documents:
+            if f == 'sample_label':
+                continue  # checked in clean(), labels are stored as separate attachments
+            self.fields[f].required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if 'sample_label' in getattr(self, 'mandatory_documents', []):
+            has_existing = bool(self.instance and self.instance.pk and self.instance.label_attachments.exists())
+            if not cleaned_data.get('sample_label') and not has_existing:
+                self.add_error('sample_label', 'Please attach at least one sample label.')
+        return cleaned_data
+
 
     class Meta:
         model = MedicineApplication
@@ -122,6 +150,7 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'does_dry_raw_materials', 'drying_area', 'drying_equipment',
             'manufacturing_location_type', 'manufacturing_area_size', 'manufacturing_area',
             'manufacturing_procedures', 'harvesting_method', 'equipment_used', 'packaging_procedures',
+            'manufacturer_name', 'manufacturer_address',
             
             'directions_for_use',
             'known_side_effects',
@@ -234,6 +263,8 @@ class MasterMedicineApplicationForm(BaseMedicineForm):
             'equipment_used': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'List all equipment used in production'}),
             'manufacturing_area': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Where is the medicine manufactured?'}),
             'packaging_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describe how the final product is packaged'}),
+            'manufacturer_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name printed on the certificate as manufacturer'}),
+            'manufacturer_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'e.g. P.O. Box 1282, Tabora'}),
             'quality_control_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Quality control procedures'}),
             'storage_environment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Mazingira ya utunzaji'}),
             'in_process_control_procedures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'In-process control procedures'}),

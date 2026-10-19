@@ -1,0 +1,7 @@
+{% extends 'medicines/documents/base_document.html' %}
+{% block page_title %}Listing Provisional Letter {{ application.reference_number }}{% endblock %}
+{% block document %}
+{% with letter_title="PROVISIONAL LETTER FOR LISTING OF TRADITIONAL MEDICINES" service_name="listing" certificate_name="Listing Certificate" fee_name="Listing Fee (Ada ya uorodheshaji)" status_word="listed" %}
+{% include 'medicines/documents/_provisional_body.html' %}
+{% endwith %}
+{% endblock %}

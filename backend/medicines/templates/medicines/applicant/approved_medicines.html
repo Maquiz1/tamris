@@ -68,30 +68,32 @@
                                         </div>
                                     </td>
                                     <td class="py-3 fw-semibold font-monospace text-secondary">
-                                        {{ application.registration_number|default:"Pending Generation" }}
+                                        {{ application.certificate_number|default:"Issued on approval" }}
                                     </td>
                                     <td class="py-3">
-                                        {% if application.status == 'FULL_REGISTRATION' %}
-                                            <span class="badge bg-success-lighten text-success"><i class="ri-checkbox-circle-fill me-1"></i> Full Registration</span>
+                                        {% if application.status == 'FULL_REGISTRATION' and application.is_expired %}
+                                            <span class="badge bg-danger-lighten text-danger"><i class="ri-error-warning-line me-1"></i> Expired</span>
+                                        {% elif application.status == 'FULL_REGISTRATION' %}
+                                            <span class="badge bg-success-lighten text-success"><i class="ri-checkbox-circle-fill me-1"></i> {{ application.display_status }}</span>
                                         {% else %}
                                             <span class="badge bg-primary-lighten text-primary"><i class="ri-time-line me-1"></i> Provisional Registration</span>
                                         {% endif %}
                                     </td>
                                     <td class="py-3 text-muted">
-                                        {{ application.updated_at|date:"M d, Y" }}
+                                        {% if application.certificate_expires_on %}Valid until {{ application.certificate_expires_on|date:"M d, Y" }}{% else %}{{ application.updated_at|date:"M d, Y" }}{% endif %}
                                     </td>
                                     <td class="text-end px-4 py-3">
                                         <div class="d-flex justify-content-end gap-2">
-                                            {% if application.status == 'FULL_REGISTRATION' %}
+                                            {% if application.has_active_certificate %}
                                                 <a href="{% url 'medicines:download_certificate' application.pk %}" class="btn btn-outline-{{ theme_color }} btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
                                                     <i class="ri-article-line me-1"></i> Certificate
                                                 </a>
-                                            {% else %}
-                                                <a href="{% url 'medicines:download_certificate' application.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
+                                            {% elif application.provisional_letter_open_to_applicant %}
+                                                <a href="{% url 'medicines:provisional_letter' application.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm fw-bold" target="_blank">
                                                     <i class="ri-file-text-line me-1"></i> Provisional Letter
                                                 </a>
                                             {% endif %}
-                                            {% if application.application_type == 'LISTING' %}
+                                            {% if application.application_type == 'LISTING' and application.has_active_certificate %}
                                                 <form action="{% url 'medicines:upgrade_to_registration' application.pk %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to upgrade this medicine to Category II Registration? You will be asked to pay the application fee.');">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3 shadow-sm fw-bold">

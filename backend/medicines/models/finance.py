@@ -36,6 +36,9 @@ class Payment(TimeStampedModel):
     verified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_payments')
     verified_at = models.DateTimeField(null=True, blank=True)
     remarks = models.TextField(blank=True, null=True, verbose_name="Maoni (Remarks)")
+    paid_before_system = models.BooleanField(default=False, help_text="Recorded by a Data Clerk from paper records")
+
+    RENEWAL_TYPES = ['LISTING_RENEWAL_FEE', 'CAT_II_RENEWAL_FEE']
 
     def __str__(self):
         return f"{self.get_payment_type_display()} for {self.application.medicine_name}"

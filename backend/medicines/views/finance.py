@@ -6,11 +6,11 @@ from django.utils import timezone
 from medicines.models import MedicineApplication, MedicineEvaluation, Payment, FeeConfiguration, InspectionSchedule, FeeInactiveError
 from django.core.paginator import Paginator
 from django.db.models import Q
-from users.emails import notify_finance_pending_payment, notify_evaluator_payment_verified, notify_applicant_application_status
+from medicines import services
 
 @login_required
 def staff_payment_list_view(request):
-    if not (request.user.is_evaluator or request.user.is_finance or request.user.is_admin):
+    if not (request.user.is_finance or request.user.is_admin):
         return redirect('users:dashboard')
     base_queryset = Payment.objects.all().order_by('-created_at')
     list_filter = request.GET.get('filter', 'pending')
@@ -21,7 +21,7 @@ def staff_payment_list_view(request):
     if list_filter == 'pending':
         base_queryset = base_queryset.filter(is_verified=False)
     if query:
-        base_queryset = base_queryset.filter(Q(application__medicine_name__icontains=query) | Q(control_number__icontains=query) | Q(application__applicant__email__icontains=query)).distinct()
+        base_queryset = base_queryset.filter(Q(application__medicine_name__icontains=query) | Q(application__reference_number__icontains=query) | Q(control_number__icontains=query) | Q(application__applicant__email__icontains=query)).distinct()
     if status_filter == 'VERIFIED':
         base_queryset = base_queryset.filter(is_verified=True)
     elif status_filter == 'PENDING':
@@ -37,45 +37,25 @@ def staff_payment_list_view(request):
 
 @login_required
 def staff_payment_detail_view(request, pk):
-    if not (request.user.is_evaluator or request.user.is_finance or request.user.is_admin):
+    if not (request.user.is_finance or request.user.is_admin):
         return redirect('users:dashboard')
     payment = get_object_or_404(Payment, pk=pk)
     application = payment.application
     if request.method == 'POST':
         action = request.POST.get('action')
-        payment_form = PaymentVerificationForm(request.POST, instance=payment)
-        if payment_form.is_valid():
-            payment_instance = payment_form.save(commit=False)
+        remarks = (request.POST.get('remarks') or '').strip()
+        try:
             if action == 'mark_paid':
-                payment_instance.is_verified = True
-                payment_instance.verified_by = request.user
-                payment_instance.verified_at = timezone.now()
-                payment_instance.save()
+                services.verify_payment(payment, request.user, remarks or None)
                 messages.success(request, f'Payment verified for {application.medicine_name}.')
-                if payment.payment_type in ['LISTING_APP_FEE', 'CAT_II_APP_FEE'] and application.status == 'PENDING_APPLICATION_FEE':
-                    application.status = 'DRAFT'
-                    application.save()
-                elif payment.payment_type in ['LISTING_EVAL_FEE', 'CAT_II_EVAL_FEE'] and application.status == 'PENDING_EVALUATION_FEE':
-                    application.status = 'UNDER_REVIEW'
-                    application.save()
-                elif payment.payment_type in ['LISTING_FEE', 'CAT_II_REGISTRATION_FEE'] and application.status in ['PENDING_LISTING_FEE', 'PENDING_REGISTRATION_FEE', 'PROVISIONAL_REGISTRATION']:
-                    application.status = 'PENDING_FINAL_APPROVAL'
-                    application.save()
-                elif payment.payment_type == 'CAT_II_INSPECTION_FEE' and application.status in ('PENDING_INSPECTION_FEE', 'PRELIMINARY_APPROVED'):
-                    application.status = 'READY_FOR_INSPECTION'
-                    application.save()
-                    from users.emails import notify_ready_for_inspection
-                    notify_ready_for_inspection(application)
-                notify_evaluator_payment_verified(application, payment.payment_type)
             elif action == 'mark_unpaid':
-                payment_instance.is_verified = False
-                payment_instance.verified_by = None
-                payment_instance.verified_at = None
-                payment_instance.save()
-                messages.warning(request, f'Payment marked as not verified for {application.medicine_name}.')
-            return redirect('medicines:staff_payment_list')
-    else:
-        payment_form = PaymentVerificationForm(instance=payment)
+                services.reject_payment(payment, request.user, remarks)
+                messages.warning(request, f'Payment not confirmed for {application.medicine_name}. The applicant has been asked to submit it again.')
+        except services.WorkflowError as e:
+            messages.error(request, str(e))
+            return redirect('medicines:staff_payment_detail', pk=pk)
+        return redirect('medicines:staff_payment_list')
+    payment_form = PaymentVerificationForm(instance=payment)
     return render(request, 'medicines/staff/payment_detail.html', {'payment': payment, 'application': application, 'payment_form': payment_form})
 import json
 from django.core.serializers.json import DjangoJSONEncoder

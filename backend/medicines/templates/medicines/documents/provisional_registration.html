@@ -1,0 +1,7 @@
+{% extends 'medicines/documents/base_document.html' %}
+{% block page_title %}Registration Provisional Letter {{ application.reference_number }}{% endblock %}
+{% block document %}
+{% with letter_title="PROVISIONAL LETTER FOR REGISTRATION OF CATEGORY II TRADITIONAL MEDICINES" service_name="registration" certificate_name="Category II Registration Certificate" fee_name="Registration Fee (Ada ya usajili)" status_word="registered" %}
+{% include 'medicines/documents/_provisional_body.html' %}
+{% endwith %}
+{% endblock %}

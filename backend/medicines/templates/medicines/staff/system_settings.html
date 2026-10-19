@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}System Settings - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    {% include 'medicines/registrar/_page_header.html' with icon="ri-settings-3-line" heading="System Settings" subheading="Certificate numbers, application references, certificate images and mandatory documents." %}
+
+    <div class="row gx-3">
+        <div class="col-lg-5">
+            <form method="post" class="card shadow-sm border-0 mb-3">
+                {% csrf_token %}
+                <input type="hidden" name="form" value="counters">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-1">Certificate counters for {{ year }}</h5>
+                    <p class="small text-muted">Set each counter to the last number already used, including numbers used on paper. Counters restart at 0001 every January. A counter cannot go below a number the system has already issued this year.</p>
+                    {% include 'medicines/legacy/_field.html' with field=counter_form.listing_last_number %}
+                    <p class="small mb-3">Next Listing certificate: <strong class="font-monospace">{{ next_listing }}</strong></p>
+                    {% include 'medicines/legacy/_field.html' with field=counter_form.category_ii_last_number %}
+                    <p class="small mb-3">Next Category II certificate: <strong class="font-monospace">{{ next_category_ii }}</strong></p>
+                    <button class="btn btn-primary w-100 fw-bold">Save counters</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-7">
+            <form method="post" enctype="multipart/form-data" class="card shadow-sm border-0 mb-3">
+                {% csrf_token %}
+                <input type="hidden" name="form" value="settings">
+                <div class="card-body p-4">
+                    {% if settings_form.non_field_errors %}<div class="alert alert-danger">{{ settings_form.non_field_errors }}</div>{% endif %}
+                    <h5 class="fw-bold mb-1">Number formats</h5>
+                    <p class="small text-muted">Changes apply to new numbers only. Numbers already issued never change.</p>
+                    <div class="row">
+                        <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=settings_form.category_ii_certificate_code %}</div>
+                        <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=settings_form.listing_certificate_code %}</div>
+                        <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=settings_form.certificate_digits %}</div>
+                        <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=settings_form.reference_prefix %}</div>
+                        <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=settings_form.listing_reference_code %}</div>
+                        <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=settings_form.category_ii_reference_code %}</div>
+                    </div>
+
+                    <h5 class="fw-bold mt-3 mb-1">Images printed on certificates</h5>
+                    <p class="small text-muted">PNG with a transparent background works best.</p>
+                    <div class="row">
+                        {% for field in settings_form %}{% if field.name == 'coat_of_arms' or field.name == 'council_logo' or field.name == 'chairman_signature' or field.name == 'registrar_signature' or field.name == 'council_seal' %}
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label fw-semibold small">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        {% endif %}{% endfor %}
+                    </div>
+
+                    <h5 class="fw-bold mt-3 mb-1">Mandatory documents</h5>
+                    <p class="small text-muted">Ticked documents must be attached before submitting. Changes apply to new submissions only.</p>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><div class="fw-semibold small mb-1">Listing application</div>{{ settings_form.mandatory_listing_documents }}</div>
+                        <div class="col-md-6 mb-3"><div class="fw-semibold small mb-1">Category II application</div>{{ settings_form.mandatory_category_ii_documents }}</div>
+                        <div class="col-md-6 mb-3"><div class="fw-semibold small mb-1">Individual account</div>{{ settings_form.mandatory_individual_documents }}<div class="form-text">NIDA or passport number is always required.</div></div>
+                        <div class="col-md-6 mb-3"><div class="fw-semibold small mb-1">Company account</div>{{ settings_form.mandatory_company_documents }}</div>
+                    </div>
+                    <button class="btn btn-primary w-100 fw-bold">Save settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

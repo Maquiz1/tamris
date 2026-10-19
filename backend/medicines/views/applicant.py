@@ -6,11 +6,19 @@ from django.utils import timezone
 from medicines.models import MedicineApplication, MedicineEvaluation, Payment, FeeConfiguration, InspectionSchedule, FeeInactiveError
 from django.core.paginator import Paginator
 from django.db.models import Q
-from users.emails import notify_finance_pending_payment, notify_evaluator_payment_verified, notify_applicant_application_status
+from users.emails import notify_finance_pending_payment
+
+
+def visible_applications(user):
+    """An applicant's applications, without legacy records still waiting for Registrar verification."""
+    return (
+        MedicineApplication.objects.filter(applicant=user, is_void=False)
+        .exclude(is_legacy=True, status='FULL_REGISTRATION', legacy_verification_status__in=['PENDING', 'RETURNED'])
+    )
 
 @login_required
 def applicant_payment_submission_view(request, pk):
-    payment = get_object_or_404(Payment, pk=pk, application__applicant=request.user)
+    payment = get_object_or_404(Payment, pk=pk, application__applicant=request.user, paid_before_system=False)
     if payment.is_verified:
         messages.error(request, 'This payment is already verified.')
         return redirect('users:dashboard')
@@ -29,14 +37,16 @@ def applicant_payment_submission_view(request, pk):
 def applicant_payment_list_view(request):
     if not request.user.is_applicant:
         return redirect('users:dashboard')
-    payments = Payment.objects.filter(application__applicant=request.user).order_by('-created_at')
+    payments = Payment.objects.filter(application__in=visible_applications(request.user)).order_by('-created_at')
     return render(request, 'medicines/applicant_payment_list.html', {'payments': payments})
 
 @login_required
 def applicant_certificate_list_view(request):
     if not request.user.is_applicant:
         return redirect('users:dashboard')
-    applications = MedicineApplication.objects.filter(applicant=request.user, status__in=['PROVISIONAL_REGISTRATION', 'FULL_REGISTRATION']).order_by('-updated_at')
+    applications = visible_applications(request.user).filter(
+        status__in=['FULL_REGISTRATION'] + MedicineApplication.PROVISIONAL_STATUSES
+    ).order_by('-updated_at')
     return render(request, 'medicines/applicant_certificate_list.html', {'applications': applications})
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -47,7 +57,7 @@ from django.db.models.functions import TruncMonth
 def applicant_applications_view(request):
     if not request.user.is_applicant:
         return redirect('users:dashboard')
-    applications = list(MedicineApplication.objects.filter(applicant=request.user).prefetch_related('payments').order_by('-created_at'))
+    applications = list(visible_applications(request.user).prefetch_related('payments').order_by('-created_at'))
     action_required = [app for app in applications if app.requires_applicant_action]
     view_filter = request.GET.get('filter', 'tasks_all')
 
@@ -81,20 +91,20 @@ def applicant_applications_view(request):
 def applicant_listed_medicines_view(request):
     if request.user.role and request.user.role.name != 'Applicant' and (not hasattr(request.user, 'medicine_applications')):
         return redirect('users:dashboard')
-    applications = MedicineApplication.objects.filter(applicant=request.user, application_type='LISTING', status__in=['PROVISIONAL_REGISTRATION', 'FULL_REGISTRATION']).order_by('-updated_at')
+    applications = visible_applications(request.user).filter(application_type='LISTING', status__in=['PROVISIONAL_REGISTRATION', 'FULL_REGISTRATION']).order_by('-updated_at')
     return render(request, 'medicines/applicant/approved_medicines.html', {'applications': applications, 'title': 'Listed Medicines', 'icon': 'bi-capsule', 'theme_color': 'success'})
 
 @login_required
 def applicant_registered_medicines_view(request):
     if request.user.role and request.user.role.name != 'Applicant' and (not hasattr(request.user, 'medicine_applications')):
         return redirect('users:dashboard')
-    applications = MedicineApplication.objects.filter(applicant=request.user, application_type='CATEGORY_II', status__in=['PROVISIONAL_REGISTRATION', 'FULL_REGISTRATION']).order_by('-updated_at')
+    applications = visible_applications(request.user).filter(application_type='CATEGORY_II', status__in=['PROVISIONAL_REGISTRATION', 'FULL_REGISTRATION']).order_by('-updated_at')
     return render(request, 'medicines/applicant/approved_medicines.html', {'applications': applications, 'title': 'Registered Medicines', 'icon': 'bi-patch-check', 'theme_color': 'info'})
 
 @login_required
 def applicant_application_detail_view(request, pk):
     application = get_object_or_404(MedicineApplication, pk=pk)
-    if application.applicant != request.user:
+    if application.applicant != request.user or not application.is_visible_to_applicant:
         messages.error(request, 'You do not have permission to view this application.')
         return redirect('users:dashboard')
     return render(request, 'medicines/applicant/application_detail.html', {'application': application})
@@ -105,8 +115,8 @@ def applicant_reports_view(request):
         return redirect('users:dashboard')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
-    apps_qs = MedicineApplication.objects.filter(applicant=request.user)
-    payments_qs = Payment.objects.filter(application__applicant=request.user)
+    apps_qs = visible_applications(request.user)
+    payments_qs = Payment.objects.filter(application__in=apps_qs)
     if start_date:
         apps_qs = apps_qs.filter(created_at__date__gte=start_date)
         payments_qs = payments_qs.filter(created_at__date__gte=start_date)

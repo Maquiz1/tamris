@@ -1,0 +1,33 @@
+{% extends 'medicines/documents/base_document.html' %}
+{% block page_title %}Listing Certificate {{ application.certificate_number }}{% endblock %}
+{% block document %}
+<div class="page">
+    <div class="frame">
+        {% if application.is_expired %}<div class="watermark"><span>EXPIRED</span></div>{% endif %}
+        {% include 'medicines/documents/_header.html' %}
+        <div class="title">LISTING OF TRADITIONAL MEDICINES</div>
+        <div class="title" style="font-size:16px;margin-top:0">Certificate of Listing of Traditional Medicine</div>
+        <div class="basis">(Made under the Traditional and Alternative Health Practice Act No. 23 of 2002).</div>
+        <div class="statement">This is to certify that the medicine described below has been listed in Tanzania.</div>
+        {% with number_label="Listing number of medicine" %}{% include 'medicines/documents/_certificate_fields.html' %}{% endwith %}
+        {% include 'medicines/documents/_signatures.html' %}
+        <div class="note">The certificate must be returned to Council if cancelled, invalidated, or if the listing of the medicine is withdrawn or when requested to do so by the Registrar.</div>
+        <div class="note left" style="margin-top:22px">Note: The efficacy liability is not on the TAHPC</div>
+    </div>
+</div>
+<div class="page page-break">
+    <div class="frame conditions">
+        <h2>CONDITIONS OF LISTING</h2>
+        <ol>
+            <li>The medicine shall comply with all relevant provisions of the Traditional and Alternative Medicine Council, Cap 244 and regulations made thereunder at all times.</li>
+            <li>The listing holder shall ensure that the medicine complies with the details approved by the Council at all times.</li>
+            <li>The listing holder shall ensure that the medicine complies with Tanzanian labelling requirements at all times.</li>
+            <li>The listing holder shall ensure that the medicine is prepared in a clean and suitable place, as described in the application.</li>
+            <li>The listing holder and any supplier shall ensure that the medicine is stored and transported in accordance with the instructions on this certificate.</li>
+            <li>The listing holder shall apply for renewal of the listing 90 days before its expiry.</li>
+            <li>The Council reserves the right to withdraw this certificate when conditions 1 to 6 are contravened, or when the risks of the medicine outweigh its benefits, or when it is in the public interest to do so.</li>
+            <li>The listing holder shall report any adverse effects of the medicine to the Council.</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

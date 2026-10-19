@@ -29,12 +29,24 @@ class Applicant(TimeStampedModel):
         return False
 
     @property
-    def is_profile_complete(self):
-        doc_types = self.documents.values_list('document_type', flat=True)
+    def missing_mandatory_documents(self):
+        from medicines.models import SystemSettings
+        settings_obj = SystemSettings.load()
         if self.applicant_type == 'Individual':
-            return 'nida_copy' in doc_types or 'tin_certificate' in doc_types
+            required = settings_obj.mandatory_individual_documents
+        else:
+            required = settings_obj.mandatory_company_documents
+        doc_types = set(self.documents.values_list('document_type', flat=True))
+        return [doc for doc in required if doc not in doc_types]
+
+    @property
+    def is_profile_complete(self):
+        if self.applicant_type == 'Individual':
+            # NIDA number (Tanzanian) or passport number (foreigner) is always required
+            has_identity = self.identities.exclude(identity_number__isnull=True).exclude(identity_number='').exists()
+            return has_identity and not self.missing_mandatory_documents
         elif self.applicant_type == 'Organization':
-            return 'brela_certificate' in doc_types or 'tin_certificate' in doc_types or 'business_license' in doc_types
+            return not self.missing_mandatory_documents
         return False
 
     @property
@@ -201,3 +213,26 @@ class StaffProfile(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user.email} - {self.designation}"
+
+
+class LegacyClaim(models.Model):
+    """A new applicant asking to take over records a Data Clerk entered from paper."""
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending confirmation'),
+        ('CONFIRMED', 'Confirmed'),
+        ('REJECTED', 'Rejected'),
+    ]
+    new_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='legacy_claims_made')
+    legacy_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='legacy_claims_received')
+    matched_on = models.CharField(max_length=255)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    decided_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='legacy_claims_decided')
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_note = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.new_user.email} claims {self.legacy_user.email} ({self.status})"

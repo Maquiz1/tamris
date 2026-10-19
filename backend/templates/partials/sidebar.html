@@ -61,11 +61,11 @@
       </li>
 
       <!-- Staff / Admin Navigation -->
-      {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles or 'Inspector' in user.all_roles or 'Accountant' in user.all_roles %}
+      {% if user.is_staff_member %}
 
       <li class="menu-header text-uppercase fs-7 fw-bold text-muted px-3 mt-3 mb-1">Staff Operations</li>
 
-      {% if user.is_staff_member %}
+      {% if user.is_admin or user.is_evaluator or user.is_registrar or user.is_data_clerk %}
       <li class="treeview">
         <a href="#!">
           <i class="ri-group-line"></i>
@@ -157,6 +157,60 @@
       </li>
       {% endif %}
 
+      {% if user.is_registrar or user.is_admin %}
+      <li class="treeview">
+        <a href="#!">
+          <i class="ri-quill-pen-line"></i>
+          <span class="menu-text">Registrar</span>
+          {% if pending_final_count|add:pending_legacy_count|add:pending_claim_count > 0 %}
+          <span class="badge bg-success ms-auto">{{ pending_final_count|add:pending_legacy_count|add:pending_claim_count }}</span>
+          {% endif %}
+        </a>
+        <ul class="treeview-menu">
+          <li>
+            <a href="{% url 'medicines:final_approval_list' %}" class="d-flex align-items-center justify-content-between">
+              <span>Final Approvals</span>
+              {% if pending_final_count > 0 %}<span class="badge bg-success">{{ pending_final_count }}</span>{% endif %}
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'medicines:legacy_verification_list' %}" class="d-flex align-items-center justify-content-between">
+              <span>Legacy Certificates</span>
+              {% if pending_legacy_count > 0 %}<span class="badge bg-warning text-dark">{{ pending_legacy_count }}</span>{% endif %}
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'medicines:claim_list' %}" class="d-flex align-items-center justify-content-between">
+              <span>Link Requests</span>
+              {% if pending_claim_count > 0 %}<span class="badge bg-info">{{ pending_claim_count }}</span>{% endif %}
+            </a>
+          </li>
+        </ul>
+      </li>
+      {% endif %}
+
+      {% if user.is_data_clerk or user.is_admin %}
+      <li class="treeview">
+        <a href="#!">
+          <i class="ri-archive-drawer-line"></i>
+          <span class="menu-text">Legacy Records</span>
+          {% if returned_legacy_count > 0 %}
+          <span class="badge bg-danger ms-auto">{{ returned_legacy_count }}</span>
+          {% endif %}
+        </a>
+        <ul class="treeview-menu">
+          <li>
+            <a href="{% url 'medicines:legacy_dashboard' %}" class="d-flex align-items-center justify-content-between">
+              <span>All Legacy Records</span>
+              {% if returned_legacy_count > 0 %}<span class="badge bg-danger">{{ returned_legacy_count }}</span>{% endif %}
+            </a>
+          </li>
+          <li><a href="{% url 'medicines:legacy_applicant_create' %}">New Applicant</a></li>
+          <li><a href="{% url 'medicines:legacy_medicine_create' %}">New Medicine Record</a></li>
+        </ul>
+      </li>
+      {% endif %}
+
       {% if user.is_superuser or 'Accountant' in user.all_roles or 'Admin' in user.all_roles %}
       <li class="treeview">
         <a href="#!">
@@ -186,7 +240,12 @@
           <span class="menu-text">Reports & Registry</span>
         </a>
         <ul class="treeview-menu">
-          {% if user.is_superuser or 'Admin' in user.all_roles or 'Evaluator' in user.all_roles %}
+          {% if user.is_committee or user.is_registrar %}
+          <li>
+            <a href="{% url 'reports:dashboard' %}">Reports Overview</a>
+          </li>
+          {% endif %}
+          {% if user.is_admin or user.is_evaluator or user.is_registrar or user.is_committee or user.is_data_clerk %}
           <li>
             <a href="{% url 'reports:medicines' %}?type=CATEGORY_II">Registered Cat II Medicines</a>
           </li>
@@ -201,13 +260,13 @@
           </li>
           {% endif %}
 
-          {% if user.is_superuser or 'Admin' in user.all_roles or 'Inspector' in user.all_roles or 'Evaluator' in user.all_roles %}
+          {% if user.is_admin or user.is_inspector or user.is_evaluator or user.is_registrar or user.is_committee %}
           <li>
             <a href="{% url 'reports:inspections' %}">All Inspections</a>
           </li>
           {% endif %}
 
-          {% if user.is_superuser or 'Admin' in user.all_roles or 'Accountant' in user.all_roles %}
+          {% if user.is_admin or user.is_finance or user.is_registrar or user.is_committee %}
           <li>
             <a href="{% url 'reports:payments' %}">All Payments</a>
           </li>
@@ -234,7 +293,7 @@
         </a>
         <ul class="treeview-menu">
           <li>
-            <a href="#">Fee Matrix (Coming Soon)</a>
+            <a href="{% url 'medicines:system_settings' %}">System Settings</a>
           </li>
           <li>
             <a href="#">Inspection Checklists (Coming Soon)</a>
@@ -307,7 +366,7 @@
       <li>
         <a href="{% url 'medicines:applicant_certificate_list' %}">
           <i class="ri-medal-line"></i>
-          <span class="menu-text">Certificate Directory</span>
+          <span class="menu-text">Letters &amp; Certificates</span>
         </a>
       </li>
 

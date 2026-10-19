@@ -211,21 +211,198 @@ class MedicineApplication(TimeStampedModel):
     clinical_observation_report = models.FileField(upload_to=medicine_document_path, verbose_name="Clinical observation reports (Ripoti za ufuatiliaji)", blank=True, null=True)
     brela_registration_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Jina la dawa lililosajiliwa na BRELA")
 
+    # Certificate details (Hati)
+    manufacturer_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Name of manufacturer (Jina la mtengenezaji)")
+    manufacturer_address = models.TextField(blank=True, null=True, verbose_name="Address of manufacturer (Anuani ya mtengenezaji)")
+
     # Status & Tracking
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='DRAFT')
     review_remarks = models.TextField(blank=True, null=True, help_text="General feedback from the staff evaluator")
     rejection_reason = models.TextField(blank=True, null=True)
     submitted_at = models.DateTimeField(blank=True, null=True)
 
+    # Reference numbers, provisional letter and certificate
+    reference_number = models.CharField(max_length=40, unique=True, blank=True, null=True, verbose_name="Application reference")
+    former_reference = models.CharField(max_length=40, blank=True, null=True, help_text="Reference printed on provisional letters before reference numbers were stored")
+    provisional_issued_on = models.DateField(blank=True, null=True)
+    certificate_number = models.CharField(max_length=30, unique=True, blank=True, null=True)
+    certificate_issued_on = models.DateField(blank=True, null=True)
+    certificate_expires_on = models.DateField(blank=True, null=True)
+    final_approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='final_approvals')
+    final_approved_at = models.DateTimeField(blank=True, null=True)
+    renewal_count = models.PositiveIntegerField(default=0)
+    renewal_reminders_sent = models.JSONField(default=list, blank=True, help_text="Days-before-expiry reminders already sent for the current expiry date")
+
+    # Conditions for improvement
+    conditions_return_status = models.CharField(max_length=30, blank=True, null=True, help_text="Status the application returns to when the applicant resubmits")
+
+    # Legacy (paper) records entered by a Data Clerk
+    LEGACY_VERIFICATION_CHOICES = [
+        ('PENDING', 'Pending verification'),
+        ('VERIFIED', 'Verified'),
+        ('RETURNED', 'Returned for correction'),
+    ]
+    is_legacy = models.BooleanField(default=False)
+    legacy_entered_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='legacy_entries')
+    legacy_verification_status = models.CharField(max_length=20, choices=LEGACY_VERIFICATION_CHOICES, blank=True, null=True)
+    legacy_verified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='legacy_verifications')
+    legacy_verified_at = models.DateTimeField(blank=True, null=True)
+    legacy_return_reason = models.TextField(blank=True, null=True)
+    legacy_certificate_scan = models.FileField(upload_to=medicine_document_path, blank=True, null=True, verbose_name="Scan of the paper certificate")
+    legacy_application_scan = models.FileField(upload_to=medicine_document_path, blank=True, null=True, verbose_name="Scan of the paper application")
+    is_void = models.BooleanField(default=False)
+    void_reason = models.TextField(blank=True, null=True)
+
+    PROVISIONAL_STATUSES = ['PENDING_LISTING_FEE', 'PENDING_REGISTRATION_FEE', 'PENDING_FINAL_APPROVAL', 'PROVISIONAL_REGISTRATION']
+
     def __str__(self):
         return f"{self.medicine_name} ({self.get_application_type_display()}) - {self.applicant.email}"
 
     @property
     def registration_number(self):
-        if self.id:
-            year = self.updated_at.strftime('%y') if self.updated_at else '26'
-            return f"TZ{year}TM{self.id:04d}"
-        return None
+        """The stored certificate number. Kept under this name for existing templates and reports."""
+        return self.certificate_number
+
+    @property
+    def is_listing(self):
+        return self.application_type == 'LISTING'
+
+    @property
+    def is_visible_to_applicant(self):
+        """Legacy records stay hidden until a Registrar has verified their certificate."""
+        if self.is_void:
+            return False
+        if self.is_legacy and self.status == 'FULL_REGISTRATION':
+            return self.legacy_verification_status == 'VERIFIED'
+        return True
+
+    @property
+    def has_active_certificate(self):
+        return (
+            self.status == 'FULL_REGISTRATION'
+            and bool(self.certificate_number)
+            and self.is_visible_to_applicant
+        )
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return bool(self.certificate_expires_on) and self.certificate_expires_on < timezone.localdate()
+
+    @property
+    def days_to_expiry(self):
+        from django.utils import timezone
+        if not self.certificate_expires_on:
+            return None
+        return (self.certificate_expires_on - timezone.localdate()).days
+
+    @property
+    def can_renew(self):
+        """Renewal opens 90 days before expiry and stays open after expiry."""
+        if not self.has_active_certificate or self.days_to_expiry is None:
+            return False
+        if self.days_to_expiry > 90:
+            return False
+        return not self.payments.filter(payment_type__in=['LISTING_RENEWAL_FEE', 'CAT_II_RENEWAL_FEE'], is_verified=False).exists()
+
+    @property
+    def pending_renewal_payment(self):
+        return self.payments.filter(payment_type__in=['LISTING_RENEWAL_FEE', 'CAT_II_RENEWAL_FEE'], is_verified=False).first()
+
+    @property
+    def shows_original_scan(self):
+        """Legacy certificates are shown as the scanned paper original until their first renewal in the system."""
+        return self.is_legacy and self.renewal_count == 0 and bool(self.legacy_certificate_scan)
+
+    @property
+    def has_provisional_letter(self):
+        return self.status in self.PROVISIONAL_STATUSES or (self.status == 'FULL_REGISTRATION' and bool(self.provisional_issued_on))
+
+    @property
+    def provisional_letter_open_to_applicant(self):
+        """The applicant sees the provisional letter only until the certificate is issued."""
+        return self.status in self.PROVISIONAL_STATUSES and not self.is_legacy
+
+    @property
+    def display_status(self):
+        if self.status == 'FULL_REGISTRATION':
+            if self.is_legacy and self.legacy_verification_status != 'VERIFIED':
+                return 'Pending verification'
+            if self.is_expired:
+                return 'Expired'
+            return 'Listed' if self.is_listing else 'Registered'
+        return self.get_status_display()
+
+    # Holder details printed on letters and certificates
+    @property
+    def applicant_profile(self):
+        return getattr(self.applicant, 'applicant_profile', None)
+
+    @property
+    def holder_name(self):
+        profile = self.applicant_profile
+        if profile is not None:
+            if profile.applicant_type == 'Organization' and hasattr(profile, 'organization'):
+                return profile.organization.organization_name
+            if hasattr(profile, 'individual'):
+                return profile.individual.full_name
+        return self.applicant.display_name
+
+    @property
+    def holder_address(self):
+        profile = self.applicant_profile
+        address = profile.address_obj if profile is not None else None
+        if not address:
+            return ''
+        parts = [address.postal_address, address.street, address.ward, address.district, address.region]
+        return ', '.join(p for p in parts if p)
+
+    @property
+    def responsible_person(self):
+        profile = self.applicant_profile
+        if profile is not None:
+            if profile.applicant_type == 'Organization' and hasattr(profile, 'organization'):
+                reps = list(profile.organization.representatives.all())
+                rep = next((r for r in reps if r.is_primary), reps[0] if reps else None)
+                if rep:
+                    return " ".join(filter(None, [rep.first_name, rep.middle_name, rep.last_name]))
+                return ''
+            if hasattr(profile, 'individual'):
+                return profile.individual.full_name
+        return self.applicant.display_name
+
+    @property
+    def shelf_life_display(self):
+        if not self.shelf_life:
+            return ''
+        unit = self.shelf_life_duration_type
+        if unit == 'YEARS':
+            return f"{self.shelf_life * 12}"
+        if unit in (None, '', 'MONTHS'):
+            return f"{self.shelf_life}"
+        return f"{self.shelf_life} {self.get_shelf_life_duration_type_display()}"
+
+    @property
+    def form_and_colour(self):
+        form = self.dosage_form_other if self.dosage_form == 'NYINGINE' and self.dosage_form_other else self.get_dosage_form_display()
+        return " ".join(filter(None, [self.medicine_color, form])).strip()
+
+    @property
+    def pack_description(self):
+        parts = []
+        if self.net_weight_volume:
+            parts.append(f"{self.net_weight_volume.normalize():f} {self.net_weight_volume_unit or ''}".strip())
+        if self.packaging_color or self.packaging_size:
+            parts.append(" ".join(filter(None, [self.packaging_color, self.packaging_size, 'container'])))
+        if self.lid_color:
+            parts.append(f"fitted with a {self.lid_color} lid")
+        return " ".join(parts)
+
+    @property
+    def storage_statement(self):
+        if self.storage_conditions == 'MAZINGIRA_MAALUM' and self.storage_conditions_other:
+            return self.storage_conditions_other
+        return self.get_storage_conditions_display()
 
     @property
     def requires_applicant_action(self):
@@ -237,6 +414,10 @@ class MedicineApplication(TimeStampedModel):
                 payment = payments[-1]
                 if not payment.control_number and not payment.is_verified:
                     return True
+        if self.status == 'FULL_REGISTRATION':
+            renewal = self.pending_renewal_payment
+            if renewal and not renewal.control_number:
+                return True
         return False
 
     class Meta:

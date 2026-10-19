@@ -1,0 +1,13 @@
+<div class="signatures">
+    <div>
+        {% if settings_obj.chairman_signature %}<img class="sig" src="{{ settings_obj.chairman_signature.url }}" alt="Chairman signature">{% endif %}
+        <div class="dots{% if settings_obj.chairman_signature %} with-image{% endif %}"></div>
+        <strong>CHAIRMAN</strong>
+    </div>
+    <div>
+        {% if settings_obj.registrar_signature %}<img class="sig" src="{{ settings_obj.registrar_signature.url }}" alt="Registrar signature">{% endif %}
+        <div class="dots{% if settings_obj.registrar_signature %} with-image{% endif %}"></div>
+        <strong>REGISTRAR</strong>
+    </div>
+</div>
+{% if settings_obj.council_seal %}<img class="seal" src="{{ settings_obj.council_seal.url }}" alt="Council seal">{% endif %}

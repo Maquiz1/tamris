@@ -35,7 +35,7 @@ class LoginView(APIView):
         user = authenticate(email=email, password=password)
         if user is not None:
             if not user.is_email_verified:
-                pass
+                return Response({'detail': 'Please verify your email address before logging in.'}, status=status.HTTP_403_FORBIDDEN)
             refresh = RefreshToken.for_user(user)
             return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'user_id': user.id, 'role': user.role.name if user.role else None})
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -94,7 +94,8 @@ class FrontendRegisterView(CreateView):
         login(self.request, user)
         self.request.session['verify_email'] = user.email
         otp_code = pyotp.TOTP(user.otp_secret).now()
-        print(f'DEBUG: Generated OTP for user {user.email} is {otp_code}')
+        if settings.DEBUG:  # never write one-time codes to production logs
+            print(f'DEBUG: Generated OTP for user {user.email} is {otp_code}')
         send_mail(subject='TAMRIS - Your OTP Verification Code', message=f'Welcome to TAMRIS! Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.', from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@tamris.go.tz'), recipient_list=[user.email], fail_silently=True)
         messages.success(self.request, 'Account created successfully. An email with your OTP has been sent!')
         return redirect(self.success_url)
@@ -146,7 +147,8 @@ def verify_otp_view(request):
                 messages.error(request, 'Invalid or expired OTP code. Please try again.')
     else:
         form = OTPVerificationForm()
-        print(f'DEBUG: Current valid OTP for user {user.email} is {pyotp.TOTP(user.otp_secret).now()}')
+        if settings.DEBUG:  # never write one-time codes to production logs
+            print(f'DEBUG: Current valid OTP for user {user.email} is {pyotp.TOTP(user.otp_secret).now()}')
     return render(request, 'users/verify_otp.html', {'form': form})
 from django.http import JsonResponse
 
@@ -162,7 +164,8 @@ def send_phone_otp_view(request):
             user.phone_otp_secret = pyotp.random_base32()
             user.save()
         otp_code = pyotp.TOTP(user.phone_otp_secret).now()
-        print(f'DEBUG: Mock SMS sent to {user.phone_number} with OTP {otp_code}')
+        if settings.DEBUG:  # never write one-time codes to production logs
+            print(f'DEBUG: Mock SMS sent to {user.phone_number} with OTP {otp_code}')
         return JsonResponse({'success': True, 'message': f'OTP sent to {user.phone_number}'})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 

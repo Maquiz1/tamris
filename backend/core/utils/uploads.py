@@ -18,7 +18,10 @@ def medicine_document_path(instance, filename):
     Generate file path for medicine application documents.
     Format: medicines/applications/user_<applicant_id>/<filename>
     """
-    applicant_id = instance.applicant.id if instance.applicant else 'unknown'
+    applicant = getattr(instance, 'applicant', None)
+    if applicant is None and getattr(instance, 'application', None) is not None:
+        applicant = instance.application.applicant  # label attachments belong to an application
+    applicant_id = applicant.id if applicant else 'unknown'
     return f'medicines/applications/user_{applicant_id}/{filename}'
 
 def inspection_document_path(instance, filename):

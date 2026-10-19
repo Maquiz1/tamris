@@ -152,6 +152,32 @@ class PractitionerDetailForm(forms.Form):
     pass
 class CompanyDetailForm(forms.Form):
     pass
+DOCUMENT_LABELS = {
+    'nida_copy': 'NIDA copy',
+    'passport_photo': 'Passport-size photo',
+    'tahpc_certificate': 'TAHPC certificate',
+    'tin_certificate': 'TIN certificate',
+    'passport_document': 'Passport',
+    'brela_certificate': 'BRELA certificate',
+    'business_license': 'Business licence',
+    'representative_nida': 'Representative NIDA',
+    'representative_id_image': 'Representative ID',
+}
+
+
+def clean_mandatory_documents(form):
+    """Every document the administrator marked as mandatory must be uploaded now or already on file."""
+    from medicines.models import SystemSettings
+    cleaned_data = forms.Form.clean(form)
+    required = getattr(SystemSettings.load(), form.mandatory_setting) or []
+    on_file = set(form.instance.documents.values_list('document_type', flat=True)) if form.instance else set()
+    missing = [doc for doc in required if doc in form.fields and not cleaned_data.get(doc) and doc not in on_file]
+    if missing:
+        names = ', '.join(DOCUMENT_LABELS.get(doc, doc) for doc in missing)
+        raise forms.ValidationError(f"Please upload the mandatory documents: {names}.")
+    return cleaned_data
+
+
 class PractitionerDocumentForm(forms.Form):
     nida_copy = forms.FileField(required=False)
     passport_photo = forms.FileField(required=False)
@@ -167,22 +193,10 @@ class PractitionerDocumentForm(forms.Form):
                 if doc.document_type in self.fields:
                     self.fields[doc.document_type].initial = doc.file
 
+    mandatory_setting = 'mandatory_individual_documents'
+
     def clean(self):
-        cleaned_data = super().clean()
-        nida = cleaned_data.get('nida_copy')
-        tin = cleaned_data.get('tin_certificate')
-        
-        # Check existing if they didn't upload a new one
-        has_existing_nida = self.instance and self.instance.documents.filter(document_type='nida_copy').exists()
-        has_existing_tin = self.instance and self.instance.documents.filter(document_type='tin_certificate').exists()
-        
-        has_nida = bool(nida) or has_existing_nida
-        has_tin = bool(tin) or has_existing_tin
-        
-        if not (has_nida or has_tin):
-            raise forms.ValidationError("You must provide either a NIDA copy or a TIN Certificate.")
-            
-        return cleaned_data
+        return clean_mandatory_documents(self)
 
     def save(self):
         if not self.instance:
@@ -212,24 +226,10 @@ class CompanyDocumentForm(forms.Form):
                 if doc.document_type in self.fields:
                     self.fields[doc.document_type].initial = doc.file
 
+    mandatory_setting = 'mandatory_company_documents'
+
     def clean(self):
-        cleaned_data = super().clean()
-        brela = cleaned_data.get('brela_certificate')
-        tin = cleaned_data.get('tin_certificate')
-        business = cleaned_data.get('business_license')
-        
-        has_existing_brela = self.instance and self.instance.documents.filter(document_type='brela_certificate').exists()
-        has_existing_tin = self.instance and self.instance.documents.filter(document_type='tin_certificate').exists()
-        has_existing_business = self.instance and self.instance.documents.filter(document_type='business_license').exists()
-        
-        has_brela = bool(brela) or has_existing_brela
-        has_tin = bool(tin) or has_existing_tin
-        has_business = bool(business) or has_existing_business
-        
-        if not (has_brela or has_tin or has_business):
-            raise forms.ValidationError("You must provide either a BRELA Certificate, TIN Certificate, or Business License.")
-            
-        return cleaned_data
+        return clean_mandatory_documents(self)
 
     def save(self):
         if not self.instance:

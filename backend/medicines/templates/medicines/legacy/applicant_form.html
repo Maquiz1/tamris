@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}New Legacy Applicant - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    {% url 'medicines:legacy_dashboard' as back %}
+    {% include 'medicines/registrar/_page_header.html' with icon="ri-user-add-line" heading="New Applicant from Paper Records" subheading="The applicant is treated as already verified. They are invited by email once their first certificate is verified." back_url=back %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="card shadow-sm border-0 mb-3"><div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Who is the applicant?</h5>
+            <div class="mb-3 d-flex gap-4">{% for radio in form.applicant_type %}<div class="form-check">{{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></div>{% endfor %}</div>
+            {% for error in form.applicant_type.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            <div class="row">
+                <div class="col-md-6">{% include 'medicines/legacy/_field.html' with field=form.email %}</div>
+                <div class="col-md-6">{% include 'medicines/legacy/_field.html' with field=form.phone_number %}</div>
+            </div>
+        </div></div>
+        <div class="card shadow-sm border-0 mb-3" id="individual-section"><div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Individual</h5>
+            <div class="row">
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.first_name %}</div>
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.middle_name %}</div>
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.last_name %}</div>
+                <div class="col-md-6">{% include 'medicines/legacy/_field.html' with field=form.identity_type %}</div>
+                <div class="col-md-6">{% include 'medicines/legacy/_field.html' with field=form.identity_number %}</div>
+            </div>
+        </div></div>
+        <div class="card shadow-sm border-0 mb-3" id="company-section"><div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Company / institution</h5>
+            <div class="row">
+                <div class="col-md-6">{% include 'medicines/legacy/_field.html' with field=form.organization_name %}</div>
+                <div class="col-md-6">{% include 'medicines/legacy/_field.html' with field=form.registration_number %}</div>
+                <div class="col-md-6">{% include 'medicines/legacy/_field.html' with field=form.representative_name %}</div>
+            </div>
+        </div></div>
+        <div class="card shadow-sm border-0 mb-3"><div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Tax and address</h5>
+            <div class="row">
+                <div class="col-md-3">{% include 'medicines/legacy/_field.html' with field=form.tin %}</div>
+                <div class="col-md-3">{% include 'medicines/legacy/_field.html' with field=form.region %}</div>
+                <div class="col-md-3">{% include 'medicines/legacy/_field.html' with field=form.district %}</div>
+                <div class="col-md-3">{% include 'medicines/legacy/_field.html' with field=form.postal_address %}</div>
+            </div>
+        </div></div>
+        <div class="card shadow-sm border-0 mb-3"><div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Scanned documents (optional)</h5>
+            <div class="row">
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.nida_copy %}</div>
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.tahpc_certificate %}</div>
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.brela_certificate %}</div>
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.tin_certificate %}</div>
+                <div class="col-md-4">{% include 'medicines/legacy/_field.html' with field=form.business_license %}</div>
+            </div>
+        </div></div>
+        <div class="text-end mb-4"><button class="btn btn-primary px-5 fw-bold">Save applicant</button></div>
+    </form>
+</div>
+<script>
+(function () {
+    function sync() {
+        var checked = document.querySelector('input[name="applicant_type"]:checked');
+        var type = checked ? checked.value : '';
+        document.getElementById('individual-section').style.display = type === 'Organization' ? 'none' : '';
+        document.getElementById('company-section').style.display = type === 'Individual' ? 'none' : '';
+    }
+    document.querySelectorAll('input[name="applicant_type"]').forEach(function (el) { el.addEventListener('change', sync); });
+    sync();
+})();
+</script>
+{% endblock %}

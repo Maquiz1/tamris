@@ -1,11 +1,16 @@
 from django import forms
 from medicines.models import MedicineEvaluation
 
+REVISABLE_SECTIONS = [
+    ('BASIC_DETAILS', 'Basic Medicine Details'),
+    ('INGREDIENTS', 'Formula & Ingredients'),
+    ('MANUFACTURING', 'Manufacturing & Packaging'),
+    ('DOCUMENTS', 'Documents & Attachments'),
+]
+
 class PreliminaryEvaluationForm(forms.ModelForm):
     sections_to_revise = forms.MultipleChoiceField(
-        choices=[
-            ('DOCUMENTS', 'Documents & Attachments'),
-        ],
+        choices=REVISABLE_SECTIONS,
         widget=forms.CheckboxSelectMultiple(),
         required=False,
         label="Sections to Revise (Check if applying conditions)"
@@ -25,11 +30,7 @@ class PreliminaryEvaluationForm(forms.ModelForm):
 
 class ScientificEvaluationForm(forms.ModelForm):
     sections_to_revise = forms.MultipleChoiceField(
-        choices=[
-            ('BASIC_DETAILS', 'Basic Medicine Details'),
-            ('INGREDIENTS', 'Formula & Ingredients'),
-            ('MANUFACTURING', 'Manufacturing & Packaging'),
-        ],
+        choices=REVISABLE_SECTIONS,
         widget=forms.CheckboxSelectMultiple(),
         required=False,
         label="Sections to Revise (Check if applying conditions)"

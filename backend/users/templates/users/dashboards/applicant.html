@@ -4,6 +4,19 @@
 
 {% block content %}
 <div class="app-body">
+  {% for match in legacy_matches %}
+  <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <strong>We found records from before TAMRIS that may be yours:</strong>
+      {{ match.display_name }} ({{ match.medicine_applications.count }} medicine record{{ match.medicine_applications.count|pluralize }}).
+      Ask the Council to link them to your account.
+    </div>
+    <form method="post" action="{% url 'medicines:legacy_claim_request' match.pk %}">
+      {% csrf_token %}
+      <button class="btn btn-primary btn-sm rounded-pill px-3">Request link</button>
+    </form>
+  </div>
+  {% endfor %}
   
   <div class="row gx-3">
     <div class="col-xxl-12 col-sm-12">
@@ -21,7 +34,7 @@
                     <i class="ri-folder-open-line fs-4"></i>
                   </div>
                   <div class="d-flex flex-column">
-                    <h2 class="m-0 lh-1">{{ user.medicine_applications.count }}</h2>
+                    <h2 class="m-0 lh-1">{{ my_applications|length }}</h2>
                     <p class="m-0">Applications</p>
                   </div>
                 </div>
@@ -179,7 +192,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for med_app in user.medicine_applications.all %}
+                  {% for med_app in my_applications %}
                   <tr>
                     <td>
                       <div class="d-flex align-items-center">
@@ -254,28 +267,42 @@
                     </td>
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2">
-                          {% if med_app.status == 'FULL_REGISTRATION' %}
+                          {% if med_app.has_active_certificate %}
                               <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-success btn-sm" target="_blank">
                                   <i class="ri-medal-line me-1"></i> Certificate
                               </a>
-                          {% elif med_app.status == 'PROVISIONAL_REGISTRATION' %}
-                              <a href="{% url 'medicines:download_certificate' med_app.pk %}" class="btn btn-primary btn-sm" target="_blank">
-                                  <i class="ri-file-paper-2-line me-1"></i> Letter
+                              {% if med_app.can_renew %}
+                              <form method="post" action="{% url 'medicines:start_renewal' med_app.pk %}" class="d-inline">{% csrf_token %}
+                                  <button class="btn btn-outline-warning btn-sm text-dark"><i class="ri-refresh-line me-1"></i> Renew</button>
+                              </form>
+                              {% endif %}
+                          {% elif med_app.provisional_letter_open_to_applicant %}
+                              <a href="{% url 'medicines:provisional_letter' med_app.pk %}" class="btn btn-primary btn-sm" target="_blank">
+                                  <i class="ri-file-paper-2-line me-1"></i> Provisional Letter
                               </a>
-                          {% elif med_app.status == 'CONDITIONS_APPLIED' %}
+                          {% endif %}
+                          {% if med_app.status == 'CONDITIONS_APPLIED' %}
                               <a href="{% url 'medicines:edit_application' med_app.pk %}" class="btn btn-warning btn-sm text-dark">
                                   <i class="ri-edit-2-line me-1"></i> Correct
                               </a>
                           {% elif 'PENDING' in med_app.status and 'FEE' in med_app.status %}
                               {% with pending_payment=med_app.payments.last %}
-                                  {% if pending_payment and not pending_payment.is_verified and not pending_payment.receipt_number %}
+                                  {% if pending_payment and not pending_payment.is_verified and not pending_payment.control_number %}
                                       <a href="{% url 'medicines:submit_payment' pending_payment.pk %}" class="btn btn-danger btn-sm">
                                           <i class="ri-upload-2-line me-1"></i> Receipt
                                       </a>
-                                  {% elif pending_payment and pending_payment.receipt_number and not pending_payment.is_verified %}
+                                  {% elif pending_payment and pending_payment.control_number and not pending_payment.is_verified %}
                                       <button class="btn btn-secondary btn-sm" disabled>
                                           <i class="ri-time-line me-1"></i> Verifying
                                       </button>
+                                  {% endif %}
+                              {% endwith %}
+                          {% elif med_app.pending_renewal_payment %}
+                              {% with renewal=med_app.pending_renewal_payment %}
+                                  {% if not renewal.control_number %}
+                                      <a href="{% url 'medicines:submit_payment' renewal.pk %}" class="btn btn-danger btn-sm"><i class="ri-upload-2-line me-1"></i> Renewal Fee</a>
+                                  {% else %}
+                                      <button class="btn btn-secondary btn-sm" disabled><i class="ri-time-line me-1"></i> Verifying Renewal</button>
                                   {% endif %}
                               {% endwith %}
                           {% elif med_app.status == 'DRAFT' %}

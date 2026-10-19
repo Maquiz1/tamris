@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Final Approval - {{ application.medicine_name }} - TAMRIS{% endblock %}
+{% block content %}
+<div class="app-body">
+    {% url 'medicines:final_approval_list' as back %}
+    {% include 'medicines/registrar/_page_header.html' with icon="ri-quill-pen-line" heading=application.medicine_name subheading=application.reference_number back_url=back badge=application.get_status_display %}
+    <div class="row gx-3">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Summary</h5>
+                    <table class="table table-sm mb-0">
+                        <tr><th class="w-50 text-muted fw-normal">Service</th><td>{{ application.get_application_type_display }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Applicant (holder)</th><td>{{ application.holder_name }} <span class="text-muted small">&lt;{{ application.applicant.email }}&gt;</span></td></tr>
+                        <tr><th class="text-muted fw-normal">Responsible person</th><td>{{ application.responsible_person|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Form and colour</th><td>{{ application.form_and_colour|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Active ingredients</th><td>{{ application.active_ingredients|default:application.ingredients|default:"-" }}</td></tr>
+                        <tr><th class="text-muted fw-normal">Provisional letter issued</th><td>{{ application.provisional_issued_on|date:"M d, Y"|default:"-" }}</td></tr>
+                        {% if application.certificate_number %}
+                        <tr><th class="text-muted fw-normal">Certificate</th><td class="fw-bold">{{ application.certificate_number }} ({{ application.certificate_issued_on|date:"M d, Y" }} to {{ application.certificate_expires_on|date:"M d, Y" }})</td></tr>
+                        {% endif %}
+                    </table>
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <a href="{% url 'medicines:staff_scientific_detail' application.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Full application and evaluation</a>
+                        {% if application.has_provisional_letter %}<a href="{% url 'medicines:provisional_letter' application.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Provisional letter</a>{% endif %}
+                        {% if application.certificate_number %}<a href="{% url 'medicines:download_certificate' application.pk %}" target="_blank" class="btn btn-success btn-sm rounded-pill px-3">Certificate</a>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if evaluation %}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Evaluation</h5>
+                    <div class="row small">
+                        <div class="col-6 mb-2">Documents complete: <strong>{{ evaluation.documents_complete|yesno:"Yes,No" }}</strong></div>
+                        <div class="col-6 mb-2">Quality: <strong>{{ evaluation.quality_check|yesno:"Yes,No" }}</strong></div>
+                        <div class="col-6 mb-2">Safety: <strong>{{ evaluation.safety_check|yesno:"Yes,No" }}</strong></div>
+                        <div class="col-6 mb-2">Efficacy: <strong>{{ evaluation.efficacy_check|yesno:"Yes,No" }}</strong></div>
+                        <div class="col-6 mb-2">Validity of tests: <strong>{{ evaluation.validity_of_tests|yesno:"Yes,No" }}</strong></div>
+                        <div class="col-6 mb-2">Label: <strong>{{ evaluation.label_inspection|yesno:"Yes,No" }}</strong></div>
+                        {% if application.application_type == 'CATEGORY_II' %}<div class="col-6 mb-2">GMP: <strong>{{ evaluation.gmp_inspection_check|yesno:"Yes,No" }}</strong></div>{% endif %}
+                    </div>
+                    {% if evaluation.overall_comments %}<p class="small mb-0 mt-2"><strong>Evaluator comments:</strong> {{ evaluation.overall_comments }}</p>{% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if inspections %}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Inspections</h5>
+                    {% for insp in inspections %}
+                        <div class="small mb-2">{{ insp.start_date_time|date:"M d, Y" }} &middot; {{ insp.get_status_display }} &middot; GMP compliant: <strong>{{ insp.gmp_compliant|yesno:"Yes,No" }}</strong>
+                            <a href="{% url 'medicines:inspection_detail' insp.pk %}" class="ms-2">Report</a></div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Payments</h5>
+                    <table class="table table-sm mb-0 small">
+                        {% for p in payments %}
+                        <tr><td>{{ p.get_payment_type_display }}</td><td>{{ p.amount }} TZS</td><td>{% if p.is_verified %}<span class="text-success">Verified {{ p.verified_at|date:"M d, Y" }}</span>{% else %}<span class="text-warning">Not verified</span>{% endif %}</td></tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Decision</h5>
+                    {% if application.status == 'PENDING_FINAL_APPROVAL' %}
+                        {% if user.is_registrar %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <p class="small text-muted">Approving issues the {% if application.is_listing %}Listing Certificate{% else %}Category II Registration Certificate{% endif %}, valid for 12 months, with the next number in the sequence.</p>
+                            <button name="action" value="approve" class="btn btn-success w-100 fw-bold mb-3" onclick="return confirm('Approve and issue the certificate?');">
+                                <i class="ri-check-double-line me-1"></i> Approve and issue certificate
+                            </button>
+                            <label class="form-label small fw-bold">Reason (needed to refuse)</label>
+                            <textarea name="reason" class="form-control mb-2" rows="3"></textarea>
+                            <button name="action" value="refuse" class="btn btn-outline-danger w-100" onclick="return confirm('Refuse this application?');">Refuse</button>
+                        </form>
+                        {% else %}
+                        <p class="small text-muted mb-0">Only a user with the Registrar role can approve. You can view this application.</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="small mb-0">Decided: <strong>{{ application.get_status_display }}</strong>{% if application.final_approved_by %} by {{ application.final_approved_by.display_name }} on {{ application.final_approved_at|date:"M d, Y" }}{% endif %}.</p>
+                        {% if application.rejection_reason and application.status == 'REJECTED' %}<p class="small mt-2 mb-0">Reason: {{ application.rejection_reason }}</p>{% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
