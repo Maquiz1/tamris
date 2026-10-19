@@ -28,16 +28,13 @@ def system_users_list_view(request):
     is_admin = request.user.is_admin
     if not is_admin:
         return redirect('users:dashboard')
+    # Superusers are managed in Django admin only, so they are never listed here.
     staff_users = CustomUser.objects.filter(
         Q(is_staff=True) |
-        Q(is_superuser=True) |
-        Q(role__name__in=['Evaluator', 'Inspector', 'Accountant', 'Admin']) |
-        Q(additional_roles__name__in=['Evaluator', 'Inspector', 'Accountant', 'Admin']) |
+        Q(role__name__in=CustomUser.STAFF_ROLES) |
+        Q(additional_roles__name__in=CustomUser.STAFF_ROLES) |
         Q(registration_status='PENDING', is_onboarding_complete=True, role__isnull=True)
-    ).distinct().order_by('email')
-
-    if not request.user.is_superuser:
-        staff_users = staff_users.exclude(is_superuser=True)
+    ).exclude(is_superuser=True).distinct().order_by('email')
 
     return render(request, 'users/system_users_list.html', {'staff_users': staff_users})
 
@@ -76,7 +73,7 @@ def system_user_detail_view(request, pk):
     is_admin = request.user.is_admin
     if not is_admin:
         return redirect('users:dashboard')
-    staff_user = get_object_or_404(CustomUser, pk=pk)
+    staff_user = get_object_or_404(CustomUser, pk=pk, is_superuser=False)
     return render(request, 'users/system_user_detail.html', {'staff_user': staff_user})
 
 @login_required
@@ -84,10 +81,7 @@ def system_user_update_view(request, pk):
     is_admin = request.user.is_admin
     if not is_admin:
         return redirect('users:dashboard')
-    user_to_update = get_object_or_404(CustomUser, pk=pk)
-    if user_to_update.is_superuser and (not request.user.is_superuser):
-        messages.error(request, 'You do not have permission to edit this superuser.')
-        return redirect('users:system_users_list')
+    user_to_update = get_object_or_404(CustomUser, pk=pk, is_superuser=False)
     from users.forms import StaffUserUpdateForm
     if request.method == 'POST':
         form = StaffUserUpdateForm(request.POST, instance=user_to_update, request_user=request.user)
@@ -106,15 +100,16 @@ def applicant_users_list_view(request):
     if not request.user.is_staff_member:
         return redirect('users:dashboard')
     
-    applicants = CustomUser.objects.filter(role__name__in=['Individual Applicant', 'Company Applicant']).order_by('-date_joined')
+    applicants = CustomUser.objects.filter(role__name__in=['Individual Applicant', 'Company Applicant']).exclude(is_superuser=True).order_by('-date_joined')
     
     # Optional filtering
     query = request.GET.get('q', '')
     if query:
         applicants = applicants.filter(
             Q(email__icontains=query) |
-            Q(user_profile__full_name__icontains=query) |
-            Q(company_profile__company_name__icontains=query)
+            Q(applicant_profile__individual__first_name__icontains=query) |
+            Q(applicant_profile__individual__last_name__icontains=query) |
+            Q(applicant_profile__organization__organization_name__icontains=query)
         ).distinct()
         
     paginator = Paginator(applicants, 10)
@@ -133,11 +128,11 @@ def resend_staff_activation_view(request, pk):
     if not is_admin:
         return redirect('users:dashboard')
         
-    staff_user = get_object_or_404(CustomUser, pk=pk)
+    staff_user = get_object_or_404(CustomUser, pk=pk, is_superuser=False)
     
     # Verify the user is a staff member
-    is_staff = staff_user.role and staff_user.role.name in ['Admin', 'Evaluator', 'Inspector', 'Accountant']
-    if not (is_staff or staff_user.is_superuser):
+    is_staff = staff_user.role and staff_user.role.name in CustomUser.STAFF_ROLES
+    if not is_staff:
         messages.error(request, "This action is only available for staff users.")
         return redirect('users:system_users_list')
         

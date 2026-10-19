@@ -11,7 +11,7 @@ from users.models import CustomUser
 @login_required
 @user_passes_test(is_staff_check)
 def users_report_view(request):
-    qs = CustomUser.objects.all().order_by('-date_joined')
+    qs = CustomUser.objects.exclude(is_superuser=True).order_by('-date_joined')  # superusers: Django admin only
     if request.GET.get('export') == 'csv':
         fields = [{'name': 'id', 'label': 'ID'}, {'name': 'email', 'label': 'Email'}, {'name': 'phone_number', 'label': 'Phone'}, {'name': 'is_staff', 'label': 'Is Staff'}, {'name': 'date_joined', 'label': 'Date Joined'}]
         return export_csv(qs, 'users_report', fields)
