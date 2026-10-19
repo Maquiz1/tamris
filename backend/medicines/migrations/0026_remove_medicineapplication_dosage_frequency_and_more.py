@@ -30,9 +30,5 @@ class Migration(migrations.Migration):
             model_name='medicineapplication',
             name='duration_value',
         ),
-        migrations.AddField(
-            model_name='medicineapplication',
-            name='dosage',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Kipimo cha matumizi (Dosage)'),
-        ),
+        # 'dosage' was never removed (see 0025), so it is not added back here.
     ]

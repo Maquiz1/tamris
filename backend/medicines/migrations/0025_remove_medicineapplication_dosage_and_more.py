@@ -10,10 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='medicineapplication',
-            name='dosage',
-        ),
+        # 'dosage' is kept: 0026 used to add it back empty, which lost every dosage entered before.
         migrations.AddField(
             model_name='medicineapplication',
             name='dosage_frequency',

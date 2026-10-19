@@ -5,6 +5,15 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def copy_sample_labels(apps, schema_editor):
+    """Keep every label already uploaded: one attachment per old sample_label file."""
+    MedicineApplication = apps.get_model('medicines', 'MedicineApplication')
+    MedicineLabelAttachment = apps.get_model('medicines', 'MedicineLabelAttachment')
+    for app in MedicineApplication.objects.exclude(sample_label__isnull=True).exclude(sample_label='').only('id', 'sample_label'):
+        if not MedicineLabelAttachment.objects.filter(application_id=app.pk, file=app.sample_label.name).exists():
+            MedicineLabelAttachment.objects.create(application_id=app.pk, file=app.sample_label.name)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -12,10 +21,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='medicineapplication',
-            name='sample_label',
-        ),
         migrations.CreateModel(
             name='MedicineLabelAttachment',
             fields=[
@@ -24,5 +29,10 @@ class Migration(migrations.Migration):
                 ('uploaded_at', models.DateTimeField(auto_now_add=True)),
                 ('application', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='label_attachments', to='medicines.medicineapplication')),
             ],
+        ),
+        migrations.RunPython(copy_sample_labels, migrations.RunPython.noop),
+        migrations.RemoveField(
+            model_name='medicineapplication',
+            name='sample_label',
         ),
     ]
