@@ -69,3 +69,48 @@ class ApplicantNameDisplayTests(TestCase):
         self.assertContains(page, 'Asha Juma')
         self.assertContains(page, '0712345678')
         self.assertContains(page, 'Urambo, Tabora')
+
+
+class UnverifiedApplicantTests(TestCase):
+    """People who never received their email code can be found and helped by staff."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = CustomUser.objects.create_user(email='admin@x.com', password='x', role=Role.objects.create(name='Admin'), is_email_verified=True)
+        cls.evaluator = CustomUser.objects.create_user(email='ev@x.com', password='x', role=Role.objects.create(name='Evaluator'), is_email_verified=True)
+        Role.objects.create(name='Individual Applicant')
+        cls.stuck = CustomUser.objects.create_user(email='stuck@x.com', password='x')  # registered, no code, no type yet
+
+    def test_unverified_registrant_listed_and_filtered(self):
+        self.client.force_login(self.admin)
+        page = self.client.get(reverse('users:applicant_users_list'), {'status': 'unverified'})
+        self.assertContains(page, 'stuck@x.com')
+        self.assertContains(page, 'Waiting for email code')
+        self.assertEqual(page.context['unverified_count'], 1)
+        self.assertNotContains(page, 'ev@x.com')
+
+    def test_resend_code_sends_email(self):
+        from django.core import mail
+        self.client.force_login(self.evaluator)
+        self.client.post(reverse('users:resend_applicant_otp', args=[self.stuck.pk]))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('verification code', mail.outbox[0].body)
+        self.assertEqual(mail.outbox[0].to, ['stuck@x.com'])
+
+    def test_failed_email_is_reported_not_hidden(self):
+        from unittest import mock
+        self.client.force_login(self.admin)
+        with mock.patch('users.emails.send_mail', side_effect=OSError('SMTP login refused')):
+            response = self.client.post(reverse('users:resend_applicant_otp', args=[self.stuck.pk]), follow=True)
+        self.assertContains(response, 'SMTP login refused')
+
+    def test_only_admin_can_verify_manually(self):
+        self.client.force_login(self.evaluator)
+        self.client.post(reverse('users:verify_applicant_email', args=[self.stuck.pk]))
+        self.stuck.refresh_from_db()
+        self.assertFalse(self.stuck.is_email_verified)
+        self.client.force_login(self.admin)
+        self.client.post(reverse('users:verify_applicant_email', args=[self.stuck.pk]), {'next': 'https://evil.example.com/'})
+        self.stuck.refresh_from_db()
+        self.assertTrue(self.stuck.is_email_verified)
+        self.assertIn('verified manually by admin@x.com', self.stuck.review_remarks)

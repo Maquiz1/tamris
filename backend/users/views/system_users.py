@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from users.forms import CustomUserCreationForm, CustomAuthenticationForm, OTPVerificationForm, PractitionerDocumentForm, CompanyDocumentForm, RoleSelectionForm, PractitionerDetailForm, CompanyDetailForm
@@ -100,7 +101,19 @@ def applicant_users_list_view(request):
     if not request.user.is_staff_member:
         return redirect('users:dashboard')
     
-    applicants = CustomUser.objects.filter(role__name__in=['Individual Applicant', 'Company Applicant']).exclude(is_superuser=True).order_by('-date_joined')
+    # Applicants, including people who registered but have not confirmed their email
+    # yet (they choose Individual or Company only after the email code).
+    applicants = (
+        CustomUser.objects.filter(Q(role__name__in=['Individual Applicant', 'Company Applicant']) | Q(role__isnull=True, is_staff=False))
+        .exclude(is_superuser=True)
+        .exclude(additional_roles__name__in=CustomUser.STAFF_ROLES)
+        .distinct()
+        .order_by('-date_joined')
+    )
+    unverified_count = applicants.filter(is_email_verified=False).count()
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'unverified':
+        applicants = applicants.filter(is_email_verified=False)
     
     # Optional filtering
     query = request.GET.get('q', '')
@@ -119,8 +132,51 @@ def applicant_users_list_view(request):
     return render(request, 'users/applicant_users_list.html', {
         'applicants': page_obj,
         'query': query,
+        'status_filter': status_filter,
+        'unverified_count': unverified_count,
         'total_applicants': applicants.count()
     })
+
+
+def _back_to_list(request):
+    from django.utils.http import url_has_allowed_host_and_scheme
+    target = request.POST.get('next', '')
+    if target and url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return redirect(target)
+    return redirect('users:applicant_users_list')
+
+
+def _unverified_applicant(pk):
+    return get_object_or_404(CustomUser, pk=pk, is_superuser=False, is_email_verified=False)
+
+
+@login_required
+def resend_applicant_otp_view(request, pk):
+    """Staff send a fresh email code to an applicant who never received one."""
+    if request.method != 'POST' or not (request.user.is_admin or request.user.is_evaluator):
+        return redirect('users:applicant_users_list')
+    from users.emails import send_otp_email
+    applicant = _unverified_applicant(pk)
+    sent, error = send_otp_email(applicant)
+    if sent:
+        messages.success(request, f'A new verification code was sent to {applicant.email}. It is valid for 5 minutes; they can also press "Resend code" on the verification page.')
+    else:
+        messages.error(request, f'The email to {applicant.email} could not be sent: {error}. Check the email settings (EMAIL_HOST, user and password) on the server.')
+    return _back_to_list(request)
+
+
+@login_required
+def verify_applicant_email_view(request, pk):
+    """An administrator confirms the email address after checking with the person directly."""
+    if request.method != 'POST' or not request.user.is_admin:
+        return redirect('users:applicant_users_list')
+    applicant = _unverified_applicant(pk)
+    applicant.is_email_verified = True
+    note = f"Email verified manually by {request.user.email} on {timezone.now():%Y-%m-%d %H:%M}."
+    applicant.review_remarks = f"{applicant.review_remarks}\n{note}".strip() if applicant.review_remarks else note
+    applicant.save(update_fields=['is_email_verified', 'review_remarks'])
+    messages.success(request, f'{applicant.email} is now verified and can log in to continue their registration.')
+    return _back_to_list(request)
 
 @login_required
 def resend_staff_activation_view(request, pk):

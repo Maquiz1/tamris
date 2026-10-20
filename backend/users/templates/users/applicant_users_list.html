@@ -18,6 +18,12 @@
                         <h3 class="mb-0 mt-1 fw-bold text-primary">Applicant Users</h3>
                         <p class="text-muted mb-0 small">Manage all registered Individual and Company Applicant accounts.</p>
                     </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'users:applicant_users_list' %}" class="btn btn-sm rounded-pill px-3 {% if status_filter != 'unverified' %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+                        <a href="?status=unverified" class="btn btn-sm rounded-pill px-3 {% if status_filter == 'unverified' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
+                            <i class="ri-mail-close-line me-1"></i> Email not verified <span class="badge bg-dark ms-1">{{ unverified_count }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -31,6 +37,7 @@
                     <form method="get" class="d-flex flex-column flex-md-row gap-3 w-100">
                         <div class="input-group flex-grow-1">
                             <span class="input-group-text bg-white text-muted border-end-0"><i class="ri-search-line"></i></span>
+                            {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
                             <input type="text" name="q" value="{{ query|default:'' }}" class="form-control border-start-0 ps-0" placeholder="Search by Email, Name, or Company..." aria-label="Search">
                             <button class="btn btn-primary px-4 fw-bold" type="submit">Search</button>
                             {% if query %}
@@ -68,7 +75,9 @@
                                     </td>
                                     <td class="px-4 py-3 text-muted">{{ applicant.email }}</td>
                                     <td class="px-4 py-3">
-                                        {% if applicant.role.name == 'Company Applicant' %}
+                                        {% if not applicant.role %}
+                                            <span class="badge rounded-pill border border-secondary text-secondary bg-white">Not chosen yet</span>
+                                        {% elif applicant.role.name == 'Company Applicant' %}
                                             <span class="badge rounded-pill border border-info text-info bg-white"><i class="ri-building-line me-1"></i>Company</span>
                                         {% else %}
                                             <span class="badge rounded-pill border border-primary text-primary bg-white"><i class="ri-user-line me-1"></i>Individual</span>
@@ -77,16 +86,38 @@
                                     </td>
                                     <td class="px-4 py-3 text-muted">{{ applicant.date_joined|date:"M d, Y" }}</td>
                                     <td class="px-4 py-3">
-                                        {% if applicant.is_active %}
+                                        {% if not applicant.is_email_verified %}
+                                            <span class="badge bg-warning text-dark"><i class="ri-mail-close-line me-1"></i> Waiting for email code</span>
+                                            <div class="small text-muted mt-1">{% if applicant.last_login %}Last login {{ applicant.last_login|date:"M d, H:i" }}{% else %}Never logged in{% endif %}</div>
+                                        {% elif applicant.is_active %}
                                             <span class="text-success fw-bold d-inline-flex align-items-center"><i class="ri-checkbox-circle-fill me-1"></i> Active</span>
                                         {% else %}
                                             <span class="text-danger fw-bold d-inline-flex align-items-center"><i class="ri-close-circle-fill me-1"></i> Inactive</span>
                                         {% endif %}
                                     </td>
                                     <td class="px-4 py-3 text-end">
+                                        <div class="d-flex justify-content-end gap-1 flex-wrap">
+                                        {% if not applicant.is_email_verified %}
+                                            {% if user.is_admin or user.is_evaluator %}
+                                            <form method="post" action="{% url 'users:resend_applicant_otp' applicant.pk %}">
+                                                {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <button class="btn btn-sm btn-warning fw-bold text-dark"><i class="ri-mail-send-line"></i> Resend code</button>
+                                            </form>
+                                            {% endif %}
+                                            {% if user.is_admin %}
+                                            <form method="post" action="{% url 'users:verify_applicant_email' applicant.pk %}" onsubmit="return confirm('Mark {{ applicant.email }} as verified? Do this only after confirming the email address with the person directly.');">
+                                                {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <button class="btn btn-sm btn-outline-success fw-bold"><i class="ri-shield-check-line"></i> Verify manually</button>
+                                            </form>
+                                            {% endif %}
+                                        {% elif applicant.is_onboarding_complete %}
                                         <a href="{% url 'users:staff_registration_detail' applicant.pk %}" class="btn btn-sm btn-outline-primary fw-bold">
                                             <i class="ri-eye-line"></i> Details
                                         </a>
+                                        {% else %}
+                                            <span class="small text-muted">Profile not submitted yet</span>
+                                        {% endif %}
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -108,7 +139,7 @@
                         <ul class="pagination justify-content-center mb-0">
                             {% if applicants.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ applicants.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Previous">
+                                    <a class="page-link" href="?page={{ applicants.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
@@ -120,13 +151,13 @@
                                 {% if applicants.number == num %}
                                     <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                             {% elif num > applicants.number|add:'-3' and num < applicants.number|add:'3' %}
-                                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a></li>
                                 {% endif %}
                             {% endfor %}
 
                             {% if applicants.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ applicants.next_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Next">
+                                    <a class="page-link" href="?page={{ applicants.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>

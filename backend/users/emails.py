@@ -364,3 +364,34 @@ def notify_staff_claim_requested(claim):
         f"Matched on: {claim.matched_on}.\nPlease confirm or reject the request in TAMRIS.\n\nThank you,\nTAMRIS System",
         recipients,
     )
+
+
+def send_otp_email(user):
+    """
+    Email the current one-time code. Returns (sent, error). Unlike send_tamris_email,
+    failures are reported and logged, so a code that never left the server is noticed.
+    """
+    import logging
+    import pyotp
+
+    if not user.otp_secret:
+        user.otp_secret = pyotp.random_base32()
+        user.save(update_fields=['otp_secret'])
+    code = pyotp.TOTP(user.otp_secret).now()
+    if settings.DEBUG:
+        print(f'DEBUG: Current valid OTP for user {user.email} is {code}')
+    try:
+        send_mail(
+            subject='TAMRIS - Your OTP Verification Code',
+            message=(
+                f'Welcome to TAMRIS! Your verification code is: {code}\n\n'
+                f'This code will expire in 5 minutes. If it has expired, use "Resend code" on the verification page.'
+            ),
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@tamris.go.tz'),
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        return True, None
+    except Exception as exc:  # SMTP refused, wrong password, network down...
+        logging.getLogger('tamris.email').exception('Could not send OTP email to %s', user.email)
+        return False, str(exc) or exc.__class__.__name__

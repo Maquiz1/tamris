@@ -10,7 +10,7 @@ from .views import (
     reupload_document_view, system_users_list_view, system_user_create_view,
     system_user_update_view, system_user_detail_view, applicant_users_list_view,
     send_phone_otp_view, verify_phone_otp_view, resend_email_otp_view,
-    resend_staff_activation_view
+    resend_staff_activation_view, resend_applicant_otp_view, verify_applicant_email_view
 )
 
 app_name = 'users'
@@ -59,6 +59,8 @@ urlpatterns = [
     path('staff/registrations/<int:pk>/', staff_registration_detail_view, name='staff_registration_detail'),
     path('staff/registrations/<int:pk>/action/', staff_registration_action_view, name='staff_registration_action'),
     path('applicants/', applicant_users_list_view, name='applicant_users_list'),
+    path('applicants/<int:pk>/resend-code/', resend_applicant_otp_view, name='resend_applicant_otp'),
+    path('applicants/<int:pk>/verify-email/', verify_applicant_email_view, name='verify_applicant_email'),
     path('system-users/', system_users_list_view, name='system_users_list'),
     path('system-users/create/', system_user_create_view, name='system_user_create'),
     path('system-users/<int:pk>/', system_user_detail_view, name='system_user_detail'),

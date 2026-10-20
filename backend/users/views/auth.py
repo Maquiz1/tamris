@@ -93,11 +93,12 @@ class FrontendRegisterView(CreateView):
         user.save()
         login(self.request, user)
         self.request.session['verify_email'] = user.email
-        otp_code = pyotp.TOTP(user.otp_secret).now()
-        if settings.DEBUG:  # never write one-time codes to production logs
-            print(f'DEBUG: Generated OTP for user {user.email} is {otp_code}')
-        send_mail(subject='TAMRIS - Your OTP Verification Code', message=f'Welcome to TAMRIS! Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.', from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@tamris.go.tz'), recipient_list=[user.email], fail_silently=True)
-        messages.success(self.request, 'Account created successfully. An email with your OTP has been sent!')
+        from users.emails import send_otp_email
+        sent, _ = send_otp_email(user)
+        if sent:
+            messages.success(self.request, 'Account created successfully. An email with your OTP has been sent!')
+        else:
+            messages.warning(self.request, 'Your account was created, but we could not send the verification email right now. Please press "Resend code" in a few minutes, or contact support.')
         return redirect(self.success_url)
 
 def frontend_login_view(request):
@@ -192,24 +193,14 @@ from django.db.models import Q
 
 @login_required
 def resend_email_otp_view(request):
+    from users.emails import send_otp_email
     user = request.user
     if user.is_email_verified:
         messages.info(request, 'Your email is already verified.')
         return redirect('users:dashboard')
-        
-    if not user.otp_secret:
-        user.otp_secret = pyotp.random_base32()
-        user.save()
-        
-    otp_code = pyotp.TOTP(user.otp_secret).now()
-    
-    send_mail(
-        subject='TAMRIS - Your OTP Verification Code',
-        message=f'Welcome to TAMRIS! Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.',
-        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@tamris.go.tz'),
-        recipient_list=[user.email],
-        fail_silently=True
-    )
-    
-    messages.success(request, 'A new verification code has been sent to your email!')
+    sent, _ = send_otp_email(user)
+    if sent:
+        messages.success(request, 'A new verification code has been sent to your email!')
+    else:
+        messages.error(request, 'We could not send the email right now. Please try again in a few minutes, or contact support.')
     return redirect('users:frontend_verify_otp')
